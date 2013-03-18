@@ -1,0 +1,35 @@
+{-# LANGUAGE NoMonomorphismRestriction #-}
+module {AG.CodeGeneration} {} {}
+imports
+{
+import Hisp
+import SKI
+}
+
+include "AG/Hisp.ag"
+include "AG/SKI.ag"
+
+attr HispExpr
+    syn variables use {++} {[]} :: {[Ident]}
+    syn code :: SKI
+    inh parameters :: {[Ident]}
+
+sem HispExpr
+    | Variable lhs.variables = [@name]
+               lhs.code = foldl makeVar (Name @name) @lhs.parameters
+    | Number   lhs.code = app "K" $ Constant @value
+    | Application lhs.code = App (app "S" @f.code) @x.code
+    | Lambda   expr.parameters = @x : @lhs.parameters
+
+{
+name = Name . ('$':)
+app = App . name
+
+makeVar :: SKI -> Ident -> SKI
+makeVar (Constant n) param = app "K" $ Constant n
+makeVar c@(Name x) param | x == param = name "I"
+                         | otherwise = app "K" c
+makeVar (App f x) param = App (app "R" f) $ makeVar x param
+
+compile = fst . flip sem_HispExpr []
+}

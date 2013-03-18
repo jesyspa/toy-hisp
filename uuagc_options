@@ -1,0 +1,11 @@
+file : "AG/Hisp.ag"
+options : haskellsyntax, pretty, data, datarecords, catas, semfuns, signatures
+
+file : "AG/CodeGeneration.ag"
+options : haskellsyntax, pretty, catas, semfuns, signatures
+
+file : "AG/SKI.ag"
+options : haskellsyntax, pretty, data, datarecords, catas, semfuns, signatures
+
+file : "AG/Visualisation.ag"
+options : haskellsyntax, pretty, catas, semfuns, signatures

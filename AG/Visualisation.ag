@@ -1,0 +1,40 @@
+{-# LANGUAGE NoMonomorphismRestriction #-}
+module {AG.Visualisation} {} {}
+imports
+{
+import Hisp
+import SKI
+}
+
+include "AG/Hisp.ag"
+include "AG/SKI.ag"
+
+attr HispExpr SKI
+    syn visual :: String
+
+attr SKI
+    inh needParens :: Bool
+
+sem HispExpr
+    | Variable lhs.visual = @name
+    | Number lhs.visual = show @value
+    | Application lhs.visual = '(' : @f.visual ++ " " ++ @x.visual ++ ")"
+    | Lambda lhs.visual = '\\' : @x ++ " -> " ++ @expr.visual
+
+sem SKI
+    | App lhs.visual = parens @lhs.needParens $ @x.visual ++ " " ++ @y.visual
+          x.needParens = False
+          y.needParens = True
+    | Name lhs.visual = @x
+    | Constant lhs.visual = show @x
+
+{
+parens True x = "(" ++ x ++ ")"
+parens False x = x
+
+instance Show HispExpr where
+    show = sem_HispExpr
+
+instance Show SKI where
+    show = flip sem_SKI False
+}

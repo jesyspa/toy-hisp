@@ -1,0 +1,9 @@
+module {AG.SKI} {} {}
+
+data SKI
+    | App x :: SKI
+          y :: SKI
+    | Name x :: String
+    | Constant x :: Int
+
+deriving SKI : Eq

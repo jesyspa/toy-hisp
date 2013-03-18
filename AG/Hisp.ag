@@ -1,0 +1,14 @@
+module {AG.Hisp} {} {}
+{
+type Ident = String
+}
+
+data HispExpr
+    | Variable name :: Ident
+    | Number value :: Int
+    | Application f :: HispExpr
+                  x :: HispExpr
+    | Lambda x :: Ident
+             expr :: HispExpr
+
+deriving HispExpr : Eq
