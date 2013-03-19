@@ -5,5 +5,9 @@ data SKI
           y :: SKI
     | Name x :: String
     | Constant x :: Int
+    | K_One y :: SKI
+    | S_One x :: SKI
+    | S_Two x :: SKI
+            y :: SKI
 
 deriving SKI : Eq

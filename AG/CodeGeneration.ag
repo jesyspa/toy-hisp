@@ -1,4 +1,3 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
 module {AG.CodeGeneration} {} {}
 imports
 {
@@ -16,20 +15,22 @@ attr HispExpr
 
 sem HispExpr
     | Variable lhs.variables = [@name]
-               lhs.code = foldl makeVar (Name @name) @lhs.parameters
-    | Number   lhs.code = app "K" $ Constant @value
-    | Application lhs.code = App (app "S" @f.code) @x.code
+               lhs.code = paramFold (Name @name) @lhs.parameters
+    | Number   lhs.code = paramFold (Constant @value) @lhs.parameters
+    | Application lhs.code = paramFold (App @f.code @x.code) @lhs.parameters
     | Lambda   expr.parameters = @x : @lhs.parameters
 
 {
 name = Name . ('$':)
 app = App . name
 
-makeVar :: SKI -> Ident -> SKI
-makeVar (Constant n) param = app "K" $ Constant n
-makeVar c@(Name x) param | x == param = name "I"
+paramFold = foldl skiFold
+
+skiFold :: SKI -> Ident -> SKI
+skiFold (Constant n) param = app "K" $ Constant n
+skiFold c@(Name x) param | x == param = name "I"
                          | otherwise = app "K" c
-makeVar (App f x) param = App (app "R" f) $ makeVar x param
+skiFold (App f x) param = App (app "S" (skiFold f param)) $ skiFold x param
 
 compile = fst . flip sem_HispExpr []
 }

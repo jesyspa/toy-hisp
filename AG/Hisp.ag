@@ -11,4 +11,11 @@ data HispExpr
     | Lambda x :: Ident
              expr :: HispExpr
 
+{-
+data HispStmt
+    | Function name :: Ident
+               params :: {[Ident]}
+               body :: HispExpr
+               -}
+
 deriving HispExpr : Eq

@@ -1,11 +1,14 @@
 file : "AG/Hisp.ag"
-options : haskellsyntax, pretty, data, datarecords, catas, semfuns, signatures
+options : haskellsyntax, pretty, data, datarecords, catas, semfuns, signatures, wrappers
 
 file : "AG/CodeGeneration.ag"
-options : haskellsyntax, pretty, catas, semfuns, signatures
+options : haskellsyntax, pretty, catas, semfuns, signatures, wrappers
+
+file : "AG/EvaluateSKI.ag"
+options : haskellsyntax, pretty, catas, semfuns, signatures, wrappers
 
 file : "AG/SKI.ag"
-options : haskellsyntax, pretty, data, datarecords, catas, semfuns, signatures
+options : haskellsyntax, pretty, data, datarecords, catas, semfuns, signatures, wrappers
 
 file : "AG/Visualisation.ag"
-options : haskellsyntax, pretty, catas, semfuns, signatures
+options : haskellsyntax, pretty, catas, semfuns, signatures, wrappers

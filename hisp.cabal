@@ -1,4 +1,4 @@
-name:                  lambda
+name:                  hisp
 version:               0.0.1
 synopsis:              A very simple language to learn lambda calculus better.
 license:               PublicDomain
@@ -8,10 +8,12 @@ tested-with:           GHC == 7.6.2
 build-type:            Custom
 cabal-version:         >= 1.8
 extra-source-files:    Makefile, uuagc_options, AG/Hisp.ag,
-                       AG/CodeGeneration.ag, AG/SKI.ag, AG/Visualisation.ag
+                       AG/CodeGeneration.ag, AG/SKI.ag, AG/Visualisation.ag,
+                       AG/EvaluateSKI.ag
 
 executable main
   main-is:             Main.hs
   build-depends:       base, cco >= 0.0.4, mtl >= 2.1.2, parsec >= 3.1.0
   hs-source-dirs:      .
-  other-modules:       AG.Hisp, AG.SKI, AG.CodeGeneration, AG.Visualisation
+  other-modules:       AG.Hisp, AG.SKI, AG.CodeGeneration, AG.Visualisation,
+                       AG.EvaluateSKI

@@ -5,6 +5,7 @@ module Lexer (
   , lRParen
   , lLambda
   , lArrow
+  , lEqual
   , lIdentifier
   , lNumber
   , lexer
@@ -19,6 +20,7 @@ data Token = LParen
            | RParen
            | Lambda
            | Arrow
+           | Equal
            | Identifier String
            | Number Int
            deriving (Show, Eq, Ord)
@@ -29,6 +31,7 @@ lparen = LParen <$ char '(' <?> "opening parenthesis"
 rparen = RParen <$ char ')' <?> "closing parenthesis"
 lambda = Lambda <$ char '\\' <?> "lambda"
 arrow = Arrow <$ string "->" <?> "arrow"
+equal = Equal <$ char '=' <?> "equal sign"
 identifier = Identifier <$> many1 letter <?> "identifier"
 number = Number . read <$> many1 digit <?> "number"
 
@@ -40,27 +43,31 @@ lexer = spaces *> many lexOne <* eof
 runLexer :: String -> Either ParseError [Token]
 runLexer = runParser lexer () ""
 
-lLParen = anyToken >>= \x -> case x of
+lLParen = try $ anyToken >>= \x -> case x of
     LParen -> return ()
     _ -> fail "left parenthesis"
 
-lRParen = anyToken >>= \x -> case x of
+lRParen = try $ anyToken >>= \x -> case x of
     RParen -> return ()
     _ -> fail "right parenthesis"
 
-lLambda = anyToken >>= \x -> case x of
+lLambda = try $ anyToken >>= \x -> case x of
     Lambda -> return ()
     _ -> fail "lambda"
 
-lArrow = anyToken >>= \x -> case x of
+lArrow = try $ anyToken >>= \x -> case x of
     Arrow -> return ()
     _ -> fail "arrow"
 
-lIdentifier = anyToken >>= \x -> case x of
+lEqual = try $ anyToken >>= \x -> case x of
+    Equal -> return ()
+    _ -> fail "equal"
+
+lIdentifier = try $ anyToken >>= \x -> case x of
     Identifier x' -> return x'
     _ -> fail "identifier"
 
-lNumber = anyToken >>= \x -> case x of
+lNumber = try $ anyToken >>= \x -> case x of
     Number x' -> return x'
     _ -> fail "number"
 
