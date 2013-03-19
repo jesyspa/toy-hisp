@@ -21,4 +21,4 @@ parser :: Parser HispExpr
 parser = hispExpr <* eof
 
 parseHisp :: String -> Either ParseError HispExpr
-parseHisp s = runLexer s >>= runParser lambda () ""
+parseHisp s = runLexer s >>= runParser hispExpr () ""
