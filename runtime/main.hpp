@@ -12,7 +12,8 @@
 enum class object_type {
     application_object,
     number_object,
-    function_object
+    function_object,
+    stack_link_object
 };
 
 struct object {
@@ -24,7 +25,64 @@ struct object {
 using ref = object*;
 
 struct stack_link;
-using stack = std::unique_ptr<stack_link>;
+
+class root {
+    using iter_t = std::list<ref>::iterator;
+    iter_t it;
+
+public:
+    root();
+    root(ref p);
+    root(root const&) = delete;
+    root(root&& o);
+    root& operator=(root const&) = delete;
+    root& operator=(root&& o);
+    ~root();
+    void swap(root& o);
+    void dismiss();
+};
+
+template<typename T>
+class safe_ref {
+    root protector;
+    T* ptr;
+
+public:
+    safe_ref() : ptr() {}
+    template<typename S>
+    safe_ref(safe_ref<S>&& o) : protector(o.get()), ptr(o.get()) {
+        o.dismiss();
+    }
+    safe_ref(T* p) : protector(p), ptr(p) {}
+    safe_ref<T>& operator=(T* p) {
+        root tmp(p);
+        protector.swap(tmp);
+        ptr = p;
+        return *this;
+    }
+
+    operator T*() const {
+        return ptr;
+    }
+
+    T* operator->() const {
+        return ptr;
+    }
+
+    T& operator*() const {
+        return *ptr;
+    }
+
+    T* get() const {
+        return ptr;
+    }
+
+    void dismiss() {
+        protector.dismiss();
+    }
+};
+
+using stack = safe_ref<stack_link>;
 
 struct application : object {
     ref left, right;
@@ -36,38 +94,17 @@ struct number : object {
     static constexpr object_type TYPE = object_type::number_object;
 };
 
-using func_t = ref (*)(stack&);
+using func_t = safe_ref<object> (*)(stack&);
 
 struct function : object {
     func_t func;
     static constexpr object_type TYPE = object_type::function_object;
 };
 
-class root {
-    using iter_t = std::list<ref>::iterator;
-    iter_t it;
-
-public:
-    root(ref p);
-    root(root const&) = delete;
-    root(root&& o);
-    root& operator=(root const&) = delete;
-    root& operator=(root&& o);
-    ~root();
-    void swap(root& o);
-};
-
-template<typename T>
-class safe_ref {
-    root protector;
-    T* ptr;
-
-public:
-    safe_ref(T* p) : protector(p), ptr(p) {}
-
-    operator T*() const {
-        return ptr;
-    }
+struct stack_link : object {
+    stack_link* prev;
+    application* arg;
+    static constexpr object_type TYPE = object_type::stack_link_object;
 };
 
 WARN_UNUSED_RESULT
@@ -80,20 +117,23 @@ WARN_UNUSED_RESULT
 safe_ref<function> make_function(func_t func);
 
 WARN_UNUSED_RESULT
+safe_ref<stack_link> make_stack_link(stack_link* prev, application* arg);
+
+WARN_UNUSED_RESULT
 ref make_bool(bool b);
 
 void collect_garbage();
 
-ref eval(ref);
+safe_ref<object> eval(ref);
 
-ref comb_i(stack& sl);
-ref comb_k(stack& sl);
-ref comb_s(stack& sl);
-ref comb_l(stack& sl);
-ref comb_r(stack& sl);
-ref comb_y(stack& sl);
-ref print(stack& sl);
-ref add(stack& sl);
-ref sub(stack& sl);
-ref le(stack& sl);
+safe_ref<object> comb_i(stack& sl);
+safe_ref<object> comb_k(stack& sl);
+safe_ref<object> comb_s(stack& sl);
+safe_ref<object> comb_l(stack& sl);
+safe_ref<object> comb_r(stack& sl);
+safe_ref<object> comb_y(stack& sl);
+safe_ref<object> print(stack& sl);
+safe_ref<object> add(stack& sl);
+safe_ref<object> sub(stack& sl);
+safe_ref<object> le(stack& sl);
 

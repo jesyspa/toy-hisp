@@ -1,6 +1,10 @@
 #include "debug.hpp"
 #include "utility.hpp"
 #include <map>
+#include <set>
+#include <vector>
+#include <iterator>
+#include <algorithm>
 
 std::map<func_t, char const*> func_names = {
 #define ENTRY(name) {name, #name }
@@ -17,20 +21,21 @@ std::map<func_t, char const*> func_names = {
 #undef ENTRY
 };
 
-// Used to prevent recursion from going too far, making errors more readable
-// when we end up with a cyclic graph.
-#define MURDER_STACK volatile char arr[64*1024]; (void) arr
-
-void internal_print(ref r, bool parens) {
-    MURDER_STACK;
+void internal_print_impl(ref r, std::vector<object*>& objs, bool parens) {
     if (auto* app = try_cast<application>(r)) {
+        if (std::find(objs.begin(), objs.end(), r) != objs.end()) {
+            printf("<loop>");
+            return;
+        }
+        objs.push_back(r);
         if (parens)
             printf("(");
-        internal_print(app->left, false);
+        internal_print_impl(app->left, objs, false);
         printf(" ");
-        internal_print(app->right, true);
+        internal_print_impl(app->right, objs, true);
         if (parens)
             printf(")");
+        objs.pop_back();
     } else if (auto* n = try_cast<number>(r)) {
         printf("%d", n->value);
     } else if (auto* f = try_cast<function>(r)){
@@ -38,13 +43,27 @@ void internal_print(ref r, bool parens) {
     }
 }
 
-void graphviz_dump(graph g) {
-    MURDER_STACK;
-    if (auto* app = try_cast<application>(g.r)) {
+void internal_print(ref r) {
+    std::vector<object*> objs;
+    internal_print_impl(r, objs, false);
+}
+
+void graphviz_dump_impl(ref r, std::set<object*>& objs) {
+    if (objs.count(r))
+        return;
+    else
+        objs.insert(r);
+    if (auto* app = try_cast<application>(r)) {
         printf("c_%p -> c_%p;\n", (void*)app, (void*)app->left);
         printf("c_%p -> c_%p;\n", (void*)app, (void*)app->right);
-        graphviz_dump(graph{app->left});
-        graphviz_dump(graph{app->right});
+        graphviz_dump_impl(app->left, objs);
+        graphviz_dump_impl(app->right, objs);
     }
 }
 
+void graphviz_dump(graph g) {
+    std::set<object*> objs;
+    printf("digraph {\n");
+    graphviz_dump_impl(g.r, objs);
+    printf("}");
+}

@@ -20,7 +20,7 @@ sem Cpp
 
 {
 
-prelude = "int main() { {"
+prelude = "#include \"runtime/main.hpp\"\nint main() { {"
 treedef x = "auto tree = " ++ x ++ "; "
 postlude = "eval(tree); } collect_garbage(); }"
 

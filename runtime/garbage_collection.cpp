@@ -11,9 +11,15 @@ namespace {
     std::size_t object_count;
 }
 
+root::root() : it(root_set.end()) {}
+
 root::root(ref p) {
-    root_set.push_front(p);
-    it = root_set.begin();
+    if (p) {
+        root_set.push_front(p);
+        it = root_set.begin();
+    } else {
+        it = root_set.end();
+    }
 }
 
 root::root(root&& o) : it(o.it) {
@@ -26,30 +32,29 @@ root& root::operator=(root&& o) {
 }
 
 root::~root() {
-    root_set.erase(it);
+    if (it != root_set.end())
+        root_set.erase(it);
 }
 
 void root::swap(root& o) {
     std::swap(it, o.it);
 }
 
+void root::dismiss() {
+    it = root_set.end();
+}
+
 template<typename T>
 WARN_UNUSED_RESULT
 T* new_object() {
-    if (++object_count > 1024*1024) {
-        printf("too many objects!");
-        exit(EXIT_FAILURE);
-    }
+    assert(++object_count <= 1024*1024 && "too many objects!");
     auto obj = static_cast<T*>(malloc(sizeof(T)));
     if (!obj) {
         // If we ran out of memory, run a garbage collection pass and
         // then try again.
         collect_garbage();
         obj = static_cast<T*>(malloc(sizeof(T)));
-        if (!obj) {
-            printf("out of memory");
-            exit(EXIT_FAILURE);
-        }
+        assert(obj && "out of memory");
     }
     obj->next = nullptr;
     obj->type = T::TYPE;
@@ -67,6 +72,8 @@ T* new_object() {
 
 WARN_UNUSED_RESULT
 safe_ref<application> make_application(ref left, ref right) {
+    PRESERVE(left);
+    PRESERVE(right);
     auto app = new_object<application>();
     app->left = left;
     app->right = right;
@@ -87,13 +94,27 @@ safe_ref<function> make_function(func_t func) {
     return fun;
 }
 
+WARN_UNUSED_RESULT
+safe_ref<stack_link> make_stack_link(stack_link* prev, application* arg) {
+    PRESERVE(prev);
+    PRESERVE(arg);
+    auto link = new_object<stack_link>();
+    link->prev = prev;
+    link->arg = arg;
+    return link;
+}
+
 void walk(ref r) {
+    assert(r && "walking over nothing");
     if (r->used)
         return;
     r->used = true;
     if (auto* app = try_cast<application>(r)) {
         walk(app->left);
         walk(app->right);
+    } else if (auto* st = try_cast<stack_link>(r)) {
+        if (st->prev)
+            walk(st->prev);
     }
 }
 

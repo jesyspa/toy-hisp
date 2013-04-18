@@ -1,7 +1,13 @@
 CABAL-CONFIGURE-FLAGS := --user
 CABAL-BUILD-FLAGS     :=
 
-all : haskell
+all : haskell lib/libdbghisp.a
+
+lib/libdbghisp.a : $(wildcard runtime/*.cpp)
+	scons
+
+lib/libhisp.a : $(wildcard runtime/*.cpp)
+	scons release
 
 haskell :
 	runhaskell Setup.hs configure $(CABAL-CONFIGURE-FLAGS)
@@ -14,3 +20,4 @@ haskell :
 clean :
 	runhaskell Setup.hs clean
 	rm -f main
+	scons -c

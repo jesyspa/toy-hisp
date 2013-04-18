@@ -2,6 +2,7 @@
 #include "utility.hpp"
 #include "stack.hpp"
 #include "debug.hpp"
+#include "garbage_collection.hpp"
 #include <cassert>
 
 ref update(application* app, ref newval) {
@@ -15,7 +16,7 @@ ref update(application* app, ref newval) {
     return app;
 }
 
-ref eval(ref r) {
+safe_ref<object> eval(ref r) {
     stack s;
     while (application* app = try_cast<application>(r)) {
         do {
