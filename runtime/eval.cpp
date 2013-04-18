@@ -18,17 +18,18 @@ ref update(application* app, ref newval) {
 
 safe_ref<object> eval(ref r) {
     stack s;
-    while (application* app = try_cast<application>(r)) {
-        do {
+    while (is<application>(r) || s) {
+        while (auto app = try_cast<application>(r)) {
             push(s, app);
             r = app->left;
-        } while ((app = try_cast<application>(r)));
+        }
 
         assert(is<function>(r) && "type error: trying to apply non-func");
         auto* f = cast<function>(r);
         bool id = f->func == comb_i;
 
         auto result = f->func(s);
+        assert(result && "null result");
         if (!s)
             r = result;
         else if (id)

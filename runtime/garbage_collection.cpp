@@ -1,7 +1,9 @@
 #include "main.hpp"
 #include "garbage_collection.hpp"
 #include "utility.hpp"
+#include "debug.hpp"
 #include <cassert>
+#include <cstring>
 #include <list>
 #include <iterator>
 
@@ -52,14 +54,14 @@ T* new_object() {
     if (!obj) {
         // If we ran out of memory, run a garbage collection pass and
         // then try again.
-        collect_garbage();
+        collect_garbage(true);
         obj = static_cast<T*>(malloc(sizeof(T)));
         assert(obj && "out of memory");
     }
     obj->next = nullptr;
     obj->type = T::TYPE;
     // For debugging purposes, we always collect garbage.
-    collect_garbage();
+    collect_garbage(true);
     if (!first) {
         first = obj;
     } else {
@@ -67,6 +69,11 @@ T* new_object() {
         first = obj;
     }
     return obj;
+}
+
+void free_object(object* p) {
+    free(p);
+    --object_count;
 }
 
 
@@ -115,20 +122,21 @@ void walk(ref r) {
     } else if (auto* st = try_cast<stack_link>(r)) {
         if (st->prev)
             walk(st->prev);
+        walk(st->arg);
     }
 }
 
-void collect_garbage() {
-    for (auto p = first; p; p = p->next)
+void collect_garbage(bool b) {
+    for (auto p = first; p; p = p->next) {
         p->used = false;
+    }
 
     for (auto p : root_set)
         walk(p);
 
     while (first && !first->used) {
         auto* p = first->next;
-        free(first);
-        --object_count;
+        free_object(first);
         first = p;
     }
     if (!first)
@@ -138,8 +146,7 @@ void collect_garbage() {
             continue;
         auto* next = p->next;
         p->next = next->next;
-        free(next);
-        --object_count;
+        free_object(next);
     }
 }
 

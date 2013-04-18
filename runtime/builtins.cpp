@@ -1,6 +1,7 @@
 #include "main.hpp"
 #include "utility.hpp"
 #include "stack.hpp"
+#include "debug.hpp"
 
 safe_ref<object> comb_i(stack& sl) {
     return extract(sl)->right;

@@ -122,7 +122,7 @@ safe_ref<stack_link> make_stack_link(stack_link* prev, application* arg);
 WARN_UNUSED_RESULT
 ref make_bool(bool b);
 
-void collect_garbage();
+void collect_garbage(bool = false);
 
 safe_ref<object> eval(ref);
 

@@ -25,6 +25,10 @@ inline void print_one(graph g) {
     graphviz_dump(g);
 }
 
+inline void print_one(void* p) {
+    printf("%p", p);
+}
+
 template<typename...>
 struct debug_print_impl;
 
