@@ -27,8 +27,10 @@ using ref = object*;
 struct stack_link;
 
 class root {
-    using iter_t = std::list<ref>::iterator;
-    iter_t it;
+    friend void collect_garbage();
+    struct link;
+    link* it;
+    static link* used;
 
 public:
     root();
@@ -39,19 +41,19 @@ public:
     root& operator=(root&& o);
     ~root();
     void swap(root& o);
-    void dismiss();
 };
 
 template<typename T>
 class safe_ref {
+    template<typename S>
+    friend class safe_ref;
     root protector;
     T* ptr;
 
 public:
     safe_ref() : ptr() {}
     template<typename S>
-    safe_ref(safe_ref<S>&& o) : protector(o.get()), ptr(o.get()) {
-        o.dismiss();
+    safe_ref(safe_ref<S>&& o) : protector(std::move(o.protector)), ptr(o.get()) {
     }
     safe_ref(T* p) : protector(p), ptr(p) {}
     safe_ref<T>& operator=(T* p) {
@@ -75,10 +77,6 @@ public:
 
     T* get() const {
         return ptr;
-    }
-
-    void dismiss() {
-        protector.dismiss();
     }
 };
 
@@ -122,7 +120,7 @@ safe_ref<stack_link> make_stack_link(stack_link* prev, application* arg);
 WARN_UNUSED_RESULT
 ref make_bool(bool b);
 
-void collect_garbage(bool = false);
+void collect_garbage();
 
 safe_ref<object> eval(ref);
 

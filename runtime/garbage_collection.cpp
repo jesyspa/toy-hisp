@@ -7,25 +7,53 @@
 #include <list>
 #include <iterator>
 
+struct root::link {
+    ref o;
+    link* next;
+    link* prev;
+
+    link(ref);
+    ~link();
+    link(link const&) = delete;
+    link& operator=(link const&) = delete;
+
+    void swap(link&);
+};
+
+root::link* root::used = nullptr;
+
 namespace {
-    std::list<ref> root_set;
     ref first;
     std::size_t object_count;
 }
 
-root::root() : it(root_set.end()) {}
+root::link::link(ref o) : o(o), next(used), prev{} {
+    if (next)
+        next->prev = this;
+    used = this;
+}
+
+root::link::~link() {
+    if (prev)
+        prev->next = next;
+    else
+        used = next;
+    if (next)
+        next->prev = prev;
+}
+
+root::root() : it{} {}
 
 root::root(ref p) {
     if (p) {
-        root_set.push_front(p);
-        it = root_set.begin();
+        it = new link(p);
     } else {
-        it = root_set.end();
+        it = nullptr;
     }
 }
 
 root::root(root&& o) : it(o.it) {
-    o.it = iter_t{};
+    o.it = nullptr;
 }
 
 root& root::operator=(root&& o) {
@@ -34,16 +62,11 @@ root& root::operator=(root&& o) {
 }
 
 root::~root() {
-    if (it != root_set.end())
-        root_set.erase(it);
+    delete it;
 }
 
 void root::swap(root& o) {
     std::swap(it, o.it);
-}
-
-void root::dismiss() {
-    it = root_set.end();
 }
 
 template<typename T>
@@ -54,14 +77,14 @@ T* new_object() {
     if (!obj) {
         // If we ran out of memory, run a garbage collection pass and
         // then try again.
-        collect_garbage(true);
+        collect_garbage();
         obj = static_cast<T*>(malloc(sizeof(T)));
         assert(obj && "out of memory");
     }
     obj->next = nullptr;
     obj->type = T::TYPE;
     // For debugging purposes, we always collect garbage.
-    collect_garbage(true);
+    collect_garbage();
     if (!first) {
         first = obj;
     } else {
@@ -126,13 +149,13 @@ void walk(ref r) {
     }
 }
 
-void collect_garbage(bool b) {
+void collect_garbage() {
     for (auto p = first; p; p = p->next) {
         p->used = false;
     }
 
-    for (auto p : root_set)
-        walk(p);
+    for (auto p = root::used; p; p = p->next)
+        walk(p->o);
 
     while (first && !first->used) {
         auto* p = first->next;
