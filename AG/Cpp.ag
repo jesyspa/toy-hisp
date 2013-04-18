@@ -1,0 +1,9 @@
+module {AG.Cpp} {} {}
+
+data Cpp
+    | App f :: Cpp
+          x :: Cpp
+    | Var x :: String
+    | Num x :: Int
+
+deriving Cpp : Eq

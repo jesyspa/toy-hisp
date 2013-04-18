@@ -3,34 +3,41 @@ imports
 {
 import Hisp
 import SKI
+import qualified Data.Set as S
 }
 
 include "AG/Hisp.ag"
 include "AG/SKI.ag"
 
 attr HispExpr
-    syn variables use {++} {[]} :: {[Ident]}
     syn code :: SKI
-    inh parameters :: {[Ident]}
+
+attr SKI
+    inh var :: String
+    syn abs :: SKI
+    syn uses use {`S.union`} {S.empty} :: {S.Set String}
+    syn copy :: self
 
 sem HispExpr
-    | Variable lhs.variables = [@name]
-               lhs.code = paramFold (Name @name) @lhs.parameters
-    | Number   lhs.code = paramFold (Constant @value) @lhs.parameters
-    | Application lhs.code = paramFold (App @f.code @x.code) @lhs.parameters
-    | Lambda   expr.parameters = @x : @lhs.parameters
+    | Variable loc.code = Name @name
+    | Number   loc.code = Constant @value
+    | Application lhs.code = @f.code `App` @x.code
+    | Lambda   loc.code = abstract @expr.code @x
+
+sem SKI
+    | * - Name Constant App Number
+                lhs.abs = K `App` @loc.copy
+    | Name      lhs.abs = if @lhs.var == @x then I else K `App` @loc.copy
+                lhs.uses = S.singleton @x
+    | Constant  lhs.abs = K `App` @loc.copy
+    | App       lhs.abs = case (@lhs.var `S.member` @x.uses, @lhs.var `S.member` @y.uses) of
+                                  (True, True) -> S `App` @x.abs `App` @y.abs
+                                  (True, False) -> L `App` @x.abs `App` @y.copy
+                                  (False, True) -> R `App` @x.copy `App` @y.abs
+                                  (False, False) -> K `App` (@x.copy `App` @y.copy)
 
 {
-name = Name . ('$':)
-app = App . name
+abstract expr var = abs_Syn_SKI $ wrap_SKI (sem_SKI expr) (Inh_SKI var)
 
-paramFold = foldl skiFold
-
-skiFold :: SKI -> Ident -> SKI
-skiFold (Constant n) param = app "K" $ Constant n
-skiFold c@(Name x) param | x == param = name "I"
-                         | otherwise = app "K" c
-skiFold (App f x) param = App (app "S" (skiFold f param)) $ skiFold x param
-
-compile = fst . flip sem_HispExpr []
+compile expr = code_Syn_HispExpr $ wrap_HispExpr (sem_HispExpr expr) Inh_HispExpr
 }

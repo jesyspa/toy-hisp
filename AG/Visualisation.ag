@@ -1,4 +1,3 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
 module {AG.Visualisation} {} {}
 imports
 {
@@ -22,6 +21,11 @@ sem HispExpr
     | Lambda lhs.visual = '\\' : @x ++ " -> " ++ @expr.visual
 
 sem SKI
+    | S lhs.visual = "S"
+    | K lhs.visual = "K"
+    | I lhs.visual = "I"
+    | L lhs.visual = "L"
+    | R lhs.visual = "R"
     | App lhs.visual = parens @lhs.needParens $ @x.visual ++ " " ++ @y.visual
           x.needParens = False
           y.needParens = True

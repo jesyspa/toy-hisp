@@ -9,11 +9,17 @@ build-type:            Custom
 cabal-version:         >= 1.8
 extra-source-files:    Makefile, uuagc_options, AG/Hisp.ag,
                        AG/CodeGeneration.ag, AG/SKI.ag, AG/Visualisation.ag,
-                       AG/EvaluateSKI.ag
+                       AG/ToCpp.ag, AG/Cpp.ag, AG/PrintCpp.ag
 
 executable main
   main-is:             Main.hs
-  build-depends:       base, cco >= 0.0.4, mtl >= 2.1.2, parsec >= 3.1.0
+  build-depends:       base, mtl, parsec, lens, transformers, containers
   hs-source-dirs:      .
   other-modules:       AG.Hisp, AG.SKI, AG.CodeGeneration, AG.Visualisation,
-                       AG.EvaluateSKI
+                       AG.ToCpp, AG.Cpp, AG.PrintCpp
+  extensions:          TypeSynonymInstances, FlexibleInstances,
+                       MultiParamTypeClasses, StandaloneDeriving,
+                       OverlappingInstances, IncoherentInstances,
+                       UndecidableInstances, FlexibleContexts,
+                       RankNTypes, TemplateHaskell,
+                       NoMonomorphismRestriction

@@ -1,10 +1,9 @@
-{-# LANGUAGE RankNTypes, FlexibleContexts, NoMonomorphismRestriction #-}
 module Lexer (
     Token
   , lLParen
   , lRParen
   , lLambda
-  , lArrow
+  , lDot
   , lEqual
   , lIdentifier
   , lNumber
@@ -19,7 +18,7 @@ import Control.Monad.Identity
 data Token = LParen
            | RParen
            | Lambda
-           | Arrow
+           | Dot
            | Equal
            | Identifier String
            | Number Int
@@ -30,12 +29,12 @@ type Lexer a = Stream [Char] m Char => ParsecT [Char] u m a
 lparen = LParen <$ char '(' <?> "opening parenthesis"
 rparen = RParen <$ char ')' <?> "closing parenthesis"
 lambda = Lambda <$ char '\\' <?> "lambda"
-arrow = Arrow <$ string "->" <?> "arrow"
+dot = Dot <$ string "." <?> "dot"
 equal = Equal <$ char '=' <?> "equal sign"
-identifier = Identifier <$> many1 letter <?> "identifier"
+identifier = Identifier <$> many1 (letter <|> char '_') <?> "identifier"
 number = Number . read <$> many1 digit <?> "number"
 
-lexOne = choice [lparen, rparen, lambda, arrow, identifier, number] <* spaces
+lexOne = choice [lparen, rparen, lambda, dot, identifier, number] <* spaces
 
 lexer :: Lexer [Token]
 lexer = spaces *> many lexOne <* eof
@@ -43,25 +42,13 @@ lexer = spaces *> many lexOne <* eof
 runLexer :: String -> Either ParseError [Token]
 runLexer = runParser lexer () ""
 
-lLParen = try $ anyToken >>= \x -> case x of
-    LParen -> return ()
-    _ -> fail "left parenthesis"
+lIs tok err = try $ anyToken >>= \x -> if x == tok then return () else fail err
 
-lRParen = try $ anyToken >>= \x -> case x of
-    RParen -> return ()
-    _ -> fail "right parenthesis"
-
-lLambda = try $ anyToken >>= \x -> case x of
-    Lambda -> return ()
-    _ -> fail "lambda"
-
-lArrow = try $ anyToken >>= \x -> case x of
-    Arrow -> return ()
-    _ -> fail "arrow"
-
-lEqual = try $ anyToken >>= \x -> case x of
-    Equal -> return ()
-    _ -> fail "equal"
+lLParen = lIs LParen "left parenthesis"
+lRParen = lIs RParen "right parenthesis"
+lLambda = lIs Lambda "lambda"
+lDot  = lIs Dot "dot"
+lEqual = lIs Equal "equal"
 
 lIdentifier = try $ anyToken >>= \x -> case x of
     Identifier x' -> return x'

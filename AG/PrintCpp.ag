@@ -1,0 +1,38 @@
+module {AG.PrintCpp} {}
+{
+import Cpp
+import qualified Data.Set as S
+}
+
+include "AG/Cpp.ag"
+
+attr Cpp
+    syn visual :: String
+    syn objects use {`S.union`} {S.empty} :: {S.Set String}
+    syn constants use {`S.union`} {S.empty} :: {S.Set Int}
+
+sem Cpp
+    | App   lhs.visual = "make_application(" ++ @f.visual ++ ", " ++ @x.visual ++ ")"
+    | Var   lhs.visual = @x ++ "_obj"
+            lhs.objects = S.singleton @x
+    | Num   lhs.visual = "c_" ++ show @x ++ "_obj"
+            lhs.constants = S.singleton @x
+
+{
+
+prelude = "int main() { {"
+treedef x = "auto tree = " ++ x ++ "; "
+postlude = "eval(tree); } collect_garbage(); }"
+
+make_obj s = "auto " ++ s ++ "_obj = make_function(" ++ s ++ "); "
+make_num s = "auto c_" ++ show s ++ "_obj = make_number(" ++ show s ++ "); "
+
+instance Show Cpp where
+    show cpp = prelude ++ objects ++ constants ++ treedef visual ++ postlude
+        where cpp' = wrap_Cpp (sem_Cpp cpp) Inh_Cpp
+              visual = visual_Syn_Cpp cpp'
+              objects = concatMap make_obj . S.elems $ objects_Syn_Cpp cpp'
+              constants = concatMap make_num . S.elems $ constants_Syn_Cpp cpp'
+
+}
+

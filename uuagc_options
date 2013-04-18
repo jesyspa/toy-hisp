@@ -4,11 +4,17 @@ options : haskellsyntax, pretty, data, datarecords, catas, semfuns, signatures, 
 file : "AG/CodeGeneration.ag"
 options : haskellsyntax, pretty, catas, semfuns, signatures, wrappers
 
-file : "AG/EvaluateSKI.ag"
-options : haskellsyntax, pretty, catas, semfuns, signatures, wrappers
-
 file : "AG/SKI.ag"
 options : haskellsyntax, pretty, data, datarecords, catas, semfuns, signatures, wrappers
 
 file : "AG/Visualisation.ag"
+options : haskellsyntax, pretty, catas, semfuns, signatures, wrappers
+
+file : "AG/Cpp.ag"
+options : haskellsyntax, pretty, data, datarecords, catas, semfuns, signatures, wrappers
+
+file : "AG/ToCpp.ag"
+options : haskellsyntax, pretty, catas, semfuns, signatures, wrappers
+
+file : "AG/PrintCpp.ag"
 options : haskellsyntax, pretty, catas, semfuns, signatures, wrappers

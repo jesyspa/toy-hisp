@@ -1,12 +1,17 @@
 module Main where
 
-import Parser
+import Text.Parsec
 import CodeGeneration
-import SKI
-import EvaluateSKI
-import Visualisation
 import Control.Applicative
+import Control.Arrow
+import Control.Monad.Trans
+import Parser
+import SKI
+import Visualisation
+import ToCpp
+import PrintCpp
 
-c = flip evaluate (Name "arg") . compile
-
-main = fmap c <$> (parseHisp <$> getContents) >>= print
+main = do
+    contents <- getContents
+    let code = ski2cpp . compile <$> parseHisp contents
+    either (error.show) print code

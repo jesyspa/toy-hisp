@@ -4,4 +4,7 @@
 dist
 main
 *.pdf
-examples/*.ssm
+lib/
+.relbuild
+.dbgbuild
+.sconsign.dblite
