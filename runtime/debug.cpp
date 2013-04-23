@@ -40,14 +40,6 @@ void internal_print_impl(ref r, std::vector<object*>& objs, bool parens) {
         printf("%d", n->value);
     } else if (auto* f = try_cast<function>(r)){
         printf("%s", func_names[f->func]);
-    } else if (auto* sl = try_cast<stack_link>(r)) {
-        printf("sl [");
-        internal_print_impl(sl->arg, objs, false);
-        printf("]");
-        if (sl->prev) {
-            printf(" -> ");
-            internal_print_impl(sl->prev, objs, false);
-        }
     }
 }
 

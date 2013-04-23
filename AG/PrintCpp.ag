@@ -2,37 +2,36 @@ module {AG.PrintCpp} {}
 {
 import Cpp
 import qualified Data.Set as S
+import Text.PrettyPrint.HughesPJ
 }
 
 include "AG/Cpp.ag"
 
-attr Cpp
-    syn visual :: String
-    syn objects use {`S.union`} {S.empty} :: {S.Set String}
-    syn constants use {`S.union`} {S.empty} :: {S.Set Int}
+attr CppExpr CppStmt
+    syn visual :: Doc
 
-sem Cpp
-    | App   lhs.visual = "make_application(" ++ @f.visual ++ ", " ++ @x.visual ++ ")"
-    | Var   lhs.visual = @x ++ "_obj"
-            lhs.objects = S.singleton @x
-    | Num   lhs.visual = "c_" ++ show @x ++ "_obj"
-            lhs.constants = S.singleton @x
+attr CppExprs CppStmts CppDoc
+    syn visual :: {[Doc]}
+
+sem CppExpr
+    | Var   lhs.visual = text @x
+    | Num   lhs.visual = int @x
+    | Call  lhs.visual = text @f <> (cat $ lparen : punctuate (text ", ") @x.visual) <> rparen
+
+sem CppExprs CppStmts
+    | Cons  lhs.visual = @hd.visual : @tl.visual
+    | Nil   lhs.visual = []
+
+sem CppStmt
+    | FunDef lhs.visual = text @rt <+> text @name <> text "()" $+$ @body.visual
+    | Block  lhs.visual = lbrace $+$ nest 4 (vcat @body.visual) $+$ rbrace
+    | Include lhs.visual = text "#include" <+> doubleQuotes (text @file)
+    | VarDef lhs.visual = text "auto" <+> text @name <+> equals <+> @init.visual <> semi
+    | Expr   lhs.visual = @expr.visual <> semi
 
 {
 
-prelude = "#include \"runtime/main.hpp\"\nint main() { {"
-treedef x = "auto tree = " ++ x ++ "; "
-postlude = "eval(tree); } collect_garbage(); }"
-
-make_obj s = "auto " ++ s ++ "_obj = make_function(" ++ s ++ "); "
-make_num s = "auto c_" ++ show s ++ "_obj = make_number(" ++ show s ++ "); "
-
-instance Show Cpp where
-    show cpp = prelude ++ objects ++ constants ++ treedef visual ++ postlude
-        where cpp' = wrap_Cpp (sem_Cpp cpp) Inh_Cpp
-              visual = visual_Syn_Cpp cpp'
-              objects = concatMap make_obj . S.elems $ objects_Syn_Cpp cpp'
-              constants = concatMap make_num . S.elems $ constants_Syn_Cpp cpp'
-
+instance Show CppDoc where
+    show = render . vcat . sem_CppDoc
 }
 

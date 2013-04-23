@@ -2,9 +2,9 @@
 
 #include "main.hpp"
 
-void push(stack& sl, application* app);
-
+bool empty(stack const& sl);
+ref top(stack const& sl);
+void push(stack& sl, ref r);
 WARN_UNUSED_RESULT
-safe_ref<application> extract(stack& sl);
-
+ref extract(stack& sl);
 void pop(stack& sl);

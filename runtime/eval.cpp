@@ -10,15 +10,16 @@ ref update(application* app, ref newval) {
         app->left = napp->left;
         app->right = napp->right;
     } else {
-        app->left = make_function(comb_i);
         app->right = newval;
+        app->left = make_function(comb_i);
     }
     return app;
 }
 
-safe_ref<object> eval(ref r) {
+ref eval(ref r) {
     stack s;
-    while (is<application>(r) || s) {
+    register_stack(s);
+    while (is<application>(r) || !empty(s)) {
         while (auto app = try_cast<application>(r)) {
             push(s, app);
             r = app->left;
@@ -30,12 +31,13 @@ safe_ref<object> eval(ref r) {
 
         auto result = f->func(s);
         assert(result && "null result");
-        if (!s)
+        if (empty(s))
             r = result;
         else if (id)
-            r = s->arg->left = result;
+            r = cast<application>(top(s))->left = result;
         else
-            r = update(cast<application>(s->arg->left), result);
+            r = update(cast<application>(cast<application>(top(s))->left), result);
     }
+    unregister_stack();
     return r;
 }

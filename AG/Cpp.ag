@@ -1,9 +1,28 @@
 module {AG.Cpp} {} {}
 
-data Cpp
-    | App f :: Cpp
-          x :: Cpp
+type CppExprs = [CppExpr]
+type CppStmts = [CppStmt]
+
+data CppExpr
+    | Call f :: String
+           x :: CppExprs
     | Var x :: String
     | Num x :: Int
 
-deriving Cpp : Eq
+data CppStmt
+    | FunDef rt :: String
+             name :: String
+             body :: CppStmt -- assume Block
+    | Block body :: CppStmts
+    | Include file :: String
+    | VarDef name :: String
+             init :: CppExpr
+    | Expr   expr :: CppExpr
+
+data CppDoc
+    | File stmts :: CppStmts
+
+deriving CppExpr : Eq
+deriving CppExprs : Eq
+deriving CppStmt : Eq
+deriving CppStmts : Eq

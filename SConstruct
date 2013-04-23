@@ -8,7 +8,7 @@ Help("""
 flags = {
    'cpp': ["-Wall", "-Wextra", "-pedantic", "-Werror", "-std=c++1y"],
    'debug': ["-O0", "-g3", "-D_GLIBCXX_DEBUG"],
-   'release': ["-O2", "-DNDEBUG"],
+   'release': ["-O2", "-g", "-DNDEBUG"],
 }
 
 Export('flags')

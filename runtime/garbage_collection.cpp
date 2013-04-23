@@ -6,91 +6,59 @@
 #include <cstring>
 #include <list>
 #include <iterator>
-
-struct root::link {
-    ref o;
-    link* next;
-    link* prev;
-
-    link(ref);
-    ~link();
-    link(link const&) = delete;
-    link& operator=(link const&) = delete;
-
-    void swap(link&);
-};
-
-root::link* root::used = nullptr;
+#include <vector>
 
 namespace {
+    bool garbage_state = false;
     ref first;
     std::size_t object_count;
+    std::size_t default_check_at = 64;
+    std::size_t check_at = default_check_at;
+
+    std::size_t const tmp_root_size = 4;
+    ref tmp_roots[tmp_root_size];
+    std::size_t next_tmp_root;
+
+    std::vector<stack*> stacks;
 }
 
-root::link::link(ref o) : o(o), next(used), prev{} {
-    if (next)
-        next->prev = this;
-    used = this;
-}
-
-root::link::~link() {
-    if (prev)
-        prev->next = next;
-    else
-        used = next;
-    if (next)
-        next->prev = prev;
-}
-
-root::root() : it{} {}
-
-root::root(ref p) {
-    if (p) {
-        it = new link(p);
-    } else {
-        it = nullptr;
-    }
-}
-
-root::root(root&& o) : it(o.it) {
-    o.it = nullptr;
-}
-
-root& root::operator=(root&& o) {
-    swap(o);
-    return *this;
-}
-
-root::~root() {
-    delete it;
-}
-
-void root::swap(root& o) {
-    std::swap(it, o.it);
+ref save(ref r) {
+    tmp_roots[next_tmp_root++] = r;
+    if (next_tmp_root > tmp_root_size)
+        next_tmp_root = 0;
+    return r;
 }
 
 template<typename T>
 WARN_UNUSED_RESULT
 T* new_object() {
-    assert(++object_count <= 1024*1024 && "too many objects!");
+    ++object_count;
+    assert(object_count <= 1024*1024 && "too many objects!");
     auto obj = static_cast<T*>(malloc(sizeof(T)));
     if (!obj) {
         // If we ran out of memory, run a garbage collection pass and
         // then try again.
         collect_garbage();
         obj = static_cast<T*>(malloc(sizeof(T)));
-        assert(obj && "out of memory");
+        if (!obj) {
+            printf("out of memory");
+            std::exit(-1);
+        }
     }
     obj->next = nullptr;
     obj->type = T::TYPE;
-    // For debugging purposes, we always collect garbage.
+    obj->used = !garbage_state;
+#ifndef NDEBUG
+    if (object_count >= check_at)
+        collect_garbage();
+#else
+    (void)object_count;
+    (void)check_at;
     collect_garbage();
-    if (!first) {
-        first = obj;
-    } else {
-        obj->next = first;
-        first = obj;
-    }
+#endif
+    obj->next = first;
+    first = obj;
+    save(obj);
     return obj;
 }
 
@@ -99,11 +67,8 @@ void free_object(object* p) {
     --object_count;
 }
 
-
 WARN_UNUSED_RESULT
-safe_ref<application> make_application(ref left, ref right) {
-    PRESERVE(left);
-    PRESERVE(right);
+application* make_application(ref left, ref right) {
     auto app = new_object<application>();
     app->left = left;
     app->right = right;
@@ -111,66 +76,51 @@ safe_ref<application> make_application(ref left, ref right) {
 }
 
 WARN_UNUSED_RESULT
-safe_ref<number> make_number(int value) {
+number* make_number(int value) {
     auto num = new_object<number>();
     num->value = value;
     return num;
 }
 
 WARN_UNUSED_RESULT
-safe_ref<function> make_function(func_t func) {
+function* make_function(func_t func) {
     auto fun = new_object<function>();
     fun->func = func;
     return fun;
 }
 
-WARN_UNUSED_RESULT
-safe_ref<stack_link> make_stack_link(stack_link* prev, application* arg) {
-    PRESERVE(prev);
-    PRESERVE(arg);
-    auto link = new_object<stack_link>();
-    link->prev = prev;
-    link->arg = arg;
-    return link;
-}
-
 void walk(ref r) {
     assert(r && "walking over nothing");
-    if (r->used)
+    if (r->used != garbage_state)
         return;
-    r->used = true;
+    r->used = !garbage_state;
     if (auto* app = try_cast<application>(r)) {
         walk(app->left);
         walk(app->right);
-    } else if (auto* st = try_cast<stack_link>(r)) {
-        if (st->prev)
-            walk(st->prev);
-        walk(st->arg);
     }
 }
 
 void collect_garbage() {
-    for (auto p = first; p; p = p->next) {
-        p->used = false;
-    }
+    garbage_state = !garbage_state;
 
-    for (auto p = root::used; p; p = p->next)
-        walk(p->o);
+    for (auto p : tmp_roots)
+        if (p)
+            walk(p);
 
-    while (first && !first->used) {
-        auto* p = first->next;
-        free_object(first);
-        first = p;
-    }
+    for (auto st : stacks)
+        for (auto p : *st)
+            walk(p);
+
     if (!first)
         return;
-    for (auto p = first; p->next; p = p->next) {
-        if (p->next->used)
+    for (auto p = first; p && p->next; p = p->next) {
+        if (p->next->used != garbage_state)
             continue;
         auto* next = p->next;
         p->next = next->next;
         free_object(next);
     }
+    check_at = std::min(2*object_count, default_check_at);
 }
 
 WARN_UNUSED_RESULT
@@ -178,6 +128,15 @@ ref make_bool(bool b) {
     if (b)
         return make_function(comb_k);
     else
-        return make_application(make_function(comb_k), make_function(comb_i));
+        return make_application(
+                make_function(comb_k),
+                make_function(comb_i));
 }
 
+void register_stack(stack& s) {
+    stacks.push_back(&s);
+}
+
+void unregister_stack() {
+    stacks.pop_back();
+}
