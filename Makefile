@@ -20,7 +20,7 @@ haskell :
 
 test : haskell lib/libdbghisp.a
 	./main < main.hisp > main.cpp
-	g++ -o m -Wall -Wextra -Werror -pedantic -std=c++1y -O0 -g3 -D_GLIBCXX_DEBUG -Llib -ldbghisp main.cpp
+	g++ -o m -Wall -Wextra -Werror -pedantic -std=c++1y -O0 -g3 -D_GLIBCXX_DEBUG main.cpp -Llib -ldbghisp
 	valgrind ./m
 
 clean :
