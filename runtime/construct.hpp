@@ -56,11 +56,13 @@ struct do_construct<application*> {
 template<typename LHS, typename RHS>
 struct do_construct<mk_app_impl<LHS, RHS>> {
     static void run(stack& s, mk_app_impl<LHS, RHS> const& app) {
-        do_construct<LHS>::run(s, app.lhs);
         do_construct<RHS>::run(s, app.rhs);
-        auto f = save(extract(s));
-        auto x = save(extract(s));
-        push(s,make_application(f, x));
+        do_construct<LHS>::run(s, app.lhs);
+        auto f = get_n(s, 0);
+        auto x = get_n(s, 1);
+        auto res = make_application(f, x);
+        pop_n(s, 2);
+        push(s, res);
     }
 };
 

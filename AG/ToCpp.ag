@@ -25,6 +25,7 @@ addTopLevel tree = Cpp.File [Cpp.Include "runtime/main.hpp", Cpp.Include "runtim
                      Cpp.Block [
                          Cpp.VarDef "tree" tree,
                          Cpp.Expr $ Cpp.Call "eval" [Cpp.Var "tree"]],
-                         Cpp.Expr $ Cpp.Call "collect_garbage" []]
+                     Cpp.Expr $ Cpp.Call "clear_tmp_roots" [],
+                     Cpp.Expr $ Cpp.Call "collect_garbage" []]
 ski2cpp = addTopLevel . sem_SKI
 }

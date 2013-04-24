@@ -5,13 +5,24 @@
 #include "garbage_collection.hpp"
 #include <cassert>
 
+namespace {
+    function make_static_comb_i() {
+        function f{};
+        f.func = comb_i;
+        f.allocated = true;
+        f.type = function::TYPE;
+        return f;
+    }
+    function static_comb_i = make_static_comb_i();
+}
+
 ref update(application* app, ref newval) {
     if (auto* napp = try_cast<application>(newval)) {
         app->left = napp->left;
         app->right = napp->right;
     } else {
         app->right = newval;
-        app->left = make_function(comb_i);
+        app->left = &static_comb_i;
     }
     return app;
 }
@@ -20,6 +31,7 @@ ref eval(ref r) {
     stack s;
     register_stack(s);
     while (is<application>(r) || !empty(s)) {
+        ASSERT_SANITY(r);
         while (auto app = try_cast<application>(r)) {
             push(s, app);
             r = app->left;
@@ -31,6 +43,7 @@ ref eval(ref r) {
 
         auto result = f->func(s);
         assert(result && "null result");
+        ASSERT_SANITY(result);
         if (empty(s))
             r = result;
         else if (id)

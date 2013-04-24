@@ -5,6 +5,7 @@
 
 template<typename T>
 bool is(ref r) {
+    assert(r && "null type");
     return r->type == T::TYPE;
 }
 

@@ -2,30 +2,36 @@
 #include "garbage_collection.hpp"
 #include "utility.hpp"
 #include "debug.hpp"
+#include "construct.hpp"
 #include <cassert>
 #include <cstring>
 #include <list>
 #include <iterator>
 #include <vector>
 
+bool garbage_state = false;
+
 namespace {
-    bool garbage_state = false;
     ref first;
     std::size_t object_count;
     std::size_t default_check_at = 64;
     std::size_t check_at = default_check_at;
 
-    std::size_t const tmp_root_size = 4;
+#ifdef TMP_ROOTS
+    std::size_t const tmp_root_size = 6;
     ref tmp_roots[tmp_root_size];
     std::size_t next_tmp_root;
+#endif
 
     std::vector<stack*> stacks;
 }
 
 ref save(ref r) {
+#ifdef TMP_ROOTS
     tmp_roots[next_tmp_root++] = r;
     if (next_tmp_root > tmp_root_size)
         next_tmp_root = 0;
+#endif
     return r;
 }
 
@@ -45,17 +51,18 @@ T* new_object() {
             std::exit(-1);
         }
     }
+    obj->allocated = true;
     obj->next = nullptr;
     obj->type = T::TYPE;
-    obj->used = !garbage_state;
 #ifndef NDEBUG
-    if (object_count >= check_at)
-        collect_garbage();
-#else
     (void)object_count;
     (void)check_at;
     collect_garbage();
+#else
+    if (object_count >= check_at)
+        collect_garbage();
 #endif
+    obj->used = !garbage_state;
     obj->next = first;
     first = obj;
     save(obj);
@@ -63,7 +70,10 @@ T* new_object() {
 }
 
 void free_object(object* p) {
+    p->allocated = false;
+#ifdef NDEBUG
     free(p);
+#endif
     --object_count;
 }
 
@@ -89,8 +99,20 @@ function* make_function(func_t func) {
     return fun;
 }
 
+void assert_global_sanity() {
+    for (auto p = first; p ; p = p->next)
+        ASSERT_SANITY(p);
+}
+
+void dump_memory() {
+#ifndef NDEBUG
+    print_one(multi_graph{first});
+#endif
+}
+
 void walk(ref r) {
     assert(r && "walking over nothing");
+    assert(r->allocated);
     if (r->used != garbage_state)
         return;
     r->used = !garbage_state;
@@ -100,27 +122,49 @@ void walk(ref r) {
     }
 }
 
-void collect_garbage() {
-    garbage_state = !garbage_state;
-
+template<typename F>
+void on_all_roots(F f) {
+#ifdef TMP_ROOTS
     for (auto p : tmp_roots)
         if (p)
-            walk(p);
+            f(p);
+#endif
 
     for (auto st : stacks)
         for (auto p : *st)
-            walk(p);
+            if (p)
+                f(p);
+}
 
-    if (!first)
-        return;
-    for (auto p = first; p && p->next; p = p->next) {
-        if (p->next->used != garbage_state)
+void collect_garbage() {
+    garbage_state = !garbage_state;
+
+    on_all_roots(walk);
+
+    dump_memory();
+
+    bool cleaned_any = false;
+
+    while (first && first->used == garbage_state) {
+        cleaned_any = true;
+        auto p = first->next;
+        free_object(first);
+        first = p;
+    }
+    for (auto p = first; p && p->next; ) {
+        if (p->next->used != garbage_state) {
+            p = p->next;
             continue;
+        }
+        cleaned_any = true;
         auto* next = p->next;
         p->next = next->next;
         free_object(next);
     }
     check_at = std::min(2*object_count, default_check_at);
+    assert_global_sanity();
+    if (cleaned_any)
+        dump_memory();
 }
 
 WARN_UNUSED_RESULT
@@ -128,9 +172,7 @@ ref make_bool(bool b) {
     if (b)
         return make_function(comb_k);
     else
-        return make_application(
-                make_function(comb_k),
-                make_function(comb_i));
+        return mk_app(comb_k, comb_i);
 }
 
 void register_stack(stack& s) {
@@ -140,3 +182,23 @@ void register_stack(stack& s) {
 void unregister_stack() {
     stacks.pop_back();
 }
+
+void clear_tmp_roots() {
+#ifdef TMP_ROOTS
+    for (auto& p : tmp_roots)
+        p = nullptr;
+    next_tmp_root = 0;
+#endif
+}
+
+void print_allocated() {
+#ifndef NDEBUG
+    printf("total: %lu", object_count);
+    for (auto p = first; p ; p = p->next) {
+        ASSERT_SANITY(p);
+        print_one(p);
+        printf("\n");
+    }
+#endif
+}
+

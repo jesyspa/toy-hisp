@@ -17,9 +17,22 @@ enum class object_type {
 
 struct object {
     bool used;
+    bool allocated;
     object_type type;
     object* next;
 };
+
+#ifndef NDEBUG
+#define ASSERT_SANITY(r) do { \
+    assert(r && r->allocated); \
+    if (auto app = try_cast<application>(r)) { \
+        assert(app->left && app->left->allocated); \
+        assert(app->right && app->right->allocated); \
+    } \
+} while(false)
+#else
+#define ASSERT_SANITY(r) do { (void)r; } while(false)
+#endif
 
 struct application;
 
@@ -67,5 +80,6 @@ ref comb_y(stack& sl);
 ref print(stack& sl);
 ref add(stack& sl);
 ref sub(stack& sl);
+ref once(stack& sl);
 ref le(stack& sl);
 

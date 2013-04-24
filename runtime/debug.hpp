@@ -6,8 +6,13 @@ struct graph {
     ref r;
 };
 
+struct multi_graph {
+    ref r;
+};
+
 void internal_print(ref r);
 void graphviz_dump(graph g);
+void multi_graphviz_dump(multi_graph g);
 
 inline void print_one(int i) {
     printf("%d", i);
@@ -23,6 +28,10 @@ inline void print_one(ref r) {
 
 inline void print_one(graph g) {
     graphviz_dump(g);
+}
+
+inline void print_one(multi_graph g) {
+    multi_graphviz_dump(g);
 }
 
 inline void print_one(void* p) {

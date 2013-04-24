@@ -4,76 +4,99 @@
 #include "debug.hpp"
 #include "construct.hpp"
 
+application* extract_app(stack& sl) {
+    return cast<application>(save(extract(sl)));
+}
+
+application* get_n_app(stack& sl, int n) {
+    return cast<application>(get_n(sl, n));
+}
+
 ref comb_i(stack& sl) {
-    return cast<application>(extract(sl))->right;
+    return extract_app(sl)->right;
 }
 
 ref comb_k(stack& sl) {
-    auto arg = cast<application>(extract(sl));
+    auto arg = extract_app(sl);
     pop(sl);
     return arg->right;
 }
 
 ref comb_s(stack& sl) {
-    auto f = cast<application>(extract(sl));
-    auto g = cast<application>(extract(sl));
-    auto x = cast<application>(extract(sl));
-    return mk_app(
+    auto f = get_n_app(sl, 0);
+    auto g = get_n_app(sl, 1);
+    auto x = get_n_app(sl, 2);
+    ref r = mk_app(
             mk_app(f->right, x->right),
             mk_app(g->right, x->right));
+    pop_n(sl, 3);
+    return r;
 }
 
 ref comb_l(stack& sl) {
-    auto f = cast<application>(extract(sl));
-    auto g = cast<application>(extract(sl));
-    auto x = cast<application>(extract(sl));
-    return mk_app(
+    auto f = get_n_app(sl, 0);
+    auto g = get_n_app(sl, 1);
+    auto x = get_n_app(sl, 2);
+    ref r = mk_app(
             mk_app(f->right, x->right),
             g->right);
+    pop_n(sl, 3);
+    return r;
 }
 
 ref comb_r(stack& sl) {
-    auto f = cast<application>(extract(sl));
-    auto g = cast<application>(extract(sl));
-    auto x = cast<application>(extract(sl));
-    return mk_app(
+    auto f = get_n_app(sl, 0);
+    auto g = get_n_app(sl, 1);
+    auto x = get_n_app(sl, 2);
+    ref r = mk_app(
         f->right,
         mk_app(g->right, x->right));
+    pop_n(sl, 3);
+    return r;
 }
 
 ref comb_y(stack& sl) {
-    auto f = cast<application>(extract(sl));
-    return mk_app(f->right, f);
+    auto f = get_n_app(sl, 0);
+    ref r = mk_app(f->right, mk_app(f->left, f->right));
+    pop(sl);
+    return r;
 }
 
 ref print(stack& sl) {
-    auto arg = cast<application>(extract(sl));
-    auto val = eval(arg->right);
+    auto arg = get_n_app(sl, 0);
+    ref val = eval(arg->right);
     std::printf("%d\n", cast<number>(val)->value);
+    pop(sl);
     return val;
 }
 
 ref add(stack& sl) {
-    auto lhs = cast<application>(extract(sl));
-    auto rhs = cast<application>(extract(sl));
-    return make_number(
+    auto lhs = get_n_app(sl, 0);
+    auto rhs = get_n_app(sl, 1);
+    ref r = make_number(
         eval_as<number>(lhs->right)->value
         + eval_as<number>(rhs->right)->value);
+    pop_n(sl, 2);
+    return r;
 }
 
 ref sub(stack& sl) {
-    auto lhs = cast<application>(extract(sl));
-    auto rhs = cast<application>(extract(sl));
-    return make_number(
+    auto lhs = get_n_app(sl, 0);
+    auto rhs = get_n_app(sl, 1);
+    ref r = make_number(
         eval_as<number>(lhs->right)->value
         - eval_as<number>(rhs->right)->value);
+    pop_n(sl, 2);
+    return r;
 }
 
 ref le(stack& sl) {
-    auto lhs = cast<application>(extract(sl));
-    auto rhs = cast<application>(extract(sl));
-    auto lhs_val = eval_as<number>(lhs->right);
-    auto rhs_val = eval_as<number>(rhs->right);
-    return make_bool(lhs_val->value <= rhs_val->value);
+    auto lhs = get_n_app(sl, 0);
+    auto rhs = get_n_app(sl, 1);
+    ref r = make_bool(
+        eval_as<number>(lhs->right)->value
+        <= eval_as<number>(rhs->right)->value);
+    pop_n(sl, 2);
+    return r;
 }
 
