@@ -12,44 +12,45 @@
         .globl mk_app_nf
         .globl mk_app_nn
 
+// x86 is low-endian, so these are backwards from what one would expect.
+// Lovely.
 mk_app_aa:
         movq $0x000,%rdx
         jmp mk_app
 mk_app_af:
-        movq $0x001,%rdx
+        movq $0x100,%rdx
         jmp mk_app
 mk_app_an:
-        movq $0x002,%rdx
+        movq $0x100,%rdx
         jmp mk_app
 mk_app_fa:
-        movq $0x100,%rdx
+        movq $0x001,%rdx
         jmp mk_app
 mk_app_ff:
         movq $0x101,%rdx
         jmp mk_app
 mk_app_fn:
-        movq $0x102,%rdx
+        movq $0x201,%rdx
         jmp mk_app
 mk_app_na:
-        movq $0x200,%rdx
+        movq $0x002,%rdx
         jmp mk_app
 mk_app_nf:
-        movq $0x201,%rdx
+        movq $0x102,%rdx
         jmp mk_app
 mk_app_nn:
         movq $0x202,%rdx
         jmp mk_app
 
-        // Allocates and initialises an application object.
-        //
-        // Takes:
-        //  - rdi: right value
-        //  - rsi: right value
-        //  - dh : left type
-        //  - dl : right type
-        //
-        // Returns:
-        //  - Pointer to the new app
+// Allocate and initialise an application object.
+//
+// IN:
+//   rdi: left value
+//   rsi: right value
+//   dh : left type
+//   dl : right type
+// OUT:
+//   eax: pointer to app
 mk_app:
         call allocate
         movw %dx,0x0e(%rax)
