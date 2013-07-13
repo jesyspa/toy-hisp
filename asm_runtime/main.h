@@ -1,20 +1,21 @@
 #pragma once
 
-typedef void (*fun)();
+typedef unsigned char byte;
+typedef unsigned short word;
+typedef unsigned dword;
+typedef unsigned long qword;
 
-void print();
-void add();
+typedef struct {
+    struct object* next;
+    byte alive;
+    byte type;
+    byte size;
+    byte filler[5];
+} object;
 
-void* mk_app_aa(void*, void*);
-void* mk_app_af(void*, fun);
-void* mk_app_an(void*, int);
-void* mk_app_fa(fun, void*);
-void* mk_app_ff(fun, fun);
-void* mk_app_fn(fun, int);
-void* mk_app_na(int, void*);
-void* mk_app_nf(int, fun);
-void* mk_app_nn(int, int);
+extern object print;
+extern object add;
 
-void* eval(void*);
-void collect_garbage(void);
+object* mk_app(object*, object*);
+object* mk_num(int);
 
