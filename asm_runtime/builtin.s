@@ -14,24 +14,30 @@ num_buffer:
 
 // Print a single number.
 //
+// MAY TRASH ALL REGS
 // IN:
-//   rdi: top of the stack
+//   rsp: top of eval stack
 // OUT:
-//   rax: 0
-//   rdx: 0 to indicate not-an-app
+//   rax: value that was printed
 print:
         .quad 0
         .byte 2
         .byte 2
         .word 0
+        .long 0
 print_real:
-        pushq %rbp
-        movq %rsp,%rbp
-        pushq %rbx
-
-        movq (%rdi),%rdi
+        popq %rdi
         movq 0x18(%rdi),%rdi
+        movb 0x09(%rdi),%al
+        cmpb $0,%al
+        jne .skipeval
         call eval
+        movq %rax,%rdi
+.skipeval:
+
+        movq %rdi,%r12
+        // This had better be a number.
+        movq 0x10(%rdi),%rax
 
         // Convert to string
         movq $10,%rcx
@@ -56,46 +62,42 @@ print_real:
         subq %rbx,%rdx
         syscall
 
-        xor %rax,%rax
-        xor %rdx,%rdx
-
-        popq %rbx
-        popq %rbp
-        ret
+        movq %r12,%rax
+        jmp reenter_eval
 
 
 // Add two numbers
 //
+// MAY TRASH ALL REGS
 // IN:
-//   rdi: top of the stack
+//   rsp: top of eval stack
 // OUT:
 //   rax: sum of the numbers
-//   rdx: 0 to indicate not-an-app
 add:
         .quad 0
         .byte 2
         .byte 2
         .word 0
+        .long 0
 add_real:
-        pushq %rbp
-        movq %rsp,%rbp
-        pushq %rbx
-
-        movq %rdi,%r12
-
-        movq (%rdi),%rdi
+        popq %rdi
         movq 0x18(%rdi),%rdi
+        movb 0x09(%rdi),%al
+        cmpb $0,%al
+        jne .skipeval_one
         call eval
-        movq %rax,%rbx
-
-        movq 0x8(%r12),%rdi
+        movq %rax,%rdi
+.skipeval_one:
+        movq 0x10(%rdi),%r12
+        popq %rdi
         movq 0x18(%rdi),%rdi
+        movb 0x09(%rdi),%al
+        cmpb $0,%al
+        jne .skipeval_two
         call eval
-        addq %rbx,%rax
-
-        xor %rdx,%rdx
-
-        popq %rbx
-        movq %rbp,%rsp
-        popq %rbp
-        ret
+        movq %rax,%rdi
+.skipeval_two:
+        movq 0x10(%rdi),%rdi
+        addq %r12,%rdi
+        call mk_num
+        jmp reenter_eval

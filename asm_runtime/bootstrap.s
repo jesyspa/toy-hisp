@@ -16,8 +16,7 @@ _start:
         call mem_init
         call make_expr
         movq %rax,%rdi
-        call dbg_print_tree
-//        call eval
+        call eval
         jmp exit
 
 
