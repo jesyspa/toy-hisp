@@ -1,6 +1,6 @@
 #pragma once
 #include "main.hpp"
-#include <cstdio>
+#include <iostream>
 
 struct graph {
     ref r;
@@ -15,11 +15,11 @@ void graphviz_dump(graph g);
 void multi_graphviz_dump(multi_graph g);
 
 inline void print_one(int i) {
-    printf("%d", i);
+    std::cerr << i;
 }
 
 inline void print_one(char const* p) {
-    printf("%s", p);
+    std::cerr << p;
 }
 
 inline void print_one(ref r) {
@@ -35,7 +35,7 @@ inline void print_one(multi_graph g) {
 }
 
 inline void print_one(void* p) {
-    printf("%p", p);
+    std::cerr << p;
 }
 
 template<typename...>
@@ -61,5 +61,5 @@ struct debug_print_impl<> {
 template<typename... ARGS>
 void debug_print(ARGS... args) {
     debug_print_impl<ARGS...>::invoke(args...);
-    getchar();
+    std::cin.get();
 }

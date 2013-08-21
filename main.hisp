@@ -1,0 +1,1 @@
+print (comb_y (\f. \x. le x 0 0 (add x (f (sub x 1)))) 5)
