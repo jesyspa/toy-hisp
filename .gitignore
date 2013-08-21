@@ -5,6 +5,8 @@ dist
 main
 *.pdf
 lib/
+.local
 .relbuild
 .dbgbuild
 .sconsign.dblite
+compile.sh
