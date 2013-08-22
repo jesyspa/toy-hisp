@@ -1,4 +1,3 @@
-./m > .graphs.sh
 rm -rf pics
 mkdir pics
 cd pics

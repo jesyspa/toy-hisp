@@ -13,7 +13,8 @@ extra-source-files:    Makefile, uuagc_options, AG/Hisp.ag,
 
 executable main
   main-is:             Main.hs
-  build-depends:       base, mtl, parsec, lens, transformers, containers, pretty
+  build-depends:       base, mtl, parsec, lens, transformers, containers,
+                       pretty, template-haskell
   hs-source-dirs:      .
   other-modules:       AG.Hisp, AG.SKI, AG.CodeGeneration, AG.Visualisation,
                        AG.ToCpp, AG.Cpp, AG.PrintCpp

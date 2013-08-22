@@ -11,6 +11,7 @@ module Lexer (
   , runLexer
 ) where
 
+import MakeParsers
 import Text.Parsec
 import Control.Applicative ((<$>), (<$), (<*>), (<*), (*>))
 import Control.Monad.Identity
@@ -42,19 +43,4 @@ lexer = spaces *> many lexOne <* eof
 runLexer :: String -> Either ParseError [Token]
 runLexer = runParser lexer () ""
 
-lIs tok err = try $ anyToken >>= \x -> if x == tok then return () else fail err
-
-lLParen = lIs LParen "left parenthesis"
-lRParen = lIs RParen "right parenthesis"
-lLambda = lIs Lambda "lambda"
-lDot  = lIs Dot "dot"
-lEqual = lIs Equal "equal"
-
-lIdentifier = try $ anyToken >>= \x -> case x of
-    Identifier x' -> return x'
-    _ -> fail "identifier"
-
-lNumber = try $ anyToken >>= \x -> case x of
-    Number x' -> return x'
-    _ -> fail "number"
-
+mkLs ''Token
