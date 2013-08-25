@@ -5,6 +5,7 @@ import Language.Haskell.TH
 import Control.Applicative
 import Text.Parsec
 import Debug.Trace
+import Control.Monad.Plus
 
 wrapAsVal :: Name -> Exp -> Dec
 wrapAsVal x e = FunD x [Clause [] (NormalB e) []]
@@ -31,14 +32,14 @@ mkL con = do
         conP = ConP cName $ fmap VarP args
         val = return . TupE $ fmap VarE args
         eName = stringE $ pprint cName
-    eVal <- [| return $val |]
-    eFail <- [| fail $eName |]
+    eVal <- [| Just $val |]
+    eFail <- [| Nothing |]
     let x = mkName "x" -- temp for case
         mVal = Match conP (NormalB eVal) []
         mFail = Match WildP (NormalB eFail) []
         eLam = return $ LamE [VarP x] $ VarE x `CaseE` [mVal, mFail]
 
-    expr <- ([| try $ anyToken >>= $eLam |])
+    expr <- ([| try $ mmapMaybe $eLam anyToken |])
     return $ wrapAsVal pName expr
 
 mkLs :: Name -> Q [Dec]

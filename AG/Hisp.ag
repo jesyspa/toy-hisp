@@ -1,7 +1,4 @@
 module {AG.Hisp} {} {}
-{
-type Ident = String
-}
 
 data HispExpr
     | Variable name :: Ident
@@ -11,4 +8,7 @@ data HispExpr
     | Lambda x :: Ident
              expr :: HispExpr
 
-deriving HispExpr : Eq
+{
+type Ident = String
+}
+
