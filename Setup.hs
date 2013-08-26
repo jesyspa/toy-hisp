@@ -1,6 +1,4 @@
-import Distribution.Simple (defaultMainWithHooks)
-import Distribution.Simple.UUAGC (uuagcLibUserHook)
-import UU.UUAGC (uuagc)
+import Distribution.Simple
 
 main :: IO ()
-main = defaultMainWithHooks (uuagcLibUserHook uuagc)
+main = defaultMain

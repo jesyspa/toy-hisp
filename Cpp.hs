@@ -2,6 +2,7 @@ module Cpp (
     CppFile(..),
     CppGlobal(..),
     CppStmt(..),
+    CppDecl(..),
     CppExpr(..),
     CppType(..)
 ) where

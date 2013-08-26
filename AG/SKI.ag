@@ -1,8 +1,0 @@
-module {AG.SKI} {} {}
-
-data SKI a
-    | S | K | I | L | R
-    | App x, y :: (SKI {a})
-    | Name x :: {a}
-    | Constant x :: Int
-
