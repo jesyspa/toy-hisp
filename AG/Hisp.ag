@@ -1,14 +1,17 @@
-module {AG.Hisp} {} {}
-
-data HispExpr
-    | Variable name :: Ident
-    | Number value :: Int
-    | Application f :: HispExpr
-                  x :: HispExpr
-    | Lambda x :: Ident
-             expr :: HispExpr
-
-{
-type Ident = String
+module {AG.Hisp} {} {
+import Bound
+import Prelude.Extras
+import Data.Traversable
+import Data.Foldable
+import Control.Applicative
+import Control.Monad
 }
+
+data HispExpr a
+    | Variable name :: {a}
+    | Number value :: Int
+    | Application f, x :: (HispExpr {a})
+    | Lambda x :: {a}
+             expr :: (HispExpr {a})
+
 

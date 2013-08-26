@@ -14,13 +14,13 @@ attr HispExpr SKI
 attr SKI
     inh needParens :: Bool
 
-sem HispExpr
-    | Variable lhs.visual = @name
+sem Show {a} => HispExpr
+    | Variable lhs.visual = show @name
     | Number lhs.visual = show @value
     | Application lhs.visual = '(' : @f.visual ++ " " ++ @x.visual ++ ")"
-    | Lambda lhs.visual = '\\' : @x ++ " -> " ++ @expr.visual
+    | Lambda lhs.visual = '\\' : show @x ++ " -> " ++ @expr.visual
 
-sem SKI
+sem Show {a} => SKI
     | S lhs.visual = "S"
     | K lhs.visual = "K"
     | I lhs.visual = "I"
@@ -29,16 +29,16 @@ sem SKI
     | App lhs.visual = parens @lhs.needParens $ @x.visual ++ " " ++ @y.visual
           x.needParens = False
           y.needParens = True
-    | Name lhs.visual = @x
+    | Name lhs.visual = show @x
     | Constant lhs.visual = show @x
 
 {
 parens True x = "(" ++ x ++ ")"
 parens False x = x
 
-instance Show HispExpr where
-    show = sem_HispExpr
+instance Show (HispExpr String) where
+    show x = sem_HispExpr x
 
-instance Show SKI where
-    show = flip sem_SKI False
+instance Show (SKI String) where
+    show x = sem_SKI x False
 }

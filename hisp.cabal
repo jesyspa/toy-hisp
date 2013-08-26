@@ -7,20 +7,20 @@ stability:             what, where?
 tested-with:           GHC == 7.6.2
 build-type:            Custom
 cabal-version:         >= 1.8
-extra-source-files:    Makefile, uuagc_options, AG/Hisp.ag,
-                       AG/CodeGeneration.ag, AG/SKI.ag, AG/Visualisation.ag,
-                       AG/ToCpp.ag, AG/Cpp.ag, AG/PrintCpp.ag
+extra-source-files:    Makefile
 
 executable main
   main-is:             Main.hs
   build-depends:       base, mtl, parsec, lens, transformers, containers,
-                       pretty, template-haskell, monadplus
+                       pretty, template-haskell, monadplus, prelude-extras,
+                       bound, wl-pprint, free, multirec
   hs-source-dirs:      .
-  other-modules:       AG.Hisp, AG.SKI, AG.CodeGeneration, AG.Visualisation,
-                       AG.ToCpp, AG.Cpp, AG.PrintCpp
   extensions:          TypeSynonymInstances, FlexibleInstances,
                        MultiParamTypeClasses, StandaloneDeriving,
                        OverlappingInstances, IncoherentInstances,
                        UndecidableInstances, FlexibleContexts,
                        RankNTypes, TemplateHaskell,
-                       NoMonomorphismRestriction
+                       NoMonomorphismRestriction, ScopedTypeVariables,
+                       ExplicitForAll, DeriveFunctor, DeriveFoldable,
+                       DeriveTraversable, KindSignatures, GADTs,
+                       EmptyDataDecls, TypeFamilies

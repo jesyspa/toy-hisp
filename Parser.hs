@@ -11,16 +11,16 @@ import Hisp
 
 type Parser a = Stream [Token] m Token => ParsecT [Token] u m a
 
-number = Number <$> lNumber
-var = Variable <$> lIdentifier
-lambda = flip (foldr Lambda) <$ lLambda <*> many1 lIdentifier <* lDot <*> hispExpr
-parenthesised = lLParen *> hispExpr <* lRParen
-atom = choice [number, var, lambda, parenthesised]
-application = chainl1 atom $ pure Application
-hispExpr = application
+pNumber = Number <$> lNumber
+pVar = Variable <$> lIdentifier
+pLambda = flip (foldr lambda) <$ lLambda <*> many1 lIdentifier <* lDot <*> pHispExpr
+pParenthesised = lLParen *> pHispExpr <* lRParen
+pAtom = choice [pNumber, pVar, pLambda, pParenthesised]
+pApplication = chainl1 pAtom $ pure (:@)
+pHispExpr = pApplication
 
-parser :: Parser HispExpr
-parser = hispExpr <* eof
+parser :: Parser (HispExpr String)
+parser = pHispExpr <* eof
 
-parseHisp :: String -> Either ParseError HispExpr
-parseHisp s = runLexer s >>= runParser hispExpr () ""
+parseHisp :: String -> Either ParseError (HispExpr String)
+parseHisp s = runLexer s >>= runParser parser () ""

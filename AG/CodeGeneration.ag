@@ -1,6 +1,4 @@
-module {AG.CodeGeneration} {} {}
-imports
-{
+module {AG.CodeGeneration} {} {
 import Hisp
 import SKI
 import qualified Data.Set as S
@@ -10,21 +8,21 @@ include "AG/Hisp.ag"
 include "AG/SKI.ag"
 
 attr HispExpr
-    syn code :: SKI
+    syn code :: {SKI @a}
 
 attr SKI
-    inh var :: String
-    syn abs :: SKI
-    syn uses use {`S.union`} {S.empty} :: {S.Set String}
+    inh var :: {@a}
+    syn abs :: {SKI @a}
+    syn uses use {`S.union`} {S.empty} :: {S.Set @a}
     syn copy :: self
 
-sem HispExpr
+sem Ord {a}, Eq {a} => HispExpr
     | Variable loc.code = Name @name
     | Number   loc.code = Constant @value
     | Application lhs.code = @f.code `App` @x.code
     | Lambda   loc.code = abstract @expr.code @x
 
-sem SKI
+sem Ord {a}, Eq {a} => SKI
     | * - Name Constant App Number
                 lhs.abs = K `App` @loc.copy
     | Name      lhs.abs = if @lhs.var == @x then I else K `App` @loc.copy
