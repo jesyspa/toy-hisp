@@ -1,7 +1,8 @@
 module SKI (
     SKI_Rec(..),
     SKI(..),
-    Combinator(..)
+    Combinator(..),
+    combName
 )where
 
 import Control.Applicative
@@ -12,6 +13,13 @@ import Data.Traversable
 import Text.PrettyPrint.Leijen hiding ((<$>))
 
 data Combinator = S | K | I | L | R deriving (Show, Read, Eq, Ord, Enum)
+
+combName :: Combinator -> String
+combName S = "comb_s"
+combName K = "comb_k"
+combName I = "comb_i"
+combName L = "comb_l"
+combName R = "comb_r"
 
 infixl 6 :@:
 data SKI_Rec a self

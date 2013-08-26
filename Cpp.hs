@@ -27,6 +27,7 @@ data CppStmt
     = Block [CppStmt]
     | Expr CppExpr
     | Decl CppDecl
+    | Return CppExpr
     deriving(Show, Read, Eq, Ord)
 
 data CppDecl
@@ -38,6 +39,7 @@ data CppExpr
     = Call String [CppExpr]
     | Variable String
     | Number Int
+    | AddressOf CppExpr
     deriving(Show, Read, Eq, Ord)
 
 data CppType
@@ -61,10 +63,9 @@ data CppAST :: * -> * where
 
 deriveAll ''CppAST
 
-
 pprintAlgebra :: Algebra CppAST Doc
-pprintAlgebra _ = file & (include & globdecl) & (block & expr & decl) &
-                  (fundecl & vardecl) & (call & variable & number) &
+pprintAlgebra _ = file & (include & globdecl) & (block & expr & decl & return) &
+                  (fundecl & vardecl) & (call & variable & number & addressOf) &
                   (simple & auto & pointer) & argdecl
     where file = vsep
           include x = text $ "#include \"" ++ x ++ "\""
@@ -72,12 +73,14 @@ pprintAlgebra _ = file & (include & globdecl) & (block & expr & decl) &
           block xs = char '{' <$> indent 4 (vsep xs) <$> char '}'
           expr x = x <> char ';'
           decl = id
+          return x = text "return" <+> x <> char ';'
           fundecl tp nm args body = tp <+> text nm <+> tupled args <> fromMaybe (char ';') body
           vardecl tp nm Nothing = tp <+> text nm <> char ';'
           vardecl tp nm (Just x)= tp <+> text nm <+> char '=' <+> x <> char ';'
           call nm exprs = text nm <> tupled exprs
           variable = text
           number = int
+          addressOf x = char '&' <> x
           simple = text
           auto = text "auto"
           pointer x = x <> char '*'

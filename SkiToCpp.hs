@@ -11,13 +11,6 @@ skiToCpp = addTopLevel . iter algebra . f
     -- if this is ever encountered, it is a bug on our part
     where f x = x >> return (error "SKI tree incomplete.")
 
-combName :: Combinator -> String
-combName S = "comb_s"
-combName K = "comb_k"
-combName I = "comb_i"
-combName L = "comb_l"
-combName R = "comb_r"
-
 algebra :: SKI_Rec String CppExpr -> CppExpr
 algebra (SKI.Variable x) = Cpp.Variable x
 algebra (SKI.Number x) = Cpp.Number x

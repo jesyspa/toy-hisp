@@ -10,3 +10,5 @@ lib/
 .dbgbuild
 .sconsign.dblite
 compile.sh
+c_compile.sh
+asm_test

@@ -4,6 +4,14 @@
         .align 8
         .globl print
         .globl add
+        .globl sub
+        .globl le
+        .globl comb_s
+        .globl comb_k
+        .globl comb_i
+        .globl comb_l
+        .globl comb_r
+        .globl comb_y
 
         .bss
 // Reserved space for converting numbers to strings.
@@ -101,3 +109,147 @@ add_real:
         addq %r12,%rdi
         call mk_num
         jmp reenter_eval
+
+// Subtract the second object on the stack from the first
+//
+// MAY TRASH ALL REGS
+// IN:
+//   rsp: top of eval stack
+// OUT:
+//   rax: difference
+sub:
+        .quad 0
+        .byte 2
+        .byte 2
+        .word 0
+        .long 0
+sub_real:
+        hlt
+        jmp reenter_eval
+
+
+// Check whether the top of the stack is less than the second-top.
+//
+// MAY TRASH ALL REGS
+// IN:
+//   rsp: top of eval stack
+// OUT:
+//   rax: true or false
+le:
+        .quad 0
+        .byte 2
+        .byte 2
+        .word 0
+        .long 0
+le_real:
+        hlt
+        jmp reenter_eval
+
+
+// Apply the S combinator
+//
+// MAY TRASH ALL REGS
+// IN:
+//   rsp: top of eval stack
+// OUT:
+//   rax: resulting expression
+comb_s:
+        .quad 0
+        .byte 2
+        .byte 2
+        .word 0
+        .long 0
+comb_s_real:
+        hlt
+        jmp reenter_eval
+
+
+// Apply the K combinator
+//
+// MAY TRASH ALL REGS
+// IN:
+//   rsp: top of eval stack
+// OUT:
+//   rax: resulting expression
+comb_k:
+        .quad 0
+        .byte 2
+        .byte 2
+        .word 0
+        .long 0
+comb_k_real:
+        hlt
+        jmp reenter_eval
+
+
+// Apply the I combinator
+//
+// MAY TRASH ALL REGS
+// IN:
+//   rsp: top of eval stack
+// OUT:
+//   rax: resulting expression
+comb_i:
+        .quad 0
+        .byte 2
+        .byte 2
+        .word 0
+        .long 0
+comb_i_real:
+        hlt
+        jmp reenter_eval
+
+
+// Apply the R combinator
+//
+// MAY TRASH ALL REGS
+// IN:
+//   rsp: top of eval stack
+// OUT:
+//   rax: resulting expression
+comb_r:
+        .quad 0
+        .byte 2
+        .byte 2
+        .word 0
+        .long 0
+comb_r_real:
+        hlt
+        jmp reenter_eval
+
+
+// Apply the L combinator
+//
+// MAY TRASH ALL REGS
+// IN:
+//   rsp: top of eval stack
+// OUT:
+//   rax: resulting expression
+comb_l:
+        .quad 0
+        .byte 2
+        .byte 2
+        .word 0
+        .long 0
+comb_l_real:
+        hlt
+        jmp reenter_eval
+
+
+// Apply the Y combinator
+//
+// MAY TRASH ALL REGS
+// IN:
+//   rsp: top of eval stack
+// OUT:
+//   rax: resulting expression
+comb_y:
+        .quad 0
+        .byte 2
+        .byte 2
+        .word 0
+        .long 0
+comb_y_real:
+        hlt
+        jmp reenter_eval
+
