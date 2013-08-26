@@ -5,11 +5,11 @@ import Control.Applicative
 import Control.Arrow
 import Control.Monad.Trans
 import Parser
-import Cpp
 import CodeGeneration
+import SkiToCpp
 import Text.PrettyPrint.Leijen hiding ((<$>))
 
 main = do
     contents <- getContents
-    let code = compile <$> parseHisp contents
+    let code = (skiToCpp . compile) <$> parseHisp contents
     either (error.show) (print.pretty) code

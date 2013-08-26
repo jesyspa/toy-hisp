@@ -2,18 +2,17 @@ module Cpp (
     CppFile(..),
     CppGlobal(..),
     CppStmt(..),
-    CppStmts(..),
     CppExpr(..),
-    CppExprs(..),
     CppType(..)
 ) where
 
 import Generics.MultiRec.Base
 import Generics.MultiRec.TH
-
-
-type CppExprs = [CppExpr]
-type CppStmts = [CppStmt]
+import Generics.MultiRec.FoldAlgK as K
+import Text.PrettyPrint.Leijen
+import Data.Maybe
+import qualified Data.Traversable as T
+import qualified Data.Foldable as F
 
 data CppFile = File [CppGlobal]
     deriving(Show, Read, Eq, Ord)
@@ -24,18 +23,18 @@ data CppGlobal
     deriving(Show, Read, Eq, Ord)
 
 data CppStmt
-    = Block CppStmts
+    = Block [CppStmt]
     | Expr CppExpr
     | Decl CppDecl
     deriving(Show, Read, Eq, Ord)
 
 data CppDecl
-    = FunDecl CppType String [(CppType, String)] (Maybe CppStmt)
+    = FunDecl CppType String [CppArgDecl] (Maybe CppStmt)
     | VarDecl CppType String (Maybe CppExpr)
     deriving(Show, Read, Eq, Ord)
 
 data CppExpr
-    = Call String CppExprs
+    = Call String [CppExpr]
     | Variable String
     | Number Int
     deriving(Show, Read, Eq, Ord)
@@ -46,12 +45,43 @@ data CppType
     | Pointer CppType
     deriving(Show, Read, Eq, Ord)
 
+data CppArgDecl
+    = ArgDecl CppType String
+    deriving(Show, Read, Eq, Ord)
+
 data CppAST :: * -> * where
-    CppFile   :: CppAST CppFile
-    CppGlobal :: CppAST CppGlobal
-    CppStmt   :: CppAST CppStmt
-    CppDecl   :: CppAST CppDecl
-    CppExpr   :: CppAST CppExpr
-    CppType   :: CppAST CppType
+    CppFile    :: CppAST CppFile
+    CppGlobal  :: CppAST CppGlobal
+    CppStmt    :: CppAST CppStmt
+    CppDecl    :: CppAST CppDecl
+    CppExpr    :: CppAST CppExpr
+    CppType    :: CppAST CppType
+    CppArgDecl :: CppAST CppArgDecl
 
 deriveAll ''CppAST
+
+
+pprintAlgebra :: Algebra CppAST Doc
+pprintAlgebra _ = file & (include & globdecl) & (block & expr & decl) &
+                  (fundecl & vardecl) & (call & variable & number) &
+                  (simple & auto & pointer) & argdecl
+    where file = vsep
+          include x = text $ "#include \"" ++ x ++ "\""
+          globdecl = id
+          block xs = char '{' <$> indent 4 (vsep xs) <$> char '}'
+          expr x = x <> char ';'
+          decl = id
+          fundecl tp nm args body = tp <+> text nm <+> tupled args <> fromMaybe (char ';') body
+          vardecl tp nm Nothing = tp <+> text nm <> char ';'
+          vardecl tp nm (Just x)= tp <+> text nm <+> char '=' <+> x <> char ';'
+          call nm exprs = text nm <> tupled exprs
+          variable = text
+          number = int
+          simple = text
+          auto = text "auto"
+          pointer x = x <> char '*'
+          argdecl x y = x <+> text y
+
+
+instance Pretty CppFile where
+    pretty = fold pprintAlgebra CppFile
