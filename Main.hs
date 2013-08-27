@@ -13,7 +13,7 @@ import Cpp
 import Text.PrettyPrint.Leijen (pretty)
 import System.Environment
 
-chooseTarget :: [String] -> (SKI String r -> CppFile)
+chooseTarget :: [String] -> SKI String r -> CppFile
 chooseTarget xs | null xs = skiToCpp
                 | head xs == "-C" = skiToC
                 | otherwise = skiToCpp

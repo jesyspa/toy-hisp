@@ -11,7 +11,7 @@ skiToC :: SKI String r -> CppFile
 skiToC = addTopLevel . iter algebra . f
     where f x = x >> return (error "SKI tree incomplete.")
 
-algebra :: SKI_Rec String CppExpr -> CppExpr
+algebra :: SKIRec String CppExpr -> CppExpr
 algebra (SKI.Variable x) = AddressOf $ Cpp.Variable x
 algebra (SKI.Number x) = Call "mk_num" [Cpp.Number x]
 algebra (Combinator x) = AddressOf $ Cpp.Variable $ combName x

@@ -25,7 +25,7 @@ data Token = LParen
            | Number Int
            deriving (Show, Eq, Ord)
 
-type Lexer a = Stream [Char] m Char => ParsecT [Char] u m a
+type Lexer a = Stream String m Char => ParsecT String u m a
 
 lparen = LParen <$ char '(' <?> "opening parenthesis"
 rparen = RParen <$ char ')' <?> "closing parenthesis"

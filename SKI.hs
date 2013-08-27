@@ -1,5 +1,5 @@
 module SKI (
-    SKI_Rec(..),
+    SKIRec(..),
     SKI(..),
     Combinator(..),
     combName
@@ -22,16 +22,16 @@ combName L = "comb_l"
 combName R = "comb_r"
 
 infixl 6 :@:
-data SKI_Rec a self
+data SKIRec a self
     = Variable a
     | Number Int
     | Combinator Combinator
     | self :@: self
     deriving (Show, Read, Eq, Ord, Functor, Traversable, Foldable)
 
-type SKI a r = Free (SKI_Rec a) r
+type SKI a r = Free (SKIRec a) r
 
-pprint :: Pretty a => SKI_Rec a (Bool -> Doc) -> Bool -> Doc
+pprint :: Pretty a => SKIRec a (Bool -> Doc) -> Bool -> Doc
 pprint (Variable a) _ = pretty a
 pprint (Number x) _ = pretty x
 pprint (Combinator x) _ = text $ show x

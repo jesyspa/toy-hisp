@@ -13,7 +13,7 @@ wrapAsVal x e = FunD x [Clause [] (NormalB e) []]
 arity :: Con -> Int
 arity (NormalC _ xs) = length xs
 arity (RecC _ xs) = length xs
-arity (InfixC _ _ _) = 2
+arity (InfixC {}) = 2
 arity (ForallC _ _ x) = arity x
 
 
@@ -28,7 +28,7 @@ mkL :: Con -> Q Dec
 mkL con = do
     let args = fmap (\x -> mkName $ "arg" ++ show x) [1..arity con]
         cName = name con
-        pName = mkName $ "l" ++ nameBase cName
+        pName = mkName $ 'l' : nameBase cName
         conP = ConP cName $ fmap VarP args
         val = return . TupE $ fmap VarE args
         eName = stringE $ pprint cName
@@ -39,7 +39,7 @@ mkL con = do
         mFail = Match WildP (NormalB eFail) []
         eLam = return $ LamE [VarP x] $ VarE x `CaseE` [mVal, mFail]
 
-    expr <- ([| try $ mmapMaybe $eLam anyToken |])
+    expr <- [| try $ mmapMaybe $eLam anyToken |]
     return $ wrapAsVal pName expr
 
 mkLs :: Name -> Q [Dec]

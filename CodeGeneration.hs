@@ -21,7 +21,7 @@ unfoldFree f x = case f x of
     Left r -> return r
     Right v -> wrap $ fmap (unfoldFree f) v
 
-hispExprToSki :: HispExpr (Comb a) -> Either String (SKI_Rec a (HispExpr (Comb a)))
+hispExprToSki :: HispExpr (Comb a) -> Either String (SKIRec a (HispExpr (Comb a)))
 hispExprToSki (Lambda x) = Left "first run toSki over the expression"
 hispExprToSki (H.Variable (Comb x)) = Right $ Combinator x
 hispExprToSki (H.Variable (Misc x)) = Right $ S.Variable x
