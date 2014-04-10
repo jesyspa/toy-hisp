@@ -23,6 +23,5 @@ addTopLevel tree = File [Include "runtime/main.hpp", Include "runtime/construct.
                      Block [
                          Decl $ VarDecl Auto "tree" (Just tree),
                          Expr $ Call "eval" [Cpp.Variable "tree"]],
-                     Expr $ Call "clear_tmp_roots" [],
                      Expr $ Call "collect_garbage" []]
 

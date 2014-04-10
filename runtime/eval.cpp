@@ -30,10 +30,10 @@ ref update(application* app, ref newval) {
 ref eval(ref r) {
     stack s;
     register_stack(s);
-    while (is<application>(r) || !empty(s)) {
+    while (is<application>(r) || !s.empty()) {
         ASSERT_SANITY(r);
         while (auto app = try_cast<application>(r)) {
-            push(s, app);
+            s.push(app);
             r = app->left;
         }
 
@@ -44,12 +44,12 @@ ref eval(ref r) {
         auto result = f->func(s);
         assert(result && "null result");
         ASSERT_SANITY(result);
-        if (empty(s))
+        if (s.empty())
             r = result;
         else if (id)
-            r = cast<application>(top(s))->left = result;
+            r = cast<application>(s.top())->left = result;
         else
-            r = update(cast<application>(cast<application>(top(s))->left), result);
+            r = update(cast<application>(cast<application>(s.top())->left), result);
     }
     unregister_stack();
     return r;

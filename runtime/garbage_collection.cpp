@@ -17,22 +17,7 @@ namespace {
     std::size_t default_check_at = 64;
     std::size_t check_at = default_check_at;
 
-#ifdef TMP_ROOTS
-    std::size_t const tmp_root_size = 6;
-    ref tmp_roots[tmp_root_size];
-    std::size_t next_tmp_root;
-#endif
-
     std::vector<stack*> stacks;
-}
-
-ref save(ref r) {
-#ifdef TMP_ROOTS
-    tmp_roots[next_tmp_root++] = r;
-    if (next_tmp_root > tmp_root_size)
-        next_tmp_root = 0;
-#endif
-    return r;
 }
 
 template<typename T>
@@ -65,7 +50,6 @@ T* new_object() {
     obj->used = !garbage_state;
     obj->next = first;
     first = obj;
-    save(obj);
     return obj;
 }
 
@@ -124,16 +108,10 @@ void walk(ref r) {
 
 template<typename F>
 void on_all_roots(F f) {
-#ifdef TMP_ROOTS
-    for (auto p : tmp_roots)
-        if (p)
-            f(p);
-#endif
-
     for (auto st : stacks)
-        for (auto p : *st)
-            if (p)
-                f(p);
+        for (int i = 0; i < st->size(); ++i)
+            if (st->get_nth(i))
+                f(st->get_nth(i));
 }
 
 void collect_garbage() {
@@ -181,14 +159,6 @@ void register_stack(stack& s) {
 
 void unregister_stack() {
     stacks.pop_back();
-}
-
-void clear_tmp_roots() {
-#ifdef TMP_ROOTS
-    for (auto& p : tmp_roots)
-        p = nullptr;
-    next_tmp_root = 0;
-#endif
 }
 
 void print_allocated() {

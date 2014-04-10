@@ -1,26 +1,10 @@
 #pragma once
+#include "object.hpp"
+#include "stack.hpp"
+
 #include <memory>
 #include <iterator>
 #include <vector>
-
-#ifdef __GNUC__
-#define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
-#else
-#define WARN_UNUSED_RESULT
-#endif
-
-enum class object_type {
-    application_object,
-    number_object,
-    function_object
-};
-
-struct object {
-    bool used;
-    bool allocated;
-    object_type type;
-    object* next;
-};
 
 #ifndef NDEBUG
 #define ASSERT_SANITY(r) do { \
@@ -36,8 +20,6 @@ struct object {
 
 struct application;
 
-using ref = object*;
-using stack = std::vector<ref>;
 using func_t = ref (*)(stack&);
 
 struct application : object {

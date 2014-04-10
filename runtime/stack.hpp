@@ -1,13 +1,34 @@
 #pragma once
 
-#include "main.hpp"
+#include "object.hpp"
+#include "macros.hpp"
 
-bool empty(stack const& sl);
-ref top(stack const& sl);
-ref get_n(stack const& sl, std::size_t n);
-void push(stack& sl, ref r);
-WARN_UNUSED_RESULT
-ref extract(stack& sl);
-void pop(stack& sl);
-void pop_n(stack& sl, std::size_t n);
+#include <array>
+
+class stack {
+public:
+    static std::size_t const STACK_SIZE = 1024;
+
+private:
+    using storage = std::array<ref, STACK_SIZE>;
+    using iterator = storage::iterator;
+    using const_iterator = storage::const_iterator;
+
+    storage data_;
+    iterator top_;
+
+public:
+    stack() : data_{{}}, top_{data_.begin()} {}
+
+    std::size_t size() const;
+    bool empty() const;
+    ref top() const;
+    ref get_nth(std::size_t n) const;
+
+    void push(ref r);
+    WARN_UNUSED_RESULT
+    ref extract();
+    void pop();
+    void pop_n(std::size_t n);
+};
 

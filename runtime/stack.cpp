@@ -1,41 +1,42 @@
 #include "stack.hpp"
-#include "garbage_collection.hpp"
-#include "debug.hpp"
-#include <cstdio>
 #include <cassert>
 
-bool empty(stack const& sl) {
-    return sl.empty();
+std::size_t stack::size() const {
+    return top_ - data_.begin();
 }
 
-ref top(stack const& sl) {
-    return sl.back();
+bool stack::empty() const {
+    return data_.begin() == top_;
 }
 
-ref get_n(stack const& sl, std::size_t n) {
-    assert(n <= sl.size() && "out of bounds");
-    return sl.rbegin()[n];
+ref stack::top() const {
+    return *top_;
 }
 
-void push(stack& sl, ref app) {
-    sl.push_back(app);
+ref stack::get_nth(std::size_t n) const {
+    assert(n <= size() && "out of bounds");
+    return top_[-n-1];
+}
+
+void stack::push(ref app) {
+    assert(top_ != data_.end() && "out of bounds");
+    *top_++ = app;
 }
 
 WARN_UNUSED_RESULT
-ref extract(stack& sl) {
-    assert(!empty(sl) && "extracting from empty stack");
-    auto app = top(sl);
-    pop(sl);
-    return app;
+ref stack::extract() {
+    assert(!empty() && "extracting from empty stack");
+    return *--top_;
 }
 
-void pop(stack& sl) {
-    assert(!empty(sl) && "popping empty stack");
-    sl.pop_back();
+void stack::pop() {
+    assert(!empty() && "popping empty stack");
+    --top_;
 }
 
-void pop_n(stack& sl, std::size_t n) {
-    assert(n <= sl.size() && "poping too far");
-    sl.resize(sl.size()-n);
+void stack::pop_n(std::size_t n) {
+    assert(n <= size() && "poping too far");
+    top_ -= n;
 }
+
 

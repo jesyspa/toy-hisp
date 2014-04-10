@@ -8,8 +8,6 @@
 
 extern bool garbage_state;
 
-ref save(ref r);
 void register_stack(stack&);
 void unregister_stack();
-void clear_tmp_roots();
 void print_allocated();
