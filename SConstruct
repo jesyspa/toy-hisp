@@ -6,8 +6,9 @@ Help("""
 ########  FLAGS  ########
 
 flags = {
-   'cpp': ["-Wall", "-Wextra", "-pedantic", "-Werror", "-std=c++1y"],
-   'debug': ["-O0", "-g3", "-D_GLIBCXX_DEBUG"],
+   'cpp': ["-Wall", "-Wextra", "-Werror", "-std=c++1y"],
+   'link': ["-lc++abi"],
+   'debug': ["-O0", "-g3"],
    'release': ["-O2", "-g", "-DNDEBUG"],
 }
 
@@ -17,7 +18,7 @@ Export('flags')
 
 ##### ENVIRONMENTS  #####
 
-base_env = Environment(CXX="g++", CPPFLAGS=flags['cpp'])
+base_env = Environment(CXX="clang++", CPPFLAGS=flags['cpp'], LINKFLAGS=flags['link'])
 
 dbg_hisp_env = base_env.Clone()
 dbg_hisp_env.MergeFlags([flags['debug']])

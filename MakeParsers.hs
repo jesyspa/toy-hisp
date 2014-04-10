@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 module MakeParsers where
 
 import Language.Haskell.TH

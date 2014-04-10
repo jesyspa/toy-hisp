@@ -20,11 +20,11 @@ haskell :
 
 test : haskell lib/libdbghisp.a
 	./main < main.hisp > main.cpp
-	g++ -o m -Wall -Wextra -Werror -pedantic -std=c++1y -O0 -g3 -D_GLIBCXX_DEBUG main.cpp -Llib -ldbghisp
+	clang++ -o m -Wall -Wextra -Werror -pedantic -std=c++1y -O0 -g3 main.cpp -Llib -ldbghisp
 	valgrind ./m
 
 asm_test : main.c asm_runtime/*.s asm_runtime/*.h
-	gcc -o asm_test -nostdlib asm_runtime/*.s main.c
+	clang -o asm_test -nostdlib asm_runtime/*.s main.c
 
 clean :
 	runhaskell Setup.hs clean
