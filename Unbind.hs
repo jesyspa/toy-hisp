@@ -23,11 +23,6 @@ instance Monad Comb where
     Misc a >>= f = f a
     Comb x >>= _ = Comb x
 
-hasBound :: Foldable f => f (Var b (f a)) -> Bool
-hasBound = any f
-    where f (B _) = True
-          f (F _) = False
-
 trivialize :: (Monad f, Traversable f) => f (Var () (f a)) -> Maybe (f a)
 trivialize = fmap join . traverse f
     where f (B _) = Nothing
@@ -41,10 +36,11 @@ unbind :: HispExpr a -> HispExpr (Comb a)
 unbind (Variable x) = Variable $ Misc x
 unbind (Number x) = Number x
 unbind (x :@ y) = unbind x :@ unbind y
-unbind (Lambda s) = go $ unscope s
+unbind (Lambda scope) = go $ unscope scope
     where go :: HispExpr (Var () (HispExpr a)) -> HispExpr (Comb a)
           go (Variable (B ())) = Variable (Comb I)
           go (Variable (F x)) = Variable (Comb K) :@ fmap Misc x
+          go (Number x) = Variable (Comb K) :@ Number x
           go (x :@ y) = case (trivialize x, trivialize y) of
                             (Nothing, Nothing) -> Variable (Comb S) :@ go x :@ go y
                             (Nothing, Just y') -> Variable (Comb L) :@ go x :@ unbind y'

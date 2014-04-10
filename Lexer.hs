@@ -13,8 +13,7 @@ module Lexer (
 
 import MakeParsers
 import Text.Parsec
-import Control.Applicative ((<$>), (<$), (<*>), (<*), (*>))
-import Control.Monad.Identity
+import Control.Applicative ((<$>), (<$), (<*), (*>))
 
 data Token = LParen
            | RParen
@@ -27,6 +26,7 @@ data Token = LParen
 
 type Lexer a = Stream String m Char => ParsecT String u m a
 
+lparen, rparen, lambda, dot, equal, identifier, number :: Lexer Token
 lparen = LParen <$ char '(' <?> "opening parenthesis"
 rparen = RParen <$ char ')' <?> "closing parenthesis"
 lambda = Lambda <$ char '\\' <?> "lambda"
@@ -35,7 +35,8 @@ equal = Equal <$ char '=' <?> "equal sign"
 identifier = Identifier <$> many1 (letter <|> char '_') <?> "identifier"
 number = Number . read <$> many1 digit <?> "number"
 
-lexOne = choice [lparen, rparen, lambda, dot, identifier, number] <* spaces
+lexOne :: Lexer Token
+lexOne = choice [lparen, rparen, lambda, dot, equal, identifier, number] <* spaces
 
 lexer :: Lexer [Token]
 lexer = spaces *> many lexOne <* eof

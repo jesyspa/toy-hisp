@@ -1,50 +1,33 @@
-Help("""
-'scons debug' for making the debug build
-'scons release' for making the release build
-""")
+from SCons.Script.SConscript import SConsEnvironment
+import glob, os
+
+vars = Variables(None, ARGUMENTS)
+vars.Add(BoolVariable('release', 'Set to build for release', False))
+vars.Add('problem', 'Problem to solve', 'real')
 
 ########  FLAGS  ########
 
 flags = {
    'cpp': ["-Wall", "-Wextra", "-Werror", "-std=c++1y"],
-   'link': ["-lc++abi"],
+   'link': [],
    'debug': ["-O0", "-g3"],
-   'release': ["-O2", "-g", "-DNDEBUG"],
+   'release': ["-O2", "-g", "-DNDEBUG"]
 }
-
-Export('flags')
 
 ######  END FLAGS  ######
 
 ##### ENVIRONMENTS  #####
 
-base_env = Environment(CXX="clang++", CPPFLAGS=flags['cpp'], LINKFLAGS=flags['link'])
+env = Environment(variables=vars, CXX="g++-4.9", CPPFLAGS=flags['cpp'], LINKFLAGS=flags['link'], ENV=os.environ)
 
-dbg_hisp_env = base_env.Clone()
-dbg_hisp_env.MergeFlags([flags['debug']])
+prefix = 'release' if env['release'] else 'debug'
 
-rel_hisp_env = base_env.Clone()
-rel_hisp_env.MergeFlags([flags['release']])
+env.MergeFlags(flags[prefix])
+env['prefix'] = prefix
 
-Export('base_env')
+Export('env')
 
 #### END ENVIRONMENTS ###
 
-dbg_exports = {
-   'env': dbg_hisp_env,
-   'prefix': 'dbg',
-}
-
-rel_exports = {
-   'env': rel_hisp_env,
-   'prefix': '',
-}
-
-SConscript("runtime/SConscript", exports=dbg_exports, variant_dir='.dbgbuild')
-SConscript("runtime/SConscript", exports=rel_exports, variant_dir='.relbuild')
-
-Alias('dbg', '#lib/libdbghisp.a')
-Alias('release', '#lib/libhisp.a')
-
-Default('dbg')
+env.SConscript("runtime/SConscript", variant_dir='.' + prefix + '_build', duplicate=0)
 

@@ -1,12 +1,10 @@
 module SKI (
     SKIRec(..),
-    SKI(..),
+    SKI,
     Combinator(..),
     combName
 )where
 
-import Control.Applicative
-import Control.Monad
 import Control.Monad.Free
 import Data.Foldable
 import Data.Traversable

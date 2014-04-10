@@ -5,11 +5,6 @@ module CodeGeneration (
 import Prelude hiding (any)
 import Hisp as H
 import SKI as S
-import Bound
-import Data.Traversable
-import Data.Foldable
-import Control.Applicative
-import Control.Monad
 import Control.Monad.Free
 import Unbind
 
@@ -22,7 +17,7 @@ unfoldFree f x = case f x of
     Right v -> wrap $ fmap (unfoldFree f) v
 
 hispExprToSki :: HispExpr (Comb a) -> Either String (SKIRec a (HispExpr (Comb a)))
-hispExprToSki (Lambda x) = Left "first run toSki over the expression"
+hispExprToSki (Lambda _) = Left "first run toSki over the expression"
 hispExprToSki (H.Variable (Comb x)) = Right $ Combinator x
 hispExprToSki (H.Variable (Misc x)) = Right $ S.Variable x
 hispExprToSki (H.Number x) = Right $ S.Number x

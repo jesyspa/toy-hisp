@@ -26,5 +26,3 @@ addTopLevel tree = File [Include "runtime/main.hpp", Include "runtime/construct.
                      Expr $ Call "clear_tmp_roots" [],
                      Expr $ Call "collect_garbage" []]
 
-
-

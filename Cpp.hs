@@ -7,13 +7,10 @@ module Cpp (
     CppType(..)
 ) where
 
-import Generics.MultiRec.Base
 import Generics.MultiRec.TH
 import Generics.MultiRec.FoldAlgK as K
 import Text.PrettyPrint.Leijen
 import Data.Maybe
-import qualified Data.Traversable as T
-import qualified Data.Foldable as F
 
 data CppFile = File [CppGlobal]
     deriving(Show, Read, Eq, Ord)

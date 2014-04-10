@@ -1,9 +1,7 @@
 module MakeParsers where
 
 import Language.Haskell.TH
-import Control.Applicative
 import Text.Parsec
-import Debug.Trace
 import Control.Monad.Plus
 
 wrapAsVal :: Name -> Exp -> Dec
@@ -16,17 +14,17 @@ arity (InfixC {}) = 2
 arity (ForallC _ _ x) = arity x
 
 
-name :: Con -> Name
-name (NormalC x _) = x
-name (RecC x _) = x
-name (InfixC _ x _) = x
-name (ForallC _ _ x) = name x
+nameOf :: Con -> Name
+nameOf (NormalC x _) = x
+nameOf (RecC x _) = x
+nameOf (InfixC _ x _) = x
+nameOf (ForallC _ _ x) = nameOf x
 
 
 mkL :: Con -> Q Dec
 mkL con = do
     let args = fmap (\x -> mkName $ "arg" ++ show x) [1..arity con]
-        cName = name con
+        cName = nameOf con
         pName = mkName $ 'l' : nameBase cName
         conP = ConP cName $ fmap VarP args
         val = return . TupE $ fmap VarE args
@@ -42,6 +40,6 @@ mkL con = do
     return $ wrapAsVal pName expr
 
 mkLs :: Name -> Q [Dec]
-mkLs name = do
+mkLs name  = do
     TyConI (DataD _ _ _ xs _) <- reify name
     mapM mkL xs

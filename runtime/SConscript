@@ -1,8 +1,8 @@
 Import('env')
-Import('prefix')
+
+prefix = env['prefix']
 
 hisp_sources = Glob("*.cpp")
-
 target = "".join(['#lib/', prefix, 'hisp'])
 
 env.StaticLibrary(target, hisp_sources)

@@ -4,7 +4,6 @@ synopsis:              A very simple language to learn lambda calculus better.
 license:               PublicDomain
 author:                Anton Golov
 stability:             what, where?
-tested-with:           GHC == 7.6.2
 build-type:            Simple
 cabal-version:         >= 1.8
 extra-source-files:    Makefile
