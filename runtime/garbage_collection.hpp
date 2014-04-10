@@ -7,7 +7,8 @@
 #define PRESERVE(x) root CONCAT(guard_, __COUNTER__ ) (x)
 
 extern bool garbage_state;
+std::size_t const STACK_COUNT = 16;
 
-void register_stack(stack&);
-void unregister_stack();
+stack& request_stack();
+void release_stack(stack&);
 void print_allocated();

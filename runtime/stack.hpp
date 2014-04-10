@@ -20,6 +20,9 @@ private:
 public:
     stack() : data_{{}}, top_{data_.begin()} {}
 
+    stack(stack const&) = delete;
+    stack& operator=(stack const&) = delete;
+
     std::size_t size() const;
     bool empty() const;
     ref top() const;

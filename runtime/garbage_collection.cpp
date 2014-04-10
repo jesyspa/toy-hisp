@@ -3,11 +3,11 @@
 #include "utility.hpp"
 #include "debug.hpp"
 #include "construct.hpp"
+#include <array>
 #include <cassert>
 #include <cstring>
-#include <list>
 #include <iterator>
-#include <vector>
+#include <list>
 
 bool garbage_state = false;
 
@@ -17,7 +17,9 @@ namespace {
     std::size_t default_check_at = 64;
     std::size_t check_at = default_check_at;
 
-    std::vector<stack*> stacks;
+    using stack_array = std::array<stack, STACK_COUNT>;
+    stack_array stacks;
+    stack_array::iterator top_stack = stacks.begin();
 }
 
 template<typename T>
@@ -108,10 +110,10 @@ void walk(ref r) {
 
 template<typename F>
 void on_all_roots(F f) {
-    for (auto st : stacks)
-        for (int i = 0; i < st->size(); ++i)
-            if (st->get_nth(i))
-                f(st->get_nth(i));
+    for (auto it = stacks.begin(); it != top_stack; ++it)
+        for (int i = 0; i < it->size(); ++i)
+            if (it->get_nth(i))
+                f(it->get_nth(i));
 }
 
 void collect_garbage() {
@@ -153,12 +155,14 @@ ref make_bool(bool b) {
         return mk_app(comb_k, comb_i);
 }
 
-void register_stack(stack& s) {
-    stacks.push_back(&s);
+stack& request_stack() {
+    assert(top_stack != stacks.end() && "out of stacks");
+    return *top_stack++;
 }
 
-void unregister_stack() {
-    stacks.pop_back();
+void release_stack(stack& s) {
+    assert(&s == &top_stack[-1] && "incorrect stack return order");
+    --top_stack;
 }
 
 void print_allocated() {

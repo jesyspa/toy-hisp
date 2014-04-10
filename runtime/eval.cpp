@@ -28,8 +28,7 @@ ref update(application* app, ref newval) {
 }
 
 ref eval(ref r) {
-    stack s;
-    register_stack(s);
+    stack& s = request_stack();
     while (is<application>(r) || !s.empty()) {
         ASSERT_SANITY(r);
         while (auto app = try_cast<application>(r)) {
@@ -51,6 +50,6 @@ ref eval(ref r) {
         else
             r = update(cast<application>(cast<application>(s.top())->left), result);
     }
-    unregister_stack();
+    release_stack(s);
     return r;
 }

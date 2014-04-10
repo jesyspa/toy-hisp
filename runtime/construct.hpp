@@ -68,9 +68,8 @@ struct do_construct<mk_app_impl<LHS, RHS>> {
 
 template<typename T>
 ref construct(T const& t) {
-    stack s;
-    register_stack(s);
+    stack& s = request_stack();
     do_construct<T>::run(s, t);
-    unregister_stack();
+    release_stack(s);
     return s.extract();
 }
