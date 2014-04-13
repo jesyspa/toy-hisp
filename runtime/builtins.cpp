@@ -4,25 +4,25 @@
 #include "debug.hpp"
 #include "construct.hpp"
 
-application* extract_app(stack& s) {
+application* extract_app(stack_ref& s) {
     return cast<application>(s.extract());
 }
 
-application* get_n_app(stack& s, int n) {
+application* get_n_app(stack_ref& s, int n) {
     return cast<application>(s.get_nth(n));
 }
 
-ref comb_i(stack& s) {
+ref comb_i(stack_ref& s) {
     return extract_app(s)->right;
 }
 
-ref comb_k(stack& s) {
+ref comb_k(stack_ref& s) {
     auto arg = extract_app(s);
     s.pop();
     return arg->right;
 }
 
-ref comb_s(stack& s) {
+ref comb_s(stack_ref& s) {
     auto f = get_n_app(s, 0);
     auto g = get_n_app(s, 1);
     auto x = get_n_app(s, 2);
@@ -33,7 +33,7 @@ ref comb_s(stack& s) {
     return r;
 }
 
-ref comb_l(stack& s) {
+ref comb_l(stack_ref& s) {
     auto f = get_n_app(s, 0);
     auto g = get_n_app(s, 1);
     auto x = get_n_app(s, 2);
@@ -44,7 +44,7 @@ ref comb_l(stack& s) {
     return r;
 }
 
-ref comb_r(stack& s) {
+ref comb_r(stack_ref& s) {
     auto f = get_n_app(s, 0);
     auto g = get_n_app(s, 1);
     auto x = get_n_app(s, 2);
@@ -55,14 +55,14 @@ ref comb_r(stack& s) {
     return r;
 }
 
-ref comb_y(stack& s) {
+ref comb_y(stack_ref& s) {
     auto f = get_n_app(s, 0);
     ref r = mk_app(f->right, mk_app(f->left, f->right));
     s.pop();
     return r;
 }
 
-ref print(stack& s) {
+ref print(stack_ref& s) {
     auto arg = get_n_app(s, 0);
     ref val = eval(arg->right);
     std::printf("%d\n", cast<number>(val)->value);
@@ -70,7 +70,7 @@ ref print(stack& s) {
     return val;
 }
 
-ref add(stack& s) {
+ref add(stack_ref& s) {
     auto lhs = get_n_app(s, 0);
     auto rhs = get_n_app(s, 1);
     ref r = make_number(
@@ -80,7 +80,7 @@ ref add(stack& s) {
     return r;
 }
 
-ref sub(stack& s) {
+ref sub(stack_ref& s) {
     auto lhs = get_n_app(s, 0);
     auto rhs = get_n_app(s, 1);
     ref r = make_number(
@@ -90,7 +90,7 @@ ref sub(stack& s) {
     return r;
 }
 
-ref le(stack& s) {
+ref le(stack_ref& s) {
     auto lhs = get_n_app(s, 0);
     auto rhs = get_n_app(s, 1);
     ref r = make_bool(

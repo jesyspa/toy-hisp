@@ -1,42 +1,54 @@
 #include "stack.hpp"
 #include <cassert>
 
-std::size_t stack::size() const {
-    return top_ - data_.begin();
+stack_ref stack::get_ref() {
+    return {this, top_};
 }
 
-bool stack::empty() const {
-    return data_.begin() == top_;
+auto stack::base() const -> const_iterator {
+    return data_.begin();
 }
 
-ref stack::top() const {
-    return *top_;
+auto stack::top() const -> const_iterator {
+    return top_;
 }
 
-ref stack::get_nth(std::size_t n) const {
+std::size_t stack_ref::size() const {
+    return ref_->top_ - base_;
+}
+
+bool stack_ref::empty() const {
+    return ref_->top_ == base_;
+}
+
+ref stack_ref::top() const {
+    return *ref_->top_;
+}
+
+ref stack_ref::get_nth(std::size_t n) const {
     assert(n <= size() && "out of bounds");
-    return top_[-n-1];
+    return ref_->top_[-n-1];
 }
 
-void stack::push(ref app) {
-    assert(top_ != data_.end() && "out of bounds");
-    *top_++ = app;
+void stack_ref::push(ref app) {
+    assert(ref_->top_ != ref_->data_.end() && "out of bounds");
+    *ref_->top_++ = app;
 }
 
 WARN_UNUSED_RESULT
-ref stack::extract() {
+ref stack_ref::extract() {
     assert(!empty() && "extracting from empty stack");
-    return *--top_;
+    return *--ref_->top_;
 }
 
-void stack::pop() {
+void stack_ref::pop() {
     assert(!empty() && "popping empty stack");
-    --top_;
+    --ref_->top_;
 }
 
-void stack::pop_n(std::size_t n) {
+void stack_ref::pop_n(std::size_t n) {
     assert(n <= size() && "poping too far");
-    top_ -= n;
+    ref_->top_ -= n;
 }
 
 

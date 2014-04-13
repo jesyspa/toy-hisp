@@ -17,7 +17,7 @@ namespace {
 }
 
 ref update(application* app, ref newval) {
-    if (auto* napp = try_cast<application>(newval)) {
+    if (auto napp = try_cast<application>(newval)) {
         app->left = napp->left;
         app->right = napp->right;
     } else {
@@ -28,7 +28,7 @@ ref update(application* app, ref newval) {
 }
 
 ref eval(ref r) {
-    stack& s = request_stack();
+    auto s = request_stack();
     while (is<application>(r) || !s.empty()) {
         ASSERT_SANITY(r);
         while (auto app = try_cast<application>(r)) {
@@ -37,7 +37,7 @@ ref eval(ref r) {
         }
 
         assert(is<function>(r) && "type error: trying to apply non-func");
-        auto* f = cast<function>(r);
+        auto f = cast<function>(r);
         bool id = f->func == comb_i;
 
         auto result = f->func(s);
@@ -50,6 +50,7 @@ ref eval(ref r) {
         else
             r = update(cast<application>(cast<application>(s.top())->left), result);
     }
-    release_stack(s);
+    while (!s.empty())
+        s.pop();
     return r;
 }

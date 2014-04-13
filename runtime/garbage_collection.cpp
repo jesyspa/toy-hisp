@@ -17,9 +17,7 @@ namespace {
     std::size_t default_check_at = 64;
     std::size_t check_at = default_check_at;
 
-    using stack_array = std::array<stack, STACK_COUNT>;
-    stack_array stacks;
-    stack_array::iterator top_stack = stacks.begin();
+    stack global_stack;
 }
 
 template<typename T>
@@ -92,7 +90,7 @@ void assert_global_sanity() {
 
 void dump_memory() {
 #ifndef NDEBUG
-    print_one(multi_graph{first});
+    print_one(multi_graph{global_stack.base(), global_stack.top(), first});
 #endif
 }
 
@@ -110,10 +108,8 @@ void walk(ref r) {
 
 template<typename F>
 void on_all_roots(F f) {
-    for (auto it = stacks.begin(); it != top_stack; ++it)
-        for (int i = 0; i < it->size(); ++i)
-            if (it->get_nth(i))
-                f(it->get_nth(i));
+    for (auto it = global_stack.base(); it != global_stack.top(); ++it)
+        f(*it);
 }
 
 void collect_garbage() {
@@ -155,14 +151,8 @@ ref make_bool(bool b) {
         return mk_app(comb_k, comb_i);
 }
 
-stack& request_stack() {
-    assert(top_stack != stacks.end() && "out of stacks");
-    return *top_stack++;
-}
-
-void release_stack(stack& s) {
-    assert(&s == &top_stack[-1] && "incorrect stack return order");
-    --top_stack;
+stack_ref request_stack() {
+    return global_stack.get_ref();
 }
 
 void print_allocated() {

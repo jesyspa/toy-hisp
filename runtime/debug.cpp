@@ -87,6 +87,12 @@ void multi_graphviz_dump(multi_graph g) {
     std::set<object*> objs;
     std::cerr << "cat << EOF > mg_" << std::setw(4) << std::setfill('0') << i++ << ".dot\n";
     std::cerr << "digraph {\n";
+    for (auto it = g.base; it != g.top; ++it) {
+        auto i = it - g.base;
+        auto p = *it;
+        std::cerr << "s_" << i << " -> c_" << (void*)p << ";\n";
+        graphviz_dump_impl(p, objs);
+    }
     for (auto p = g.r; p ; p = p->next)
         graphviz_dump_impl(p, objs);
     std::cerr << "}\n";

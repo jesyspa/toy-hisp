@@ -5,23 +5,45 @@
 
 #include <array>
 
+class stack_ref;
+
 class stack {
 public:
     static std::size_t const STACK_SIZE = 1024;
 
 private:
     using storage = std::array<ref, STACK_SIZE>;
+
+public:
     using iterator = storage::iterator;
     using const_iterator = storage::const_iterator;
 
+private:
     storage data_;
     iterator top_;
 
 public:
+    friend class stack_ref;
+
     stack() : data_{{}}, top_{data_.begin()} {}
 
     stack(stack const&) = delete;
     stack& operator=(stack const&) = delete;
+
+    stack_ref get_ref();
+    const_iterator base() const;
+    const_iterator top() const;
+};
+
+class stack_ref {
+    using iterator = stack::iterator;
+    stack* ref_;
+    iterator base_;
+
+    stack_ref(stack* ref, iterator base) : ref_(ref), base_(base) {}
+
+public:
+    friend class stack;
 
     std::size_t size() const;
     bool empty() const;
@@ -34,4 +56,3 @@ public:
     void pop();
     void pop_n(std::size_t n);
 };
-

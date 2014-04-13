@@ -20,7 +20,7 @@
 
 struct application;
 
-using func_t = ref (*)(stack&);
+using func_t = ref (*)(stack_ref&);
 
 struct application : object {
     ref left, right;
@@ -53,15 +53,15 @@ void collect_garbage();
 
 ref eval(ref);
 
-ref comb_i(stack& sl);
-ref comb_k(stack& sl);
-ref comb_s(stack& sl);
-ref comb_l(stack& sl);
-ref comb_r(stack& sl);
-ref comb_y(stack& sl);
-ref print(stack& sl);
-ref add(stack& sl);
-ref sub(stack& sl);
-ref once(stack& sl);
-ref le(stack& sl);
+ref comb_i(stack_ref& sl);
+ref comb_k(stack_ref& sl);
+ref comb_s(stack_ref& sl);
+ref comb_l(stack_ref& sl);
+ref comb_r(stack_ref& sl);
+ref comb_y(stack_ref& sl);
+ref print(stack_ref& sl);
+ref add(stack_ref& sl);
+ref sub(stack_ref& sl);
+ref once(stack_ref& sl);
+ref le(stack_ref& sl);
 

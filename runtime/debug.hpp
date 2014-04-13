@@ -7,6 +7,7 @@ struct graph {
 };
 
 struct multi_graph {
+    stack::const_iterator base, top;
     ref r;
 };
 
