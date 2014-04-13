@@ -21,8 +21,13 @@ bool stack_ref::empty() const {
     return ref_->top_ == base_;
 }
 
+bool stack_ref::singleton() const {
+    return size() == 1;
+}
+
 ref stack_ref::top() const {
-    return *ref_->top_;
+    assert(!empty() && "inspecting top of empty stack");
+    return ref_->top_[-1];
 }
 
 ref stack_ref::get_nth(std::size_t n) const {
@@ -51,4 +56,15 @@ void stack_ref::pop_n(std::size_t n) {
     ref_->top_ -= n;
 }
 
+void stack_ref::roll(std::size_t n) {
+    assert(n <= size() && "rolling too far");
+    auto p = top();
+    std::copy_backward(ref_->top_ - n - 1, ref_->top_ - 1, ref_->top_);
+    ref_->top_[-n-1] = p;
+}
+
+void stack_ref::flip() {
+    assert(size() >= 2 && "flipping almost-empty stack");
+    std::swap(ref_->top_[-1], ref_->top_[-2]);
+}
 

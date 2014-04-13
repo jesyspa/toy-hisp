@@ -27,30 +27,22 @@ ref update(application* app, ref newval) {
     return app;
 }
 
-ref eval(ref r) {
-    auto s = request_stack();
-    while (is<application>(r) || !s.empty()) {
-        ASSERT_SANITY(r);
-        while (auto app = try_cast<application>(r)) {
-            s.push(app);
-            r = app->left;
-        }
+// Evaluate the expression at the top of stack_ref, returning the result on
+// the same stack.  We assume the expression is the only thing currently on
+// the stack.
+void eval(stack_ref s) {
+    assert(s.singleton() && "incorrect number of args");
 
-        assert(is<function>(r) && "type error: trying to apply non-func");
-        auto f = cast<function>(r);
-        bool id = f->func == comb_i;
+    while (is<application>(s.top()) || !s.singleton()) {
+        ASSERT_SANITY(s.top());
+        while (auto app = try_cast<application>(s.top()))
+            s.push(app->left);
 
-        auto result = f->func(s);
-        assert(result && "null result");
-        ASSERT_SANITY(result);
-        if (s.empty())
-            r = result;
-        else if (id)
-            r = cast<application>(s.top())->left = result;
-        else
-            r = update(cast<application>(cast<application>(s.top())->left), result);
+        dump_memory();
+        assert(is<function>(s.top()) && "type error: trying to apply non-func");
+        auto f = s.extract_as<function>();
+
+        f->func(s);
+        dump_memory();
     }
-    while (!s.empty())
-        s.pop();
-    return r;
 }

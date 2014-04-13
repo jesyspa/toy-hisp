@@ -20,7 +20,7 @@
 
 struct application;
 
-using func_t = ref (*)(stack_ref&);
+using func_t = void (*)(stack_ref);
 
 struct application : object {
     ref left, right;
@@ -37,31 +37,27 @@ struct function : object {
     static constexpr object_type TYPE = object_type::function_object;
 };
 
-WARN_UNUSED_RESULT
-application* make_application(ref left, ref right);
+void make_application(stack_ref s);
 
-WARN_UNUSED_RESULT
-number* make_number(int value);
+void make_number(stack_ref s, int value);
 
-WARN_UNUSED_RESULT
-function* make_function(func_t func);
+void make_function(stack_ref s, func_t func);
 
-WARN_UNUSED_RESULT
-ref make_bool(bool b);
+void make_bool(stack_ref s, bool b);
 
 void collect_garbage();
 
-ref eval(ref);
+void eval(stack_ref s);
 
-ref comb_i(stack_ref& sl);
-ref comb_k(stack_ref& sl);
-ref comb_s(stack_ref& sl);
-ref comb_l(stack_ref& sl);
-ref comb_r(stack_ref& sl);
-ref comb_y(stack_ref& sl);
-ref print(stack_ref& sl);
-ref add(stack_ref& sl);
-ref sub(stack_ref& sl);
-ref once(stack_ref& sl);
-ref le(stack_ref& sl);
+void comb_i(stack_ref s);
+void comb_k(stack_ref s);
+void comb_s(stack_ref s);
+void comb_l(stack_ref s);
+void comb_r(stack_ref s);
+void comb_y(stack_ref s);
+void print(stack_ref s);
+void add(stack_ref s);
+void sub(stack_ref s);
+void once(stack_ref s);
+void le(stack_ref s);
 

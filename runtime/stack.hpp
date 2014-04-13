@@ -2,6 +2,7 @@
 
 #include "object.hpp"
 #include "macros.hpp"
+#include "utility.hpp"
 
 #include <array>
 
@@ -53,12 +54,34 @@ public:
 
     std::size_t size() const;
     bool empty() const;
+    bool singleton() const;
     ref top() const;
     ref get_nth(std::size_t n) const;
 
     void push(ref r);
     WARN_UNUSED_RESULT
     ref extract();
+    template<typename T>
+    WARN_UNUSED_RESULT
+    T* extract_as();
+    template<typename T>
+    WARN_UNUSED_RESULT
+    T* try_extract_as();
     void pop();
     void pop_n(std::size_t n);
+    void roll(std::size_t n);
+    void flip();
 };
+
+template<typename T>
+WARN_UNUSED_RESULT
+T* stack_ref::extract_as() {
+    return cast<T>(extract());
+}
+
+template<typename T>
+WARN_UNUSED_RESULT
+T* stack_ref::try_extract_as() {
+    return try_cast<T>(extract());
+}
+

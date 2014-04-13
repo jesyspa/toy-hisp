@@ -1,6 +1,6 @@
 #pragma once
 
-#include "main.hpp"
+#include "object.hpp"
 #include <cassert>
 
 template<typename T>
@@ -20,10 +20,5 @@ T* try_cast(ref r) {
     if (is<T>(r))
         return reinterpret_cast<T*>(r);
     return nullptr;
-}
-
-template<typename T>
-T* eval_as(ref r) {
-    return cast<T>(eval(r));
 }
 

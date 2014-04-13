@@ -61,26 +61,23 @@ void free_object(object* p) {
     --object_count;
 }
 
-WARN_UNUSED_RESULT
-application* make_application(ref left, ref right) {
+void make_application(stack_ref s) {
     auto app = new_object<application>();
-    app->left = left;
-    app->right = right;
-    return app;
+    app->right = s.extract();
+    app->left = s.extract();
+    s.push(app);
 }
 
-WARN_UNUSED_RESULT
-number* make_number(int value) {
+void make_number(stack_ref s, int value) {
     auto num = new_object<number>();
     num->value = value;
-    return num;
+    s.push(num);
 }
 
-WARN_UNUSED_RESULT
-function* make_function(func_t func) {
+void make_function(stack_ref s, func_t func) {
     auto fun = new_object<function>();
     fun->func = func;
-    return fun;
+    s.push(fun);
 }
 
 void assert_global_sanity() {
@@ -139,16 +136,19 @@ void collect_garbage() {
     }
     check_at = std::min(2*object_count, default_check_at);
     assert_global_sanity();
+    (void)cleaned_any;
     if (cleaned_any)
         dump_memory();
 }
 
-WARN_UNUSED_RESULT
-ref make_bool(bool b) {
-    if (b)
-        return make_function(comb_k);
-    else
-        return mk_app(comb_k, comb_i);
+void make_bool(stack_ref s, bool b) {
+    if (b) {
+        make_function(s, comb_k);
+    } else {
+        make_function(s, comb_k);
+        make_function(s, comb_i);
+        make_application(s);
+    }
 }
 
 stack_ref request_stack() {
