@@ -7,6 +7,10 @@
 
 class stack_ref;
 
+// Main abstraction class for the stack mechanism.  While evaluating, we often
+// need to stop using the stack we are currently working with and evaluate an
+// expression by itself.  This class allows us to split off such a "sub-stack"
+// at will.
 class stack {
 public:
     static std::size_t const STACK_SIZE = 1024;
@@ -35,6 +39,8 @@ public:
     const_iterator top() const;
 };
 
+// A sub-stack of the stack described above.  This tracks its own base but
+// performs all other operations on the parent stack.
 class stack_ref {
     using iterator = stack::iterator;
     stack* ref_;
