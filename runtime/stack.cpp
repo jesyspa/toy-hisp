@@ -13,6 +13,14 @@ auto stack::top() const -> const_iterator {
     return top_;
 }
 
+auto stack::base() -> iterator {
+    return data_.begin();
+}
+
+auto stack::top() -> iterator {
+    return top_;
+}
+
 std::size_t stack_ref::size() const {
     return ref_->top_ - base_;
 }

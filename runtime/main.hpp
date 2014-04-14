@@ -8,10 +8,10 @@
 
 #ifndef NDEBUG
 #define ASSERT_SANITY(r) do { \
-    assert(r && r->allocated); \
+    assert(r && is_heap_ptr(r)); \
     if (auto app = try_cast<application>(r)) { \
-        assert(app->left && app->left->allocated); \
-        assert(app->right && app->right->allocated); \
+        assert(app->left && is_heap_ptr(app->left)); \
+        assert(app->right && is_heap_ptr(app->right)); \
     } \
 } while(false)
 #else

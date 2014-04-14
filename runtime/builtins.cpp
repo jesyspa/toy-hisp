@@ -64,9 +64,8 @@ void print(stack_ref s) {
     auto child_s = request_stack();
     child_s.push(arg->right);
     eval(child_s);
-    auto num = child_s.extract_as<number>();
+    auto num = cast<number>(child_s.top());
     std::printf("%d\n", num->value);
-    s.push(num);
 }
 
 void add(stack_ref s) {

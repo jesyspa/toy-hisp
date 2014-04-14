@@ -23,7 +23,7 @@ std::map<func_t, char const*> func_names = {
 #undef ENTRY
 };
 
-void internal_print_impl(ref r, std::vector<object*>& objs, bool parens) {
+void internal_print_impl(object const* r, std::vector<object const*>& objs, bool parens) {
     ASSERT_SANITY(r);
     if (auto* app = try_cast<application>(r)) {
         if (std::find(objs.begin(), objs.end(), r) != objs.end()) {
@@ -46,18 +46,16 @@ void internal_print_impl(ref r, std::vector<object*>& objs, bool parens) {
     }
 }
 
-void internal_print(ref r) {
-    std::vector<object*> objs;
+void internal_print(object const* r) {
+    std::vector<object const*> objs;
     internal_print_impl(r, objs, false);
 }
 
-void graphviz_dump_impl(ref r, std::set<object*>& objs) {
+void graphviz_dump_impl(object const* r, std::set<object const*>& objs) {
     ASSERT_SANITY(r);
     if (objs.count(r))
         return;
     objs.insert(r);
-    if (r->used == garbage_state)
-        std::cerr << "c_" << (void*)r << " [color=red];\n";
     if (auto* app = try_cast<application>(r)) {
         std::cerr << "c_" << (void*)app << " -> c_" << (void*)app->left << ";\n";
         std::cerr << "c_" << (void*)app << " -> c_" << (void*)app->right << " [color=blue];\n";
@@ -74,7 +72,7 @@ void graphviz_dump_impl(ref r, std::set<object*>& objs) {
 
 void graphviz_dump(graph g) {
     static int i = 0;
-    std::set<object*> objs;
+    std::set<object const*> objs;
     std::cerr << "cat << EOF > g_" << std::setw(4) << std::setfill('0') << i++ << ".dot\n";
     std::cerr << "digraph {\n";
     graphviz_dump_impl(g.r, objs);
@@ -84,7 +82,7 @@ void graphviz_dump(graph g) {
 
 void multi_graphviz_dump(multi_graph g) {
     static int i = 0;
-    std::set<object*> objs;
+    std::set<object const*> objs;
     std::cerr << "cat << EOF > mg_" << std::setw(4) << std::setfill('0') << i++ << ".dot\n";
     std::cerr << "digraph {\n";
     for (auto it = g.base; it != g.top; ++it) {
@@ -93,8 +91,31 @@ void multi_graphviz_dump(multi_graph g) {
         std::cerr << "s_" << i << " -> c_" << (void*)p << ";\n";
         graphviz_dump_impl(p, objs);
     }
-    for (auto p = g.r; p ; p = p->next)
-        graphviz_dump_impl(p, objs);
+
+    for (std::size_t i = 0; i < g.size;) {
+        auto obj = reinterpret_cast<object const*>(g.space + i);
+        graphviz_dump_impl(obj, objs);
+        i += obj->size;
+    }
     std::cerr << "}\n";
     std::cerr << "EOF\n";
+}
+
+void raw_dump(memory m) {
+    std::cerr << "heap";
+    for (std::size_t i = 0; i < m.size; ++i) {
+        if (i % 8 == 0)
+            std::cerr << '\n' << (void*)(m.space + i) << ": ";
+
+        std::cerr << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)(unsigned char)m.space[i];
+        if (i % 8 != 7)
+            std::cerr << ' ';
+    }
+
+    std::cerr << "\n\n";
+    std::cerr << "stack\n";
+    for (auto it = m.base; it != m.top; ++it)
+        std::cerr << (void*)*it << '\n';
+
+    std::cerr << '\n';
 }

@@ -21,6 +21,7 @@ addTopLevel :: CppExpr -> CppFile
 addTopLevel tree = File [Include "runtime/main.hpp", Include "runtime/construct.hpp", GlobDecl main]
     where main = FunDecl (Simple "int") "main" [] $ Just $ Block [
                      Block [
+                         Expr $ Call "init_gc" [],
                          Decl $ VarDecl Auto "s" (Just $ Call "construct" [tree]),
                          Expr $ Call "eval" [Cpp.Variable "s"]],
                      Expr $ Call "collect_garbage" []]

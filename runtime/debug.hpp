@@ -8,12 +8,20 @@ struct graph {
 
 struct multi_graph {
     stack::const_iterator base, top;
-    ref r;
+    char* space;
+    std::size_t size;
+};
+
+struct memory {
+    stack::const_iterator base, top;
+    char* space;
+    std::size_t size;
 };
 
 void internal_print(ref r);
 void graphviz_dump(graph g);
 void multi_graphviz_dump(multi_graph g);
+void raw_dump(memory m);
 
 inline void print_one(int i) {
     std::cerr << i;
@@ -37,6 +45,10 @@ inline void print_one(multi_graph g) {
 
 inline void print_one(void* p) {
     std::cerr << p;
+}
+
+inline void print_one(memory m) {
+    raw_dump(m);
 }
 
 template<typename...>

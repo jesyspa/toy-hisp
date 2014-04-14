@@ -5,28 +5,6 @@
 #include "garbage_collection.hpp"
 #include <cassert>
 
-namespace {
-    function make_static_comb_i() {
-        function f{};
-        f.func = comb_i;
-        f.allocated = true;
-        f.type = function::TYPE;
-        return f;
-    }
-    function static_comb_i = make_static_comb_i();
-}
-
-ref update(application* app, ref newval) {
-    if (auto napp = try_cast<application>(newval)) {
-        app->left = napp->left;
-        app->right = napp->right;
-    } else {
-        app->right = newval;
-        app->left = &static_comb_i;
-    }
-    return app;
-}
-
 // Evaluate the expression at the top of stack_ref, returning the result on
 // the same stack.  We assume the expression is the only thing currently on
 // the stack.

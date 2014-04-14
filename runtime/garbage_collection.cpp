@@ -12,53 +12,49 @@
 bool garbage_state = false;
 
 namespace {
-    ref first;
-    std::size_t object_count;
-    std::size_t default_check_at = 64;
-    std::size_t check_at = default_check_at;
+    std::size_t const HEAP_SIZE = 1024;
+    char* active_space;
+    char* space_bottom;
+    char* space_top;
 
     stack global_stack;
+}
+
+char* allocate_space() {
+    return static_cast<char*>(calloc(HEAP_SIZE, 1));
+}
+
+void init_gc() {
+    assert(!active_space && "gc already initialized");
+
+    active_space = allocate_space();
+    space_bottom = active_space;
+    space_top = active_space + HEAP_SIZE;
+}
+
+ref allocate_from(char*& space, std::size_t bytes) {
+    auto obj = reinterpret_cast<ref>(space);
+    space += bytes;
+    return obj;
 }
 
 template<typename T>
 WARN_UNUSED_RESULT
 T* new_object() {
-    ++object_count;
-    assert(object_count <= 1024*1024 && "too many objects!");
-    auto obj = static_cast<T*>(malloc(sizeof(T)));
-    if (!obj) {
-        // If we ran out of memory, run a garbage collection pass and
-        // then try again.
+    // Ensure we have enough memory.
+    if (space_top - space_bottom < sizeof(T)) {
+        // If not, try again after garbage collection.
         collect_garbage();
-        obj = static_cast<T*>(malloc(sizeof(T)));
-        if (!obj) {
-            printf("out of memory");
+        if (space_top - space_bottom < sizeof(T)) {
+            printf("out of memory\n");
             std::exit(-1);
         }
     }
-    obj->allocated = true;
-    obj->next = nullptr;
+    auto obj = allocate_from(space_bottom, sizeof(T));
     obj->type = T::TYPE;
-#ifndef NDEBUG
-    (void)object_count;
-    (void)check_at;
-    collect_garbage();
-#else
-    if (object_count >= check_at)
-        collect_garbage();
-#endif
-    obj->used = !garbage_state;
-    obj->next = first;
-    first = obj;
-    return obj;
-}
-
-void free_object(object* p) {
-    p->allocated = false;
-#ifdef NDEBUG
-    free(p);
-#endif
-    --object_count;
+    obj->forward = obj;
+    obj->size = sizeof(T);
+    return static_cast<T*>(obj);
 }
 
 void make_application(stack_ref s) {
@@ -80,65 +76,64 @@ void make_function(stack_ref s, func_t func) {
     s.push(fun);
 }
 
-void assert_global_sanity() {
-    for (auto p = first; p ; p = p->next)
-        ASSERT_SANITY(p);
-}
-
 void dump_memory() {
 #ifndef NDEBUG
-    print_one(multi_graph{global_stack.base(), global_stack.top(), first});
+#ifndef DUMP_RAW
+    print_one(multi_graph{global_stack.base(), global_stack.top(), active_space, (std::size_t(space_bottom - active_space))});
+#else
+    print_one(memory{global_stack.base(), global_stack.top(), active_space, (std::size_t)(space_bottom - active_space)});
+#endif
 #endif
 }
 
-void walk(ref r) {
-    assert(r && "walking over nothing");
-    assert(r->allocated);
-    if (r->used != garbage_state)
+void move_ptr(char*& bottom, ref& r) {
+    assert(r && "moving a nullptr");
+    if (r->forward != r) {
+        r = r->forward;
         return;
-    r->used = !garbage_state;
-    if (auto* app = try_cast<application>(r)) {
-        walk(app->left);
-        walk(app->right);
+    }
+    assert(is_heap_ptr(r));
+
+    auto new_r = allocate_from(bottom, r->size);
+    std::memcpy(new_r, r, r->size);
+    r = r->forward = new_r->forward = new_r;
+}
+
+void scan(ref obj, char*& bottom) {
+    if (auto app = try_cast<application>(obj)) {
+        move_ptr(bottom, app->left);
+        move_ptr(bottom, app->right);
     }
 }
 
-template<typename F>
-void on_all_roots(F f) {
+void update_roots(char*& bottom) {
     for (auto it = global_stack.base(); it != global_stack.top(); ++it)
-        f(*it);
+        move_ptr(bottom, *it);
+}
+
+void update_semispace(char* space, char*& bottom) {
+    char* scanned = space;
+    while (scanned != bottom) {
+        auto obj = reinterpret_cast<ref>(scanned);
+        scan(obj, bottom);
+        scanned += obj->size;
+    }
 }
 
 void collect_garbage() {
-    garbage_state = !garbage_state;
-
-    on_all_roots(walk);
-
     dump_memory();
 
-    bool cleaned_any = false;
+    char* tospace = allocate_space();
+    char* tospace_bottom = tospace;
+    char* tospace_top = tospace + HEAP_SIZE;
+    update_roots(tospace_bottom);
+    update_semispace(tospace, tospace_bottom);
 
-    while (first && first->used == garbage_state) {
-        cleaned_any = true;
-        auto p = first->next;
-        free_object(first);
-        first = p;
-    }
-    for (auto p = first; p && p->next; ) {
-        if (p->next->used != garbage_state) {
-            p = p->next;
-            continue;
-        }
-        cleaned_any = true;
-        auto* next = p->next;
-        p->next = next->next;
-        free_object(next);
-    }
-    check_at = std::min(2*object_count, default_check_at);
-    assert_global_sanity();
-    (void)cleaned_any;
-    if (cleaned_any)
-        dump_memory();
+    active_space = tospace;
+    space_bottom = tospace_bottom;
+    space_top = tospace_top;
+
+    dump_memory();
 }
 
 void make_bool(stack_ref s, bool b) {
@@ -155,14 +150,7 @@ stack_ref request_stack() {
     return global_stack.get_ref();
 }
 
-void print_allocated() {
-#ifndef NDEBUG
-    printf("total: %lu", object_count);
-    for (auto p = first; p ; p = p->next) {
-        ASSERT_SANITY(p);
-        print_one(p);
-        printf("\n");
-    }
-#endif
+bool is_heap_ptr(void const* ptr) {
+    auto c = static_cast<char const*>(ptr);
+    return active_space <= c && c < space_top;
 }
-

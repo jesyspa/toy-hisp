@@ -38,6 +38,8 @@ public:
     stack_ref get_ref();
     const_iterator base() const;
     const_iterator top() const;
+    iterator base();
+    iterator top();
 };
 
 // A sub-stack of the stack described above.  This tracks its own base but

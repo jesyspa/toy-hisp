@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 enum class object_type {
     application_object,
     number_object,
@@ -7,10 +9,9 @@ enum class object_type {
 };
 
 struct object {
-    bool used;
-    bool allocated;
     object_type type;
-    object* next;
+    std::size_t size;
+    object* forward;
 };
 
 using ref = object*;
