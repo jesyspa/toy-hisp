@@ -3,12 +3,14 @@
 #include "object.hpp"
 #include <cassert>
 
+// Check whether the object is of the given type
 template<typename T>
 bool is(CRef obj) {
-    assert(obj && "null type");
+    assert(obj && "invalid pointer");
     return obj->type == T::TYPE;
 }
 
+// Unconditionally treat the pointer as referring to the given type.
 template<typename T>
 T* cast(Ref obj) {
     assert(is<T>(obj) && "type mismatch");
@@ -21,6 +23,8 @@ T const* cast(CRef obj) {
     return static_cast<T const*>(obj);
 }
 
+// Attempt to cast to a pointer of the given type.  Returns nullptr if the referent is of a
+// different type.
 template<typename T>
 T* try_cast(Ref obj) {
     if (is<T>(obj))

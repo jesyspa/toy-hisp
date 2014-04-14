@@ -127,8 +127,6 @@ void update_semispace(char* space, char*& bottom) {
 }
 
 void collect_garbage() {
-    dump_memory();
-
     char* tospace = allocate_space();
     char* tospace_bottom = tospace;
     char* tospace_top = tospace + HEAP_SIZE;
@@ -140,8 +138,6 @@ void collect_garbage() {
     active_space = tospace;
     space_bottom = tospace_bottom;
     space_top = tospace_top;
-
-    dump_memory();
 }
 
 void make_bool(SubStack stack, bool value) {

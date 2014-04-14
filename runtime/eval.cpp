@@ -6,9 +6,8 @@
 #include "utility.hpp"
 #include <cassert>
 
-// Evaluate the expression at the top of stack_ref, returning the result on
-// the same stack.  We assume the expression is the only thing currently on
-// the stack.
+// Evaluate the expression at the top of stack_ref, returning the result on the same stack.  We
+// assume the expression is the only thing currently on the stack.
 void eval(SubStack stack) {
     assert(stack.singleton() && "incorrect number of args");
 
@@ -17,11 +16,9 @@ void eval(SubStack stack) {
         while (auto app = try_cast<Application>(stack.top()))
             stack.push(app->left);
 
-        dump_memory();
         assert(is<Function>(stack.top()) && "type error: trying to apply non-func");
         auto f = stack.extract_as<Function>();
 
         f->func(stack);
-        dump_memory();
     }
 }

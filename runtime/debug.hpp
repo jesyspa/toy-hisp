@@ -2,6 +2,8 @@
 #include "main.hpp"
 #include <iostream>
 
+// Helper structs for disambiguating what exactly we want to print.
+
 struct GraphBag {
     Ref root;
 };
@@ -18,11 +20,8 @@ struct MemoryBag {
     std::size_t size;
 };
 
-void print_expression(Ref root);
-void graphviz_dump(GraphBag graph);
-void multi_graphviz_dump(MultiGraphBag graph);
-void raw_dump(MemoryBag memory);
 
+// Helper functions to make debug_print print the correct object.
 inline void print_one(int i) {
     std::cerr << i;
 }
@@ -31,48 +30,41 @@ inline void print_one(char const* p) {
     std::cerr << p;
 }
 
-inline void print_one(Ref root) {
-    print_expression(root);
-}
-
-inline void print_one(GraphBag graph) {
-    graphviz_dump(graph);
-}
-
-inline void print_one(MultiGraphBag graph) {
-    multi_graphviz_dump(graph);
-}
-
 inline void print_one(void* p) {
     std::cerr << p;
 }
 
+// Print the expression starting at the given root.
+inline void print_one(Ref root) {
+    void print_expression(Ref root);
+    print_expression(root);
+}
+
+// Print everything reachable from the given root as a graph.
+inline void print_one(GraphBag graph) {
+    void graphviz_dump(GraphBag graph);
+    graphviz_dump(graph);
+}
+
+// Print everything currently allocated, annotated with stack pointers.
+inline void print_one(MultiGraphBag graph) {
+void multi_graphviz_dump(MultiGraphBag graph);
+    multi_graphviz_dump(graph);
+}
+
+// Print all currently allocated memory in a kinda-human-readable format.
 inline void print_one(MemoryBag memory) {
+    void raw_dump(MemoryBag memory);
     raw_dump(memory);
 }
 
-template<typename...>
-struct DebugPrintImpl;
 
-template<typename T, typename... ARGS>
-struct DebugPrintImpl<T, ARGS...> {
-    static void invoke(T t, ARGS... args) {
-#ifndef NDEBUG
-        print_one(t);
-#else
-        (void)t;
-#endif
-        DebugPrintImpl<ARGS...>::invoke(args...);
-    }
-};
-
-template<>
-struct DebugPrintImpl<> {
-    static void invoke() {}
-};
-
+// Print all arguments separated by spaces and followed by a newline, then wait for user input.
 template<typename... ARGS>
 void debug_print(ARGS... args) {
-    DebugPrintImpl<ARGS...>::invoke(args...);
+    auto dummy = {(print_one(args), std::cerr << ' ', 0)...};
+    std::cerr << '\n';
+    (void)dummy;
     std::cin.get();
 }
+

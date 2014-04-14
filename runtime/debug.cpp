@@ -8,6 +8,7 @@
 #include <iomanip>
 
 namespace {
+    // Map of function addresses to their names.  Only used for printing debug messages.
     std::map<Func, char const*> func_names = {
 #define ENTRY(name) {name, #name }
         ENTRY(comb_i),

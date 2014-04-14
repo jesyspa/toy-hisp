@@ -4,6 +4,13 @@
 #include "debug.hpp"
 #include "construct.hpp"
 
+// Implementations of Hisp built-in functions.  All expect their arguments to be passed on the
+// stack, and will place their return value on it, too.
+//
+// We should probably either use the program stack for this or some stack-based language that we can
+// then interpret (or compile?).  The latter would make it easier to eventually compile to
+// supercombinators, too.
+
 void comb_i(SubStack stack) {
     auto arg = stack.extract_as<Application>();
     stack.push(arg->right);

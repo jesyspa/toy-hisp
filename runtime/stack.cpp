@@ -1,6 +1,11 @@
 #include "stack.hpp"
 #include <cassert>
 
+Stack::Stack()
+    : data_{{}}
+    , top_{data_.begin()}
+{}
+
 SubStack Stack::get_ref() {
     return {*this, top_};
 }
@@ -20,6 +25,11 @@ auto Stack::begin() -> iterator {
 auto Stack::end() -> iterator {
     return top_;
 }
+
+SubStack::SubStack(Stack& stack, iterator base)
+    : ref_{&stack}
+    , base_{base}
+{}
 
 std::size_t SubStack::size() const {
     return ref_->top_ - base_;

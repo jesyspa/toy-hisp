@@ -8,15 +8,15 @@
 
 class SubStack;
 
-// Main abstraction class for the Stack mechanism.  While evaluating, we often
-// need to stop using the Stack we are currently working with and evaluate an
-// expression by itself.  This class allows us to split off such a "sub-Stack"
-// at will.
+// Stores pointers into the heap that are still useful.  Built-in functions operate on this stack
+// instead of using the program stack as it is easier for the garbage collector to scan this.
+//
+// As we often need to suspend a computation and perform a different one, both using a stack, we
+// avoid extra allocations by having them share a stack.  The stack is not modified directly;
+// instead, a sub-stack is requested which remembers its base and provides an interface for updating
+// the whole stack.
 class Stack {
-public:
     static std::size_t const STACK_SIZE = 1024;
-
-private:
     using storage = std::array<Ref, STACK_SIZE>;
 
 public:
@@ -30,7 +30,7 @@ private:
 public:
     friend class SubStack;
 
-    Stack() : data_{{}}, top_{data_.begin()} {}
+    Stack();
 
     Stack(Stack const&) = delete;
     Stack& operator=(Stack const&) = delete;
@@ -42,14 +42,15 @@ public:
     iterator end();
 };
 
-// A sub-stack of the stack described above.  This tracks its own base but
-// performs all other operations on the parent stack.
+// Provides an interface to modify a Stack.  So called because we only expect a SubStack to be
+// responsible for some (top) part of the stack; anything below the point where it was created is
+// not of interest to it.
 class SubStack {
     using iterator = Stack::iterator;
     Stack* ref_;
     iterator base_;
 
-    SubStack(Stack& stack, iterator base) : ref_(&stack), base_(base) {}
+    SubStack(Stack& stack, iterator base);
 
 public:
     friend class Stack;
@@ -59,7 +60,7 @@ public:
     bool singleton() const;
     Ref top() const;
 
-    void push(Ref r);
+    void push(Ref obj);
     WARN_UNUSED_RESULT
     Ref extract();
     template<typename T>
@@ -67,6 +68,7 @@ public:
     T* extract_as();
     void pop();
     void pop_n(std::size_t n);
+    // move the top element to position n, moving all intermediate elements up.
     void roll(std::size_t n);
     void flip();
 };
