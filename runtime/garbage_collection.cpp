@@ -24,6 +24,14 @@ char* allocate_space() {
     return static_cast<char*>(calloc(HEAP_SIZE, 1));
 }
 
+void deallocate_space(void* ptr) {
+#ifdef NDEBUG
+    free(ptr);
+#else
+    (void)ptr;
+#endif
+}
+
 void init_gc() {
     assert(!active_space && "gc already initialized");
 
@@ -128,6 +136,8 @@ void collect_garbage() {
     char* tospace_top = tospace + HEAP_SIZE;
     update_roots(tospace_bottom);
     update_semispace(tospace, tospace_bottom);
+
+    deallocate_space(active_space);
 
     active_space = tospace;
     space_bottom = tospace_bottom;
