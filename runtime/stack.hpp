@@ -6,18 +6,18 @@
 
 #include <array>
 
-class stack_ref;
+class SubStack;
 
-// Main abstraction class for the stack mechanism.  While evaluating, we often
-// need to stop using the stack we are currently working with and evaluate an
-// expression by itself.  This class allows us to split off such a "sub-stack"
+// Main abstraction class for the Stack mechanism.  While evaluating, we often
+// need to stop using the Stack we are currently working with and evaluate an
+// expression by itself.  This class allows us to split off such a "sub-Stack"
 // at will.
-class stack {
+class Stack {
 public:
     static std::size_t const STACK_SIZE = 1024;
 
 private:
-    using storage = std::array<ref, STACK_SIZE>;
+    using storage = std::array<Ref, STACK_SIZE>;
 
 public:
     using iterator = storage::iterator;
@@ -28,47 +28,43 @@ private:
     iterator top_;
 
 public:
-    friend class stack_ref;
+    friend class SubStack;
 
-    stack() : data_{{}}, top_{data_.begin()} {}
+    Stack() : data_{{}}, top_{data_.begin()} {}
 
-    stack(stack const&) = delete;
-    stack& operator=(stack const&) = delete;
+    Stack(Stack const&) = delete;
+    Stack& operator=(Stack const&) = delete;
 
-    stack_ref get_ref();
-    const_iterator base() const;
-    const_iterator top() const;
-    iterator base();
-    iterator top();
+    SubStack get_ref();
+    const_iterator begin() const;
+    const_iterator end() const;
+    iterator begin();
+    iterator end();
 };
 
 // A sub-stack of the stack described above.  This tracks its own base but
 // performs all other operations on the parent stack.
-class stack_ref {
-    using iterator = stack::iterator;
-    stack* ref_;
+class SubStack {
+    using iterator = Stack::iterator;
+    Stack* ref_;
     iterator base_;
 
-    stack_ref(stack* ref, iterator base) : ref_(ref), base_(base) {}
+    SubStack(Stack& stack, iterator base) : ref_(&stack), base_(base) {}
 
 public:
-    friend class stack;
+    friend class Stack;
 
     std::size_t size() const;
     bool empty() const;
     bool singleton() const;
-    ref top() const;
-    ref get_nth(std::size_t n) const;
+    Ref top() const;
 
-    void push(ref r);
+    void push(Ref r);
     WARN_UNUSED_RESULT
-    ref extract();
+    Ref extract();
     template<typename T>
     WARN_UNUSED_RESULT
     T* extract_as();
-    template<typename T>
-    WARN_UNUSED_RESULT
-    T* try_extract_as();
     void pop();
     void pop_n(std::size_t n);
     void roll(std::size_t n);
@@ -77,13 +73,7 @@ public:
 
 template<typename T>
 WARN_UNUSED_RESULT
-T* stack_ref::extract_as() {
+T* SubStack::extract_as() {
     return cast<T>(extract());
-}
-
-template<typename T>
-WARN_UNUSED_RESULT
-T* stack_ref::try_extract_as() {
-    return try_cast<T>(extract());
 }
 

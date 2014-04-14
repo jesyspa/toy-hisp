@@ -9,15 +9,13 @@
 #include <iterator>
 #include <list>
 
-bool garbage_state = false;
-
 namespace {
     std::size_t const HEAP_SIZE = 1024;
     char* active_space;
     char* space_bottom;
     char* space_top;
 
-    stack global_stack;
+    Stack global_stack;
 }
 
 char* allocate_space() {
@@ -40,8 +38,8 @@ void init_gc() {
     space_top = active_space + HEAP_SIZE;
 }
 
-ref allocate_from(char*& space, std::size_t bytes) {
-    auto obj = reinterpret_cast<ref>(space);
+Ref allocate_from(char*& space, std::size_t bytes) {
+    auto obj = reinterpret_cast<Ref>(space);
     space += bytes;
     return obj;
 }
@@ -65,64 +63,64 @@ T* new_object() {
     return static_cast<T*>(obj);
 }
 
-void make_application(stack_ref s) {
-    auto app = new_object<application>();
-    app->right = s.extract();
-    app->left = s.extract();
-    s.push(app);
+void make_application(SubStack stack) {
+    auto app = new_object<Application>();
+    app->right = stack.extract();
+    app->left = stack.extract();
+    stack.push(app);
 }
 
-void make_number(stack_ref s, int value) {
-    auto num = new_object<number>();
+void make_number(SubStack stack, int value) {
+    auto num = new_object<Number>();
     num->value = value;
-    s.push(num);
+    stack.push(num);
 }
 
-void make_function(stack_ref s, func_t func) {
-    auto fun = new_object<function>();
+void make_function(SubStack stack, Func func) {
+    auto fun = new_object<Function>();
     fun->func = func;
-    s.push(fun);
+    stack.push(fun);
 }
 
 void dump_memory() {
 #ifndef NDEBUG
 #ifndef DUMP_RAW
-    print_one(multi_graph{global_stack.base(), global_stack.top(), active_space, (std::size_t(space_bottom - active_space))});
+    print_one(MultiGraphBag{global_stack, active_space, (std::size_t(space_bottom - active_space))});
 #else
-    print_one(memory{global_stack.base(), global_stack.top(), active_space, (std::size_t)(space_bottom - active_space)});
+    print_one(MemoryBag{global_stack, active_space, (std::size_t)(space_bottom - active_space)});
 #endif
 #endif
 }
 
-void move_ptr(char*& bottom, ref& r) {
-    assert(r && "moving a nullptr");
-    if (r->forward != r) {
-        r = r->forward;
+void move_ptr(char*& bottom, Ref& obj) {
+    assert(obj && "moving a nullptr");
+    if (obj->forward != obj) {
+        obj = obj->forward;
         return;
     }
-    assert(is_heap_ptr(r));
+    assert(is_heap_ptr(obj));
 
-    auto new_r = allocate_from(bottom, r->size);
-    std::memcpy(new_r, r, r->size);
-    r = r->forward = new_r->forward = new_r;
+    auto new_obj = allocate_from(bottom, obj->size);
+    std::memcpy(new_obj, obj, obj->size);
+    obj = obj->forward = new_obj->forward = new_obj;
 }
 
-void scan(ref obj, char*& bottom) {
-    if (auto app = try_cast<application>(obj)) {
+void scan(Ref obj, char*& bottom) {
+    if (auto app = try_cast<Application>(obj)) {
         move_ptr(bottom, app->left);
         move_ptr(bottom, app->right);
     }
 }
 
 void update_roots(char*& bottom) {
-    for (auto it = global_stack.base(); it != global_stack.top(); ++it)
-        move_ptr(bottom, *it);
+    for (auto& e : global_stack)
+        move_ptr(bottom, e);
 }
 
 void update_semispace(char* space, char*& bottom) {
     char* scanned = space;
     while (scanned != bottom) {
-        auto obj = reinterpret_cast<ref>(scanned);
+        auto obj = reinterpret_cast<Ref>(scanned);
         scan(obj, bottom);
         scanned += obj->size;
     }
@@ -146,17 +144,17 @@ void collect_garbage() {
     dump_memory();
 }
 
-void make_bool(stack_ref s, bool b) {
-    if (b) {
-        make_function(s, comb_k);
+void make_bool(SubStack stack, bool value) {
+    if (value) {
+        make_function(stack, comb_k);
     } else {
-        make_function(s, comb_k);
-        make_function(s, comb_i);
-        make_application(s);
+        make_function(stack, comb_k);
+        make_function(stack, comb_i);
+        make_application(stack);
     }
 }
 
-stack_ref request_stack() {
+SubStack request_stack() {
     return global_stack.get_ref();
 }
 

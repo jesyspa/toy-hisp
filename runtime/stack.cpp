@@ -1,77 +1,72 @@
 #include "stack.hpp"
 #include <cassert>
 
-stack_ref stack::get_ref() {
-    return {this, top_};
+SubStack Stack::get_ref() {
+    return {*this, top_};
 }
 
-auto stack::base() const -> const_iterator {
+auto Stack::begin() const -> const_iterator {
     return data_.begin();
 }
 
-auto stack::top() const -> const_iterator {
+auto Stack::end() const -> const_iterator {
     return top_;
 }
 
-auto stack::base() -> iterator {
+auto Stack::begin() -> iterator {
     return data_.begin();
 }
 
-auto stack::top() -> iterator {
+auto Stack::end() -> iterator {
     return top_;
 }
 
-std::size_t stack_ref::size() const {
+std::size_t SubStack::size() const {
     return ref_->top_ - base_;
 }
 
-bool stack_ref::empty() const {
+bool SubStack::empty() const {
     return ref_->top_ == base_;
 }
 
-bool stack_ref::singleton() const {
+bool SubStack::singleton() const {
     return size() == 1;
 }
 
-ref stack_ref::top() const {
+Ref SubStack::top() const {
     assert(!empty() && "inspecting top of empty stack");
     return ref_->top_[-1];
 }
 
-ref stack_ref::get_nth(std::size_t n) const {
-    assert(n <= size() && "out of bounds");
-    return ref_->top_[-n-1];
-}
-
-void stack_ref::push(ref app) {
+void SubStack::push(Ref app) {
     assert(ref_->top_ != ref_->data_.end() && "out of bounds");
     *ref_->top_++ = app;
 }
 
 WARN_UNUSED_RESULT
-ref stack_ref::extract() {
+Ref SubStack::extract() {
     assert(!empty() && "extracting from empty stack");
     return *--ref_->top_;
 }
 
-void stack_ref::pop() {
+void SubStack::pop() {
     assert(!empty() && "popping empty stack");
     --ref_->top_;
 }
 
-void stack_ref::pop_n(std::size_t n) {
+void SubStack::pop_n(std::size_t n) {
     assert(n <= size() && "poping too far");
     ref_->top_ -= n;
 }
 
-void stack_ref::roll(std::size_t n) {
+void SubStack::roll(std::size_t n) {
     assert(n <= size() && "rolling too far");
     auto p = top();
     std::copy_backward(ref_->top_ - n - 1, ref_->top_ - 1, ref_->top_);
     ref_->top_[-n-1] = p;
 }
 
-void stack_ref::flip() {
+void SubStack::flip() {
     assert(size() >= 2 && "flipping almost-empty stack");
     std::swap(ref_->top_[-1], ref_->top_[-2]);
 }

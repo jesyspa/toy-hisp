@@ -4,34 +4,34 @@
 #include <cassert>
 
 template<typename T>
-bool is(object const* r) {
-    assert(r && "null type");
-    return r->type == T::TYPE;
+bool is(CRef obj) {
+    assert(obj && "null type");
+    return obj->type == T::TYPE;
 }
 
 template<typename T>
-T* cast(ref r) {
-    assert(is<T>(r) && "type mismatch");
-    return static_cast<T*>(r);
+T* cast(Ref obj) {
+    assert(is<T>(obj) && "type mismatch");
+    return static_cast<T*>(obj);
 }
 
 template<typename T>
-T const* cast(object const* r) {
-    assert(is<T>(r) && "type mismatch");
-    return static_cast<T const*>(r);
+T const* cast(CRef obj) {
+    assert(is<T>(obj) && "type mismatch");
+    return static_cast<T const*>(obj);
 }
 
 template<typename T>
-T* try_cast(object* r) {
-    if (is<T>(r))
-        return static_cast<T*>(r);
+T* try_cast(Ref obj) {
+    if (is<T>(obj))
+        return static_cast<T*>(obj);
     return nullptr;
 }
 
 template<typename T>
-T const* try_cast(object const* r) {
-    if (is<T>(r))
-        return static_cast<T const*>(r);
+T const* try_cast(CRef obj) {
+    if (is<T>(obj))
+        return static_cast<T const*>(obj);
     return nullptr;
 }
 

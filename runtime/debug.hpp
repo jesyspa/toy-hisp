@@ -2,26 +2,26 @@
 #include "main.hpp"
 #include <iostream>
 
-struct graph {
-    ref r;
+struct GraphBag {
+    Ref root;
 };
 
-struct multi_graph {
-    stack::const_iterator base, top;
+struct MultiGraphBag {
+    Stack const& stack;
     char* space;
     std::size_t size;
 };
 
-struct memory {
-    stack::const_iterator base, top;
+struct MemoryBag {
+    Stack const& stack;
     char* space;
     std::size_t size;
 };
 
-void internal_print(ref r);
-void graphviz_dump(graph g);
-void multi_graphviz_dump(multi_graph g);
-void raw_dump(memory m);
+void print_expression(Ref root);
+void graphviz_dump(GraphBag graph);
+void multi_graphviz_dump(MultiGraphBag graph);
+void raw_dump(MemoryBag memory);
 
 inline void print_one(int i) {
     std::cerr << i;
@@ -31,48 +31,48 @@ inline void print_one(char const* p) {
     std::cerr << p;
 }
 
-inline void print_one(ref r) {
-    internal_print(r);
+inline void print_one(Ref root) {
+    print_expression(root);
 }
 
-inline void print_one(graph g) {
-    graphviz_dump(g);
+inline void print_one(GraphBag graph) {
+    graphviz_dump(graph);
 }
 
-inline void print_one(multi_graph g) {
-    multi_graphviz_dump(g);
+inline void print_one(MultiGraphBag graph) {
+    multi_graphviz_dump(graph);
 }
 
 inline void print_one(void* p) {
     std::cerr << p;
 }
 
-inline void print_one(memory m) {
-    raw_dump(m);
+inline void print_one(MemoryBag memory) {
+    raw_dump(memory);
 }
 
 template<typename...>
-struct debug_print_impl;
+struct DebugPrintImpl;
 
 template<typename T, typename... ARGS>
-struct debug_print_impl<T, ARGS...> {
+struct DebugPrintImpl<T, ARGS...> {
     static void invoke(T t, ARGS... args) {
 #ifndef NDEBUG
         print_one(t);
 #else
         (void)t;
 #endif
-        debug_print_impl<ARGS...>::invoke(args...);
+        DebugPrintImpl<ARGS...>::invoke(args...);
     }
 };
 
 template<>
-struct debug_print_impl<> {
+struct DebugPrintImpl<> {
     static void invoke() {}
 };
 
 template<typename... ARGS>
 void debug_print(ARGS... args) {
-    debug_print_impl<ARGS...>::invoke(args...);
+    DebugPrintImpl<ARGS...>::invoke(args...);
     std::cin.get();
 }

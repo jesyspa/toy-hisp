@@ -4,109 +4,109 @@
 #include "debug.hpp"
 #include "construct.hpp"
 
-void comb_i(stack_ref s) {
-    auto arg = s.extract_as<application>();
-    s.push(arg->right);
+void comb_i(SubStack stack) {
+    auto arg = stack.extract_as<Application>();
+    stack.push(arg->right);
 }
 
-void comb_k(stack_ref s) {
-    auto arg = s.extract_as<application>();
-    s.pop();
-    s.push(arg->right);
+void comb_k(SubStack stack) {
+    auto arg = stack.extract_as<Application>();
+    stack.pop();
+    stack.push(arg->right);
 }
 
-void comb_s(stack_ref s) {
-    auto f = s.extract_as<application>();
-    auto g = s.extract_as<application>();
-    auto x = s.extract_as<application>();
-    s.push(g->right);
-    s.push(x->right);
-    s.push(f->right);
-    s.push(x->right);
-    make_application(s);
-    s.roll(2);
-    make_application(s);
-    make_application(s);
+void comb_s(SubStack stack) {
+    auto f = stack.extract_as<Application>();
+    auto g = stack.extract_as<Application>();
+    auto x = stack.extract_as<Application>();
+    stack.push(g->right);
+    stack.push(x->right);
+    stack.push(f->right);
+    stack.push(x->right);
+    make_application(stack);
+    stack.roll(2);
+    make_application(stack);
+    make_application(stack);
 }
 
-void comb_l(stack_ref s) {
-    auto f = s.extract_as<application>();
-    auto g = s.extract_as<application>();
-    auto x = s.extract_as<application>();
-    s.push(g->right);
-    s.push(f->right);
-    s.push(x->right);
-    make_application(s);
-    s.flip();
-    make_application(s);
+void comb_l(SubStack stack) {
+    auto f = stack.extract_as<Application>();
+    auto g = stack.extract_as<Application>();
+    auto x = stack.extract_as<Application>();
+    stack.push(g->right);
+    stack.push(f->right);
+    stack.push(x->right);
+    make_application(stack);
+    stack.flip();
+    make_application(stack);
 }
 
-void comb_r(stack_ref s) {
-    auto f = s.extract_as<application>();
-    auto g = s.extract_as<application>();
-    auto x = s.extract_as<application>();
-    s.push(f->right);
-    s.push(g->right);
-    s.push(x->right);
-    make_application(s);
-    make_application(s);
+void comb_r(SubStack stack) {
+    auto f = stack.extract_as<Application>();
+    auto g = stack.extract_as<Application>();
+    auto x = stack.extract_as<Application>();
+    stack.push(f->right);
+    stack.push(g->right);
+    stack.push(x->right);
+    make_application(stack);
+    make_application(stack);
 }
 
-void comb_y(stack_ref s) {
-    auto f = s.extract_as<application>();
-    s.push(f->right);
-    s.push(f);
-    make_application(s);
+void comb_y(SubStack stack) {
+    auto f = stack.extract_as<Application>();
+    stack.push(f->right);
+    stack.push(f);
+    make_application(stack);
 }
 
-void print(stack_ref s) {
-    auto arg = s.extract_as<application>();
+void print(SubStack stack) {
+    auto arg = stack.extract_as<Application>();
     auto child_s = request_stack();
     child_s.push(arg->right);
     eval(child_s);
-    auto num = cast<number>(child_s.top());
+    auto num = cast<Number>(child_s.top());
     std::printf("%d\n", num->value);
 }
 
-void add(stack_ref s) {
-    auto lhs = s.extract_as<application>();
-    auto rhs = s.extract_as<application>();
-    s.push(lhs->right);
+void add(SubStack stack) {
+    auto lhs = stack.extract_as<Application>();
+    auto rhs = stack.extract_as<Application>();
+    stack.push(lhs->right);
     auto child_s = request_stack();
-    s.push(rhs->right);
+    stack.push(rhs->right);
     eval(child_s);
-    s.flip();
+    stack.flip();
     eval(child_s);
-    auto rhs_num = s.extract_as<number>()->value;
-    auto lhs_num = s.extract_as<number>()->value;
-    make_number(s, lhs_num + rhs_num);
+    auto rhs_num = stack.extract_as<Number>()->value;
+    auto lhs_num = stack.extract_as<Number>()->value;
+    make_number(stack, lhs_num + rhs_num);
 }
 
-void sub(stack_ref s) {
-    auto lhs = s.extract_as<application>();
-    auto rhs = s.extract_as<application>();
-    s.push(lhs->right);
+void sub(SubStack stack) {
+    auto lhs = stack.extract_as<Application>();
+    auto rhs = stack.extract_as<Application>();
+    stack.push(lhs->right);
     auto child_s = request_stack();
-    s.push(rhs->right);
+    stack.push(rhs->right);
     eval(child_s);
-    s.flip();
+    stack.flip();
     eval(child_s);
-    auto rhs_num = s.extract_as<number>()->value;
-    auto lhs_num = s.extract_as<number>()->value;
-    make_number(s, lhs_num - rhs_num);
+    auto rhs_num = stack.extract_as<Number>()->value;
+    auto lhs_num = stack.extract_as<Number>()->value;
+    make_number(stack, lhs_num - rhs_num);
 }
 
-void le(stack_ref s) {
-    auto lhs = s.extract_as<application>();
-    auto rhs = s.extract_as<application>();
-    s.push(lhs->right);
+void le(SubStack stack) {
+    auto lhs = stack.extract_as<Application>();
+    auto rhs = stack.extract_as<Application>();
+    stack.push(lhs->right);
     auto child_s = request_stack();
-    s.push(rhs->right);
+    stack.push(rhs->right);
     eval(child_s);
-    s.flip();
+    stack.flip();
     eval(child_s);
-    auto rhs_num = s.extract_as<number>()->value;
-    auto lhs_num = s.extract_as<number>()->value;
-    make_bool(s, lhs_num <= rhs_num);
+    auto rhs_num = stack.extract_as<Number>()->value;
+    auto lhs_num = stack.extract_as<Number>()->value;
+    make_bool(stack, lhs_num <= rhs_num);
 }
 

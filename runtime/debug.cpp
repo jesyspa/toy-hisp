@@ -1,6 +1,5 @@
 #include "debug.hpp"
 #include "utility.hpp"
-#include "garbage_collection.hpp"
 #include <map>
 #include <set>
 #include <vector>
@@ -8,114 +7,121 @@
 #include <algorithm>
 #include <iomanip>
 
-std::map<func_t, char const*> func_names = {
+namespace {
+    std::map<Func, char const*> func_names = {
 #define ENTRY(name) {name, #name }
-    ENTRY(comb_i),
-    ENTRY(comb_k),
-    ENTRY(comb_s),
-    ENTRY(comb_l),
-    ENTRY(comb_r),
-    ENTRY(comb_y),
-    ENTRY(print),
-    ENTRY(add),
-    ENTRY(sub),
-    ENTRY(le)
+        ENTRY(comb_i),
+        ENTRY(comb_k),
+        ENTRY(comb_s),
+        ENTRY(comb_l),
+        ENTRY(comb_r),
+        ENTRY(comb_y),
+        ENTRY(print),
+        ENTRY(add),
+        ENTRY(sub),
+        ENTRY(le)
 #undef ENTRY
-};
+    };
+}
 
-void internal_print_impl(object const* r, std::vector<object const*>& objs, bool parens) {
-    ASSERT_SANITY(r);
-    if (auto* app = try_cast<application>(r)) {
-        if (std::find(objs.begin(), objs.end(), r) != objs.end()) {
+void print_expression_impl(CRef obj, std::vector<CRef>& objs, bool parens) {
+    ASSERT_SANITY(obj);
+    if (auto* app = try_cast<Application>(obj)) {
+        if (std::find(objs.begin(), objs.end(), obj) != objs.end()) {
             std::cerr << "<loop>";
             return;
         }
-        objs.push_back(r);
+        objs.push_back(obj);
         if (parens)
             std::cerr << '(';
-        internal_print_impl(app->left, objs, false);
+        print_expression_impl(app->left, objs, false);
         std::cerr << ' ';
-        internal_print_impl(app->right, objs, true);
+        print_expression_impl(app->right, objs, true);
         if (parens)
             std::cerr << ')';
         objs.pop_back();
-    } else if (auto* n = try_cast<number>(r)) {
+    } else if (auto* n = try_cast<Number>(obj)) {
         std::cerr << n->value;
-    } else if (auto* f = try_cast<function>(r)){
+    } else if (auto* f = try_cast<Function>(obj)){
         std::cerr << func_names[f->func];
     }
 }
 
-void internal_print(object const* r) {
-    std::vector<object const*> objs;
-    internal_print_impl(r, objs, false);
+void print_expression(CRef root) {
+    std::vector<CRef> objs;
+    print_expression_impl(root, objs, false);
 }
 
-void graphviz_dump_impl(object const* r, std::set<object const*>& objs) {
-    ASSERT_SANITY(r);
-    if (objs.count(r))
+void graphviz_dump_impl(CRef obj, std::set<CRef>& objs) {
+    ASSERT_SANITY(obj);
+    if (objs.count(obj))
         return;
-    objs.insert(r);
-    if (auto* app = try_cast<application>(r)) {
+    objs.insert(obj);
+    if (auto* app = try_cast<Application>(obj)) {
         std::cerr << "c_" << (void*)app << " -> c_" << (void*)app->left << ";\n";
         std::cerr << "c_" << (void*)app << " -> c_" << (void*)app->right << " [color=blue];\n";
         graphviz_dump_impl(app->left, objs);
         graphviz_dump_impl(app->right, objs);
-    } else if (auto* num = try_cast<number>(r)) {
+    } else if (auto* num = try_cast<Number>(obj)) {
         std::cerr << "c_" << (void*)num << " [label=\"" << num->value << "\"];\n";
-    } else if (auto* fun = try_cast<function>(r)) {
+    } else if (auto* fun = try_cast<Function>(obj)) {
         if (!func_names[fun->func])
             func_names[fun->func] = "???";
         std::cerr << "c_" << (void*)fun << " [label=\"" << func_names[fun->func] << "\"];\n";
     }
 }
 
-void graphviz_dump(graph g) {
+void graphviz_dump(GraphBag graph) {
     static int i = 0;
-    std::set<object const*> objs;
+    std::set<CRef> objs;
     std::cerr << "cat << EOF > g_" << std::setw(4) << std::setfill('0') << i++ << ".dot\n";
     std::cerr << "digraph {\n";
-    graphviz_dump_impl(g.r, objs);
+
+    graphviz_dump_impl(graph.root, objs);
+
     std::cerr << "}\n";
     std::cerr << "EOF\n";
 }
 
-void multi_graphviz_dump(multi_graph g) {
+void multi_graphviz_dump(MultiGraphBag graph) {
     static int i = 0;
-    std::set<object const*> objs;
+    std::set<CRef> objs;
     std::cerr << "cat << EOF > mg_" << std::setw(4) << std::setfill('0') << i++ << ".dot\n";
     std::cerr << "digraph {\n";
-    for (auto it = g.base; it != g.top; ++it) {
-        auto i = it - g.base;
-        auto p = *it;
-        std::cerr << "s_" << i << " -> c_" << (void*)p << ";\n";
-        graphviz_dump_impl(p, objs);
+
+    int root_count = 0;
+    for (auto root : graph.stack) {
+        std::cerr << "s_" << root_count << " -> c_" << (void*)root << ";\n";
+        graphviz_dump_impl(root, objs);
+        ++root_count;
     }
 
-    for (std::size_t i = 0; i < g.size;) {
-        auto obj = reinterpret_cast<object const*>(g.space + i);
+    for (std::size_t i = 0; i < graph.size;) {
+        auto obj = reinterpret_cast<CRef>(graph.space + i);
         graphviz_dump_impl(obj, objs);
         i += obj->size;
     }
+
     std::cerr << "}\n";
     std::cerr << "EOF\n";
 }
 
-void raw_dump(memory m) {
+void raw_dump(MemoryBag memory) {
     std::cerr << "heap";
-    for (std::size_t i = 0; i < m.size; ++i) {
+    for (std::size_t i = 0; i < memory.size; ++i) {
         if (i % 8 == 0)
-            std::cerr << '\n' << (void*)(m.space + i) << ": ";
+            std::cerr << '\n' << (void*)(memory.space + i) << ": ";
 
-        std::cerr << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)(unsigned char)m.space[i];
+        unsigned val = static_cast<unsigned char>(memory.space[i]);
+        std::cerr << std::setfill('0') << std::setw(2) << std::hex << val;
         if (i % 8 != 7)
             std::cerr << ' ';
     }
 
     std::cerr << "\n\n";
     std::cerr << "stack\n";
-    for (auto it = m.base; it != m.top; ++it)
-        std::cerr << (void*)*it << '\n';
+    for (auto obj : memory.stack)
+        std::cerr << (void*)obj << '\n';
 
     std::cerr << '\n';
 }

@@ -2,16 +2,17 @@
 
 #include <cstddef>
 
-enum class object_type {
+enum class ObjectType {
     application_object,
     number_object,
     function_object
 };
 
-struct object {
-    object_type type;
+struct Object {
+    ObjectType type;
     std::size_t size;
-    object* forward;
+    Object* forward;
 };
 
-using ref = object*;
+using Ref = Object*;
+using CRef = Object const*;

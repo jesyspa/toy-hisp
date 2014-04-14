@@ -6,58 +6,42 @@
 #include <iterator>
 #include <vector>
 
-#ifndef NDEBUG
-#define ASSERT_SANITY(r) do { \
-    assert(r && is_heap_ptr(r)); \
-    if (auto app = try_cast<application>(r)) { \
-        assert(app->left && is_heap_ptr(app->left)); \
-        assert(app->right && is_heap_ptr(app->right)); \
-    } \
-} while(false)
-#else
-#define ASSERT_SANITY(r) do { (void)r; } while(false)
-#endif
+using Func = void (*)(SubStack);
 
-struct application;
-
-using func_t = void (*)(stack_ref);
-
-struct application : object {
-    ref left, right;
-    static constexpr object_type TYPE = object_type::application_object;
+struct Application : Object {
+    Ref left, right;
+    static constexpr ObjectType TYPE = ObjectType::application_object;
 };
 
-struct number : object {
+struct Number : Object {
     int value;
-    static constexpr object_type TYPE = object_type::number_object;
+    static constexpr ObjectType TYPE = ObjectType::number_object;
 };
 
-struct function : object {
-    func_t func;
-    static constexpr object_type TYPE = object_type::function_object;
+struct Function : Object {
+    Func func;
+    static constexpr ObjectType TYPE = ObjectType::function_object;
 };
 
-void make_application(stack_ref s);
+void make_application(SubStack stack);
 
-void make_number(stack_ref s, int value);
+void make_number(SubStack stack, int value);
 
-void make_function(stack_ref s, func_t func);
+void make_function(SubStack stack, Func func);
 
-void make_bool(stack_ref s, bool b);
+void make_bool(SubStack stack, bool value);
 
-void collect_garbage();
+void eval(SubStack stack);
 
-void eval(stack_ref s);
-
-void comb_i(stack_ref s);
-void comb_k(stack_ref s);
-void comb_s(stack_ref s);
-void comb_l(stack_ref s);
-void comb_r(stack_ref s);
-void comb_y(stack_ref s);
-void print(stack_ref s);
-void add(stack_ref s);
-void sub(stack_ref s);
-void once(stack_ref s);
-void le(stack_ref s);
+void comb_i(SubStack stack);
+void comb_k(SubStack stack);
+void comb_s(SubStack stack);
+void comb_l(SubStack stack);
+void comb_r(SubStack stack);
+void comb_y(SubStack stack);
+void print(SubStack stack);
+void add(SubStack stack);
+void sub(SubStack stack);
+void once(SubStack stack);
+void le(SubStack stack);
 

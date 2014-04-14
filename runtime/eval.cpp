@@ -1,26 +1,27 @@
-#include "main.hpp"
-#include "utility.hpp"
-#include "stack.hpp"
 #include "debug.hpp"
 #include "garbage_collection.hpp"
+#include "macros.hpp"
+#include "main.hpp"
+#include "stack.hpp"
+#include "utility.hpp"
 #include <cassert>
 
 // Evaluate the expression at the top of stack_ref, returning the result on
 // the same stack.  We assume the expression is the only thing currently on
 // the stack.
-void eval(stack_ref s) {
-    assert(s.singleton() && "incorrect number of args");
+void eval(SubStack stack) {
+    assert(stack.singleton() && "incorrect number of args");
 
-    while (is<application>(s.top()) || !s.singleton()) {
-        ASSERT_SANITY(s.top());
-        while (auto app = try_cast<application>(s.top()))
-            s.push(app->left);
+    while (is<Application>(stack.top()) || !stack.singleton()) {
+        ASSERT_SANITY(stack.top());
+        while (auto app = try_cast<Application>(stack.top()))
+            stack.push(app->left);
 
         dump_memory();
-        assert(is<function>(s.top()) && "type error: trying to apply non-func");
-        auto f = s.extract_as<function>();
+        assert(is<Function>(stack.top()) && "type error: trying to apply non-func");
+        auto f = stack.extract_as<Function>();
 
-        f->func(s);
+        f->func(stack);
         dump_memory();
     }
 }
