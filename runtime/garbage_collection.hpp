@@ -8,6 +8,10 @@ void init_gc();
 // Perform a garbage collection.  Invalidates all pointers into the heap.
 void collect_garbage();
 
+// Create an initialization file based on the current program state.
+// Should not be called while in eval.
+void create_init_file();
+
 // Get an (empty) stack starting at the top of the current program stack.
 SubStack request_stack();
 

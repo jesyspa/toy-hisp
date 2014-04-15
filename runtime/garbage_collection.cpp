@@ -1,8 +1,9 @@
-#include "main.hpp"
 #include "garbage_collection.hpp"
-#include "utility.hpp"
-#include "debug.hpp"
 #include "construct.hpp"
+#include "debug.hpp"
+#include "main.hpp"
+#include "serialisation.hpp"
+#include "utility.hpp"
 #include <array>
 #include <cassert>
 #include <cstring>
@@ -90,6 +91,11 @@ void dump_memory() {
     print_one(MemoryBag{global_stack, active_space, (std::size_t)(space_bottom - active_space)});
 #endif
 #endif
+}
+
+void create_init_file() {
+    assert(global_stack.begin() + 1 == global_stack.end() && "dangerous with so many stacks");
+    write_init_file(MemoryInfo{*global_stack.begin(), active_space, (std::size_t)(space_bottom - active_space)});
 }
 
 void move_ptr(char*& bottom, Ref& obj) {

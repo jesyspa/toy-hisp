@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 
 enum class ObjectType {
     application_object,
@@ -10,7 +11,7 @@ enum class ObjectType {
 
 struct Object {
     ObjectType type;
-    std::size_t size;
+    std::uint32_t size;
     Object* forward;
 };
 

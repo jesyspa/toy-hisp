@@ -1,29 +1,14 @@
 #include "debug.hpp"
 #include "utility.hpp"
+#include "serialisation.hpp"
+#include <algorithm>
+#include <cstdint>
+#include <fstream>
+#include <iomanip>
+#include <iterator>
 #include <map>
 #include <set>
 #include <vector>
-#include <iterator>
-#include <algorithm>
-#include <iomanip>
-
-namespace {
-    // Map of function addresses to their names.  Only used for printing debug messages.
-    std::map<Func, char const*> func_names = {
-#define ENTRY(name) {name, #name }
-        ENTRY(comb_i),
-        ENTRY(comb_k),
-        ENTRY(comb_s),
-        ENTRY(comb_l),
-        ENTRY(comb_r),
-        ENTRY(comb_y),
-        ENTRY(print),
-        ENTRY(add),
-        ENTRY(sub),
-        ENTRY(le)
-#undef ENTRY
-    };
-}
 
 void print_expression_impl(CRef obj, std::vector<CRef>& objs, bool parens) {
     ASSERT_SANITY(obj);
@@ -126,3 +111,5 @@ void raw_dump(MemoryBag memory) {
 
     std::cerr << '\n';
 }
+
+
