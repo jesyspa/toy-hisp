@@ -11,7 +11,7 @@
 #include <list>
 
 namespace {
-    std::size_t const HEAP_SIZE = 1024;
+    std::size_t HEAP_SIZE = 1024;
     char* active_space;
     char* space_bottom;
     char* space_top;
@@ -96,6 +96,17 @@ void dump_memory() {
 void create_init_file() {
     assert(global_stack.begin() + 1 == global_stack.end() && "dangerous with so many stacks");
     write_init_file(MemoryInfo{*global_stack.begin(), active_space, (std::size_t)(space_bottom - active_space)});
+}
+
+SubStack use_init_file() {
+    auto memory = read_init_file();
+    active_space = memory.space;
+    HEAP_SIZE = 2*memory.size;
+    space_top = memory.space + HEAP_SIZE;
+    space_bottom = memory.space + memory.size;
+    auto stack = request_stack();
+    stack.push(memory.root);
+    return stack;
 }
 
 void move_ptr(char*& bottom, Ref& obj) {

@@ -4,12 +4,12 @@
 #include "main.hpp"
 #include <map>
 
-// Map of function addresses to their names.  Only used for printing debug
-// messages.
+// Map of function addresses to their names, and another map back.
 extern std::map<Func, char const*> func_names;
+extern std::map<std::string, Func> funcs_by_name;
 
 struct MemoryInfo {
-    CRef root;
+    Ref root;
     char* space;
     std::size_t size;
 };
@@ -23,3 +23,6 @@ struct MemoryInfo {
 // dump to be much use.
 void write_init_file(MemoryInfo memory);
 
+// Read a file cerated with write_init_file.  Currently very fragile and mostly
+// for testing purposes; we'll clean it up into something presentable later.
+MemoryInfo read_init_file();
