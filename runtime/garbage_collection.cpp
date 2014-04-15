@@ -48,10 +48,10 @@ template<typename T>
 WARN_UNUSED_RESULT
 T* new_object() {
     // Ensure we have enough memory.
-    if (space_top - space_bottom < sizeof(T)) {
+    if (static_cast<std::size_t>(space_top - space_bottom) < sizeof(T)) {
         // If not, try again after garbage collection.
         collect_garbage();
-        if (space_top - space_bottom < sizeof(T)) {
+        if (static_cast<std::size_t>(space_top - space_bottom) < sizeof(T)) {
             printf("out of memory\n");
             std::exit(-1);
         }
