@@ -23,6 +23,16 @@ T const* cast(CRef obj) {
     return reinterpret_cast<T const*>(obj);
 }
 
+template<typename T>
+T& cast(Object& obj) {
+    return *cast<T>(&obj);
+}
+
+template<typename T>
+T const& cast(Object const& obj) {
+    return *cast<T>(&obj);
+}
+
 // Attempt to cast to a pointer of the given type.  Returns nullptr if the referent is of a
 // different type.
 template<typename T>
@@ -37,5 +47,15 @@ T const* try_cast(CRef obj) {
     if (is<T>(obj))
         return reinterpret_cast<T const*>(obj);
     return nullptr;
+}
+
+template<typename T>
+T* try_cast(Object& obj) {
+    return try_cast<T>(&obj);
+}
+
+template<typename T>
+T const* try_cast(Object const& obj) {
+    return try_cast<T>(&obj);
 }
 

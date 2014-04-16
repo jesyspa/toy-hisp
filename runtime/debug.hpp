@@ -1,6 +1,7 @@
 #pragma once
-#include "main.hpp"
+#include "object.hpp"
 #include "space.hpp"
+#include "stack.hpp"
 #include <iostream>
 
 // Helper structs for disambiguating what exactly we want to print.
@@ -11,12 +12,12 @@ struct GraphBag {
 
 struct MultiGraphBag {
     Stack const& stack;
-    Space space;
+    Space const& space;
 };
 
 struct MemoryBag {
     Stack const& stack;
-    Space space;
+    Space const& space;
 };
 
 

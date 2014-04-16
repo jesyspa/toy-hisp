@@ -1,9 +1,9 @@
 #include "garbage_collection.hpp"
+#include "builtins.hpp"
 #include "debug.hpp"
-#include "main.hpp"
 #include "serialisation.hpp"
+#include "space.hpp"
 #include "utility.hpp"
-#include <array>
 #include <cassert>
 #include <cstring>
 #include <iterator>
@@ -12,14 +12,6 @@
 namespace {
     Space active_space;
     Stack global_stack;
-}
-
-void deallocate_space(void* ptr) {
-#ifdef NDEBUG
-    free(ptr);
-#else
-    (void)ptr;
-#endif
 }
 
 template<typename T>
@@ -58,6 +50,16 @@ void make_function(SubStack stack, Func func) {
     stack.push(fun);
 }
 
+void make_bool(SubStack stack, bool value) {
+    if (value) {
+        make_function(stack, comb_k);
+    } else {
+        make_function(stack, comb_k);
+        make_function(stack, comb_i);
+        make_application(stack);
+    }
+}
+
 void dump_memory() {
 #ifndef NDEBUG
 #ifndef DUMP_RAW
@@ -70,41 +72,28 @@ void dump_memory() {
 
 void create_init_file() {
     assert(global_stack.begin() + 1 == global_stack.end() && "dangerous with so many stacks");
-    write_init_file(MemoryInfo{*global_stack.begin(), active_space});
+    write_init_file(*global_stack.begin(), active_space);
 }
 
 SubStack use_init_file() {
     assert(!active_space.initialized() && "memory already initialized");
     auto memory = read_init_file();
-    active_space = memory.space;
+    active_space = std::move(memory.space);
     auto stack = request_stack();
     stack.push(memory.root);
     return stack;
 }
 
-void move_ptr(Space& bottom, Ref& obj) {
-    assert(obj && "moving a nullptr");
-    if (obj->forward != obj) {
-        obj = obj->forward;
-        return;
-    }
-    assert(is_heap_ptr(obj));
-
-    auto new_obj = bottom.allocate(obj->size);
-    std::memcpy(new_obj, obj, obj->size);
-    obj = new_obj;
-}
-
-void scan(Ref obj, Space& tospace) {
+void scan(Object& obj, Space& tospace) {
     if (auto app = try_cast<Application>(obj)) {
-        move_ptr(tospace, app->left);
-        move_ptr(tospace, app->right);
+        tospace.migrate(app->left);
+        tospace.migrate(app->right);
     }
 }
 
 void update_roots(Space& tospace) {
     for (auto& e : global_stack)
-        move_ptr(tospace, e);
+        tospace.migrate(e);
 }
 
 void update_semispace(Space& tospace) {
@@ -121,17 +110,7 @@ void collect_garbage() {
 
     active_space.deinit_space();
 
-    active_space = tospace;
-}
-
-void make_bool(SubStack stack, bool value) {
-    if (value) {
-        make_function(stack, comb_k);
-    } else {
-        make_function(stack, comb_k);
-        make_function(stack, comb_i);
-        make_application(stack);
-    }
+    active_space = std::move(tospace);
 }
 
 SubStack request_stack() {

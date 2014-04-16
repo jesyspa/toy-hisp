@@ -29,7 +29,11 @@ auto Space::iterator::operator++(int) -> iterator {
     return {BaseIterator::operator++(0)};
 }
 
-Ref Space::iterator::operator*() const {
+Object& Space::iterator::operator*() const {
+    return *obj_;
+}
+
+Ref Space::iterator::operator->() const {
     return obj_;
 }
 
@@ -43,6 +47,35 @@ auto Space::const_iterator::operator++(int) -> const_iterator {
     return {BaseIterator::operator++(0)};
 }
 
-CRef Space::const_iterator::operator*() const {
+Object const& Space::const_iterator::operator*() const {
+    return *obj_;
+}
+
+CRef Space::const_iterator::operator->() const {
     return obj_;
 }
+
+auto Space::begin() -> iterator {
+    return iterator{reinterpret_cast<Ref>(bottom_)};
+}
+
+auto Space::end() -> iterator {
+    return iterator{reinterpret_cast<Ref>(free_bottom_)};
+}
+
+auto Space::begin() const -> const_iterator {
+    return const_iterator{reinterpret_cast<CRef>(bottom_)};
+}
+
+auto Space::end() const -> const_iterator {
+    return const_iterator{reinterpret_cast<CRef>(free_bottom_)};
+}
+
+auto Space::cbegin() const -> const_iterator {
+    return begin();
+}
+
+auto Space::cend() const -> const_iterator {
+    return end();
+}
+

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "object.hpp"
-#include "main.hpp"
 #include "space.hpp"
 #include <map>
 
@@ -21,7 +20,7 @@ struct MemoryInfo {
 // Currently mostly a stub to bootstrap the binary file option; we need a
 // compiled file to test the loading code and we need loading code for such a
 // dump to be much use.
-void write_init_file(MemoryInfo memory);
+void write_init_file(CRef root, Space const& space);
 
 // Read a file cerated with write_init_file.  Currently very fragile and mostly
 // for testing purposes; we'll clean it up into something presentable later.

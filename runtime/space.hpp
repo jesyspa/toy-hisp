@@ -64,7 +64,8 @@ public:
         iterator& operator++();
         iterator operator++(int);
 
-        Ref operator*() const;
+        Object& operator*() const;
+        Ref operator->() const;
 
         iterator() = default;
     };
@@ -77,12 +78,19 @@ public:
         const_iterator& operator++();
         const_iterator operator++(int);
 
-        CRef operator*() const;
+        Object const& operator*() const;
+        CRef operator->() const;
 
         const_iterator() = default;
     };
 
     Space();
+    Space(Space const&) = delete;
+    Space(Space&&);
+    Space& operator=(Space const&) = delete;
+    Space& operator=(Space&&);
+
+    void swap(Space& other);
 
     void init_space(std::size_t);
     void deinit_space();
@@ -97,6 +105,8 @@ public:
     //
     // Returns whether the extension succeeded.
     bool extend(Ref obj, std::size_t);
+    // Move the given object to this space.
+    void migrate(Ref& obj);
 
 
     bool initialized() const;

@@ -82,8 +82,8 @@ void multi_graphviz_dump(MultiGraphBag graph) {
         ++root_count;
     }
 
-    for (auto obj : graph.space)
-        graphviz_dump_impl(obj, objs);
+    for (auto& obj : graph.space)
+        graphviz_dump_impl(&obj, objs);
 
     std::cerr << "}\n";
     std::cerr << "EOF\n";
@@ -95,10 +95,9 @@ void raw_dump(MemoryBag memory) {
 
     std::cerr << "\n";
     std::cerr << "stack\n";
-    for (auto obj : memory.stack)
-        std::cerr << (void*)obj << '\n';
+    for (auto& obj : memory.stack)
+        std::cerr << (void*)&obj << '\n';
 
     std::cerr << '\n';
 }
-
 

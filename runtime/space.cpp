@@ -6,6 +6,21 @@
 
 Space::Space() : bottom_{}, free_bottom_{}, top_{} {}
 
+Space::Space(Space&& other) : Space() {
+    swap(other);
+}
+
+Space& Space::operator=(Space&& other) {
+    swap(other);
+    return *this;
+}
+
+void Space::swap(Space& other) {
+    std::swap(bottom_, other.bottom_);
+    std::swap(free_bottom_, other.free_bottom_);
+    std::swap(top_, other.top_);
+}
+
 void Space::init_space(std::size_t size) {
     assert(!initialized() && "cannot double-initialize space");
     bottom_ = static_cast<char*>(calloc(size, 1));
@@ -39,6 +54,18 @@ bool Space::extend(Ref obj, std::size_t size) {
     free_bottom_ += increase;
     obj->size = size;
     return true;
+}
+
+void Space::migrate(Ref& obj) {
+    assert(obj && "migrating a nullptr");
+    if (obj->forward != obj) {
+        obj = obj->forward;
+        return;
+    }
+
+    auto new_obj = allocate(obj->size);
+    std::memcpy(new_obj, obj, obj->size);
+    obj = obj->forward = new_obj->forward = new_obj;
 }
 
 bool Space::initialized() const {
@@ -77,30 +104,6 @@ CRef Space::from_offset(std::size_t offset) const {
 Ref Space::from_offset(std::size_t offset) {
     assert(initialized() && "using uninitialized space");
     return reinterpret_cast<Ref>(bottom_ + offset);
-}
-
-auto Space::begin() -> iterator {
-    return iterator{reinterpret_cast<Ref>(bottom_)};
-}
-
-auto Space::end() -> iterator {
-    return iterator{reinterpret_cast<Ref>(free_bottom_)};
-}
-
-auto Space::begin() const -> const_iterator {
-    return const_iterator{reinterpret_cast<CRef>(bottom_)};
-}
-
-auto Space::end() const -> const_iterator {
-    return const_iterator{reinterpret_cast<CRef>(free_bottom_)};
-}
-
-auto Space::cbegin() const -> const_iterator {
-    return begin();
-}
-
-auto Space::cend() const -> const_iterator {
-    return end();
 }
 
 void Space::print_readable(std::ostream& os) const {

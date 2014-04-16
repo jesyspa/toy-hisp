@@ -1,7 +1,8 @@
-#include "main.hpp"
-#include "utility.hpp"
+#include "builtins.hpp"
+#include "eval.hpp"
 #include "stack.hpp"
-#include "debug.hpp"
+#include "utility.hpp"
+#include <cstdio>
 
 // Implementations of Hisp built-in functions.  All expect their arguments to be passed on the
 // stack, and will place their return value on it, too.

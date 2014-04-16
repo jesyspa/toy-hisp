@@ -22,3 +22,10 @@ bool is_heap_ptr(CRef obj);
 
 // Free resources used for garbage collection
 void deinit_gc();
+
+// Allocation functions.  All return a pointer to the new object on the stack.
+void make_application(SubStack stack);
+void make_number(SubStack stack, int value);
+void make_function(SubStack stack, Func func);
+void make_bool(SubStack stack, bool value);
+

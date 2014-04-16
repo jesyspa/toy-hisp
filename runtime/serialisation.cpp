@@ -1,11 +1,11 @@
 #include "serialisation.hpp"
 #include "object.hpp"
-#include "main.hpp"
+#include "builtins.hpp"
+#include "utility.hpp"
 #include <cstdint>
 #include <cstring>
 #include <fstream>
-#include <istream>
-#include <ostream>
+#include <iostream>
 
 std::map<Func, char const*> func_names = {
 #define ENTRY(name) {name, #name }
@@ -43,7 +43,7 @@ namespace {
         static constexpr ObjectType TYPE = ObjectType::application_object;
         std::uint64_t left_addr, right_addr;
 
-        SerializedApplication(Application const* app, Space& space)
+        SerializedApplication(Application const* app, Space const& space)
             : SerializedObject(app)
         {
             static_assert(sizeof(SerializedApplication) == sizeof(Application), "bad serialization implementation");
@@ -76,7 +76,7 @@ namespace {
         }
     };
 
-    void write_object(Space& space, CRef obj, std::ostream& os) {
+    void write_object(Space const& space, Object const& obj, std::ostream& os) {
         if (auto app = try_cast<Application>(obj)) {
             SerializedApplication s(app, space);
             os.write(reinterpret_cast<char const*>(&s), sizeof(SerializedApplication));
@@ -130,20 +130,20 @@ namespace {
     }
 }
 
-void write_init_file(MemoryInfo memory) {
+void write_init_file(CRef root, Space const& space) {
     std::ofstream hic("out.hic", std::ios::binary);
 
     hic.write(hisp_tag, 4);
     write_uint32(hic, 0);
 
-    auto root_addr = memory.space.to_offset(memory.root);
+    auto root_addr = space.to_offset(root);
     write_uint64(hic, root_addr);
 
-    auto heap_size = memory.space.bytes_allocated();
+    auto heap_size = space.bytes_allocated();
     write_uint64(hic, heap_size);
 
-    for (auto obj : memory.space)
-        write_object(memory.space, obj, hic);
+    for (auto& obj : space)
+        write_object(space, obj, hic);
 }
 
 MemoryInfo read_init_file() {
@@ -165,5 +165,5 @@ MemoryInfo read_init_file() {
     while (space.bytes_allocated() != heap_size)
         read_object(space, hic);
 
-    return {root, space};
+    return {root, std::move(space)};
 }
