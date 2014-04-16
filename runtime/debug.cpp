@@ -82,11 +82,8 @@ void multi_graphviz_dump(MultiGraphBag graph) {
         ++root_count;
     }
 
-    for (std::size_t i = 0; i < graph.size;) {
-        auto obj = reinterpret_cast<CRef>(graph.space + i);
+    for (auto obj : graph.space)
         graphviz_dump_impl(obj, objs);
-        i += obj->size;
-    }
 
     std::cerr << "}\n";
     std::cerr << "EOF\n";
@@ -94,17 +91,9 @@ void multi_graphviz_dump(MultiGraphBag graph) {
 
 void raw_dump(MemoryBag memory) {
     std::cerr << "heap";
-    for (std::size_t i = 0; i < memory.size; ++i) {
-        if (i % 8 == 0)
-            std::cerr << '\n' << (void*)(memory.space + i) << ": ";
+    memory.space.print_readable(std::cerr);
 
-        unsigned val = static_cast<unsigned char>(memory.space[i]);
-        std::cerr << std::setfill('0') << std::setw(2) << std::hex << val;
-        if (i % 8 != 7)
-            std::cerr << ' ';
-    }
-
-    std::cerr << "\n\n";
+    std::cerr << "\n";
     std::cerr << "stack\n";
     for (auto obj : memory.stack)
         std::cerr << (void*)obj << '\n';

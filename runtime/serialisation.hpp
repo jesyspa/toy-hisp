@@ -2,6 +2,7 @@
 
 #include "object.hpp"
 #include "main.hpp"
+#include "space.hpp"
 #include <map>
 
 // Map of function addresses to their names, and another map back.
@@ -10,8 +11,7 @@ extern std::map<std::string, Func> funcs_by_name;
 
 struct MemoryInfo {
     Ref root;
-    char* space;
-    std::size_t size;
+    Space space;
 };
 
 // Create a file from which we'll later be able to initialize the program.
