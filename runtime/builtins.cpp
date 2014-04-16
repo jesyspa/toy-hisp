@@ -2,7 +2,6 @@
 #include "utility.hpp"
 #include "stack.hpp"
 #include "debug.hpp"
-#include "construct.hpp"
 
 // Implementations of Hisp built-in functions.  All expect their arguments to be passed on the
 // stack, and will place their return value on it, too.

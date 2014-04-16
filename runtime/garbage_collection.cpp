@@ -1,5 +1,4 @@
 #include "garbage_collection.hpp"
-#include "construct.hpp"
 #include "debug.hpp"
 #include "main.hpp"
 #include "serialisation.hpp"
