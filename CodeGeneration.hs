@@ -11,6 +11,7 @@ import Unbind
 compile :: HispExpr a -> SKI a String
 compile = unfoldFree hispExprToSki . unbind
 
+-- What do you mean, Free doesn't have anamorphism support?
 unfoldFree :: Functor f => (a -> Either r (f a)) -> a -> Free f r
 unfoldFree f x = case f x of
     Left r -> return r

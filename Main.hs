@@ -1,13 +1,14 @@
 module Main where
 
+import CodeGeneration
 import Control.Applicative
 import Parser
-import CodeGeneration
-import SkiToCpp
+import SkiToHic
+import System.IO
 import Text.PrettyPrint.Leijen (pretty)
 
 main :: IO ()
 main = do
     contents <- getContents
-    let code = (skiToCpp . compile) <$> parseHisp contents
-    either (error.show) (print.pretty) code
+    let code = (skiToHic . compile) <$> parseHisp contents
+    either (error.show) print code

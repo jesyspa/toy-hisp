@@ -23,11 +23,13 @@ instance Monad Comb where
     Misc a >>= f = f a
     Comb x >>= _ = Comb x
 
+-- TODO: What does this do again?
 trivialize :: (Monad f, Traversable f) => f (Var () (f a)) -> Maybe (f a)
 trivialize = fmap join . traverse f
     where f (B _) = Nothing
           f (F x) = Just x
 
+-- Or this, for that matter...
 flipCombVar :: Comb (Var () (HispExpr a)) -> Var () (HispExpr (Comb a))
 flipCombVar = fmap sequenceA . sequenceA
 
