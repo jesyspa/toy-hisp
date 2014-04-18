@@ -10,6 +10,7 @@
 #include <list>
 
 namespace {
+    std::size_t bytes_alive_at_last_collection;
     Space active_space;
     Stack global_stack;
 }
@@ -104,13 +105,15 @@ void update_semispace(Space& tospace) {
 
 void collect_garbage() {
     Space tospace;
-    tospace.init_space(active_space.size());
+    auto const new_size = std::max(active_space.size(), 2*bytes_alive_at_last_collection);
+    tospace.init_space(new_size);
     update_roots(tospace);
     update_semispace(tospace);
 
     active_space.deinit_space();
 
     active_space = std::move(tospace);
+    bytes_alive_at_last_collection = active_space.bytes_allocated();
 }
 
 SubStack request_stack() {
