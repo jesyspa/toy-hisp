@@ -12,7 +12,7 @@ executable main
   main-is:             Main.hs
   build-depends:       base, mtl, parsec, lens, transformers, containers,
                        pretty, template-haskell, monadplus, prelude-extras,
-                       bound, wl-pprint, free
+                       bound, wl-pprint, free, bytestring
   hs-source-dirs:      .
   extensions:          TypeSynonymInstances, FlexibleInstances,
                        MultiParamTypeClasses, StandaloneDeriving,

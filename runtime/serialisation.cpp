@@ -135,6 +135,7 @@ void write_init_file(CRef root, Space const& space) {
 
     hic.write(hisp_tag, 4);
     write_uint32(hic, 0);
+    write_uint64(hic, 0);
 
     auto root_addr = space.to_offset(root);
     write_uint64(hic, root_addr);
@@ -152,7 +153,7 @@ MemoryInfo read_init_file() {
     char tag[4] = {};
     hic.read(tag, sizeof(tag));
     assert(std::memcmp(tag, hisp_tag, sizeof(tag)) == 0 && "invalid file");
-    hic.ignore(4);
+    hic.ignore(12);
 
     auto root_offset = read_uint64(hic);
     auto heap_size = read_uint64(hic);

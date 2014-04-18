@@ -4,11 +4,11 @@ module Hisp (
 ) where
 
 import Bound
-import Prelude.Extras
-import Data.Traversable
-import Data.Foldable
 import Control.Applicative
 import Control.Monad
+import Data.Foldable
+import Data.Traversable
+import Prelude.Extras
 
 infixl 6 :@
 data HispExpr a
