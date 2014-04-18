@@ -17,9 +17,6 @@ import CodeGeneration
 objectSize :: Int
 objectSize = 32
 
-headerSize :: Int
-headerSize = 32
-
 data ObjectType = ApplicationType | NumberType | FunctionType
                 deriving (Show, Eq, Ord, Enum)
 
