@@ -84,8 +84,8 @@ void add(SubStack stack) {
     eval(child_s);
     stack.flip();
     eval(child_s);
-    auto rhs_num = stack.extract_as<Number>()->value;
     auto lhs_num = stack.extract_as<Number>()->value;
+    auto rhs_num = stack.extract_as<Number>()->value;
     make_number(stack, lhs_num + rhs_num);
 }
 
@@ -98,8 +98,8 @@ void sub(SubStack stack) {
     eval(child_s);
     stack.flip();
     eval(child_s);
-    auto rhs_num = stack.extract_as<Number>()->value;
     auto lhs_num = stack.extract_as<Number>()->value;
+    auto rhs_num = stack.extract_as<Number>()->value;
     make_number(stack, lhs_num - rhs_num);
 }
 
@@ -112,8 +112,8 @@ void le(SubStack stack) {
     eval(child_s);
     stack.flip();
     eval(child_s);
-    auto rhs_num = stack.extract_as<Number>()->value;
     auto lhs_num = stack.extract_as<Number>()->value;
+    auto rhs_num = stack.extract_as<Number>()->value;
     make_bool(stack, lhs_num <= rhs_num);
 }
 
