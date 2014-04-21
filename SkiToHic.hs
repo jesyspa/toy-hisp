@@ -3,6 +3,7 @@ module SkiToHic (
 ) where
 
 import Hic
+import Hisp
 import SKI
 import Control.Monad.Free
 import Data.Foldable as F
@@ -18,11 +19,12 @@ number = snd . F.foldr f (0, M.empty)
     where f x (i, m) = (i+1, M.insert x i m)
 
 toObject :: M.Map (SKI String) Int -> SKI String -> Object
-toObject _ (Variable x) = Object FunctionType [Function x]
+toObject _ (Variable (Misc x)) = Object FunctionType [Function x]
+toObject _ (Variable (Comb x)) = Object FunctionType [Function $ combName x]
 toObject _ (SKI.Number x) = Object NumberType [Hic.Number x]
-toObject _ (Combinator c) = Object FunctionType [Function $ combName c]
 toObject m (lhs :@: rhs) = Object ApplicationType [addr lhs, addr rhs]
-    where addr = Pointer  . (objectSize*) . (m M.!)
+    where addr = Hic.Number . (objectSize*) . (m M.!)
+toObject _ (Abstraction x) = absurdAbs x
 
 makeObjects :: M.Map (SKI String) Int -> M.Map Int Object
 makeObjects m = M.foldrWithKey f M.empty m

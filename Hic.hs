@@ -22,7 +22,6 @@ data ObjectType = ApplicationType | NumberType | FunctionType
 
 data Field = Number Int
            | Function String
-           | Pointer Int
            deriving (Eq, Ord, Show)
 
 data Object = Object ObjectType [Field]
@@ -49,7 +48,6 @@ objectTypeToByteString FunctionType = word32LE 2
 fieldToByteString :: Field -> Builder
 fieldToByteString (Number i) = word64LE $ fromIntegral i
 fieldToByteString (Function str) = build8ByteString str
-fieldToByteString (Pointer i) = word64LE $ fromIntegral i
 
 objectToByteString :: Object -> Builder
 objectToByteString (Object tp fs) = mconcat $ [tpNum, objSize, pad64] ++ fields
