@@ -85,6 +85,3 @@ instance Abstraction abs => Monad (HispExpr abs) where
 lambda :: Eq a => a -> HispExpr Lambda a -> HispExpr Lambda a
 lambda v = Abstraction . Lambda . abstract1 v
 
-
-
-

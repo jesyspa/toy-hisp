@@ -3,9 +3,7 @@ module SkiToHic (
 ) where
 
 import Hic
-import Hisp
 import SKI
-import Control.Monad.Free
 import Data.Foldable as F
 import qualified Data.Set as S
 import qualified Data.Map as M

@@ -2,9 +2,8 @@ module CodeGeneration (
     compile
 ) where
 
-import Prelude hiding (any)
-import Hisp as H
-import SKI as S
+import Hisp
+import SKI
 import Unbind
 
 compile :: HispExpr Lambda a -> SKI a
