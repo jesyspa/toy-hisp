@@ -107,4 +107,3 @@ void raw_dump(MemoryBag memory) {
 
     std::cerr << '\n';
 }
-

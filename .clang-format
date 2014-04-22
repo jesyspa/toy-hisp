@@ -1,0 +1,15 @@
+AccessModifierOffset: -4
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: true
+BreakConstructorInitializersBeforeComma: true
+BasedOnStyle: LLVM
+ColumnLimit: 120
+Cpp11BracedListStyle: true
+IndentWidth: 4
+NamespaceIndentation: Inner
+PointerBindsToType: true
+Standard: C++11
+TabWidth: 4
+UseTab: Never
+

@@ -28,4 +28,3 @@ void make_application(SubStack stack);
 void make_number(SubStack stack, int value);
 void make_function(SubStack stack, Func func);
 void make_bool(SubStack stack, bool value);
-

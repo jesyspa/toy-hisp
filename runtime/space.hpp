@@ -29,33 +29,20 @@ class Space {
         void increment();
 
     public:
-        friend bool operator==(BaseIterator lhs, BaseIterator rhs) {
-            return lhs.obj_ == rhs.obj_;
-        }
+        friend bool operator==(BaseIterator lhs, BaseIterator rhs) { return lhs.obj_ == rhs.obj_; }
 
-        friend bool operator!=(BaseIterator lhs, BaseIterator rhs) {
-            return !(lhs == rhs);
-        }
+        friend bool operator!=(BaseIterator lhs, BaseIterator rhs) { return !(lhs == rhs); }
 
-        friend bool operator<(BaseIterator lhs, BaseIterator rhs) {
-            return lhs.obj_ < rhs.obj_;
-        }
+        friend bool operator<(BaseIterator lhs, BaseIterator rhs) { return lhs.obj_ < rhs.obj_; }
 
-        friend bool operator>(BaseIterator lhs, BaseIterator rhs) {
-            return rhs < lhs;
-        }
+        friend bool operator>(BaseIterator lhs, BaseIterator rhs) { return rhs < lhs; }
 
-        friend bool operator<=(BaseIterator lhs, BaseIterator rhs) {
-            return !(rhs < lhs);
-        }
+        friend bool operator<=(BaseIterator lhs, BaseIterator rhs) { return !(rhs < lhs); }
 
-        friend bool operator>=(BaseIterator lhs, BaseIterator rhs) {
-            return !(lhs < rhs);
-        }
+        friend bool operator>=(BaseIterator lhs, BaseIterator rhs) { return !(lhs < rhs); }
     };
 
 public:
-
     class iterator : public BaseIterator {
         friend class Space;
         iterator(Ref obj);
@@ -107,7 +94,6 @@ public:
     bool extend(Ref obj, std::size_t);
     // Move the given object to this space.
     void migrate(Ref& obj);
-
 
     bool initialized() const;
     std::size_t size() const;

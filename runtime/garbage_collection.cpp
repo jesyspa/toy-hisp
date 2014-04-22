@@ -10,14 +10,13 @@
 #include <list>
 
 namespace {
-    std::size_t bytes_alive_at_last_collection;
-    Space active_space;
-    Stack global_stack;
+std::size_t bytes_alive_at_last_collection;
+Space active_space;
+Stack global_stack;
 }
 
-template<typename T>
-WARN_UNUSED_RESULT
-T* new_object() {
+template <typename T>
+WARN_UNUSED_RESULT T* new_object() {
     auto obj = active_space.allocate(sizeof(T));
     if (!obj) {
         // If not, try again after garbage collection.
@@ -107,7 +106,7 @@ void update_semispace(Space& tospace) {
 
 void collect_garbage() {
     Space tospace;
-    auto const new_size = std::max(active_space.size(), 2*bytes_alive_at_last_collection);
+    auto const new_size = std::max(active_space.size(), 2 * bytes_alive_at_last_collection);
     tospace.init_space(new_size);
     update_roots(tospace);
     update_semispace(tospace);
@@ -118,14 +117,8 @@ void collect_garbage() {
     bytes_alive_at_last_collection = active_space.bytes_allocated();
 }
 
-SubStack request_stack() {
-    return global_stack.get_ref();
-}
+SubStack request_stack() { return global_stack.get_ref(); }
 
-bool is_heap_ptr(CRef obj) {
-    return active_space.contains(obj);
-}
+bool is_heap_ptr(CRef obj) { return active_space.contains(obj); }
 
-void deinit_gc() {
-    active_space.deinit_space();
-}
+void deinit_gc() { active_space.deinit_space(); }

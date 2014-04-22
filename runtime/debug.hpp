@@ -20,19 +20,12 @@ struct MemoryBag {
     Space const& space;
 };
 
-
 // Helper functions to make debug_print print the correct object.
-inline void print_one(int i) {
-    std::cerr << i;
-}
+inline void print_one(int i) { std::cerr << i; }
 
-inline void print_one(char const* p) {
-    std::cerr << p;
-}
+inline void print_one(char const* p) { std::cerr << p; }
 
-inline void print_one(void* p) {
-    std::cerr << p;
-}
+inline void print_one(void* p) { std::cerr << p; }
 
 // Print the expression starting at the given root.
 inline void print_one(Ref root) {
@@ -48,7 +41,7 @@ inline void print_one(GraphBag graph) {
 
 // Print everything currently allocated, annotated with stack pointers.
 inline void print_one(MultiGraphBag graph) {
-void multi_graphviz_dump(MultiGraphBag graph);
+    void multi_graphviz_dump(MultiGraphBag graph);
     multi_graphviz_dump(graph);
 }
 
@@ -58,13 +51,11 @@ inline void print_one(MemoryBag memory) {
     raw_dump(memory);
 }
 
-
 // Print all arguments separated by spaces and followed by a newline, then wait for user input.
-template<typename... ARGS>
+template <typename... ARGS>
 void debug_print(ARGS... args) {
     auto dummy = {(print_one(args), std::cerr << ' ', 0)...};
     std::cerr << '\n';
     (void)dummy;
     std::cin.get();
 }
-

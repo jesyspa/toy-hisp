@@ -63,12 +63,10 @@ public:
     void push(Ref obj);
     WARN_UNUSED_RESULT
     Ref extract();
-    template<typename T>
-    WARN_UNUSED_RESULT
-    T* extract_as();
-    template<typename T>
-    WARN_UNUSED_RESULT
-    T* try_extract_as(); // leave unchanged on fail
+    template <typename T>
+    WARN_UNUSED_RESULT T* extract_as();
+    template <typename T>
+    WARN_UNUSED_RESULT T* try_extract_as(); // leave unchanged on fail
     void pop();
     void pop_n(std::size_t n);
     // move the top element to position n, moving all intermediate elements up.
@@ -76,18 +74,15 @@ public:
     void flip();
 };
 
-template<typename T>
-WARN_UNUSED_RESULT
-T* SubStack::extract_as() {
+template <typename T>
+WARN_UNUSED_RESULT T* SubStack::extract_as() {
     return cast<T>(extract());
 }
 
-template<typename T>
-WARN_UNUSED_RESULT
-T* SubStack::try_extract_as() {
+template <typename T>
+WARN_UNUSED_RESULT T* SubStack::try_extract_as() {
     auto p = try_cast<T>(top());
     if (p)
         pop();
     return p;
 }
-

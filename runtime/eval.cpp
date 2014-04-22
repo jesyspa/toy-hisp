@@ -62,4 +62,3 @@ void eval(SubStack stack) {
     stack.flip();
     stack.pop();
 }
-

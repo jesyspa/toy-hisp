@@ -116,4 +116,3 @@ void le(SubStack stack) {
     auto rhs_num = stack.extract_as<Number>()->value;
     make_bool(stack, lhs_num <= rhs_num);
 }
-

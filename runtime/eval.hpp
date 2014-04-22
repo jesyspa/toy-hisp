@@ -6,4 +6,3 @@ class SubStack;
 // same stack.  We assume the expression is the only thing currently on the
 // stack.
 void eval(SubStack stack);
-

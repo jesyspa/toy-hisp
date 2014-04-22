@@ -3,12 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-enum class ObjectType {
-    application_object,
-    number_object,
-    function_object,
-    forwarder_object
-};
+enum class ObjectType { application_object, number_object, function_object, forwarder_object };
 
 struct Object {
     ObjectType type;

@@ -1,12 +1,17 @@
 #include "space.hpp"
-#include <cstdlib>
 #include <cassert>
-#include <iostream>
+#include <cstdlib>
+#include <cstring>
 #include <iomanip>
+#include <iostream>
 
-Space::Space() : bottom_{}, free_bottom_{}, top_{} {}
+Space::Space()
+    : bottom_{}
+    , free_bottom_{}
+    , top_{} {}
 
-Space::Space(Space&& other) : Space() {
+Space::Space(Space&& other)
+    : Space() {
     swap(other);
 }
 
@@ -68,21 +73,13 @@ void Space::migrate(Ref& obj) {
     obj = obj->forward = new_obj->forward = new_obj;
 }
 
-bool Space::initialized() const {
-    return bottom_ != nullptr;
-}
+bool Space::initialized() const { return bottom_ != nullptr; }
 
-std::size_t Space::size() const {
-    return static_cast<std::size_t>(top_ - bottom_);
-}
+std::size_t Space::size() const { return static_cast<std::size_t>(top_ - bottom_); }
 
-std::size_t Space::bytes_allocated() const {
-    return static_cast<std::size_t>(free_bottom_ - bottom_);
-}
+std::size_t Space::bytes_allocated() const { return static_cast<std::size_t>(free_bottom_ - bottom_); }
 
-std::size_t Space::bytes_available() const {
-    return static_cast<std::size_t>(top_ - free_bottom_);
-}
+std::size_t Space::bytes_available() const { return static_cast<std::size_t>(top_ - free_bottom_); }
 
 bool Space::contains(CRef obj) const {
     assert(initialized() && "using uninitialized space");

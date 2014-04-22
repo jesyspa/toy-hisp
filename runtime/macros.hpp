@@ -9,14 +9,17 @@
 #endif
 
 #ifndef NDEBUG
-#define ASSERT_SANITY(r) do { \
-    assert(r && is_heap_ptr(r)); \
-    if (auto app = try_cast<Application>(r)) { \
-        assert(app->left && is_heap_ptr(app->left)); \
-        assert(app->right && is_heap_ptr(app->right)); \
-    } \
-} while(false)
+#define ASSERT_SANITY(r)                                                                                               \
+    do {                                                                                                               \
+        assert(r&& is_heap_ptr(r));                                                                                    \
+        if (auto app = try_cast<Application>(r)) {                                                                     \
+            assert(app->left&& is_heap_ptr(app->left));                                                                \
+            assert(app->right&& is_heap_ptr(app->right));                                                              \
+        }                                                                                                              \
+    } while (false)
 #else
-#define ASSERT_SANITY(r) do { (void)r; } while(false)
+#define ASSERT_SANITY(r)                                                                                               \
+    do {                                                                                                               \
+        (void) r;                                                                                                      \
+    } while (false)
 #endif
-
