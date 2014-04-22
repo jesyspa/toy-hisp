@@ -12,7 +12,7 @@
 
 void print_expression_impl(CRef obj, std::vector<CRef>& objs, bool parens) {
     ASSERT_SANITY(obj);
-    if (auto* app = try_cast<Application>(obj)) {
+    if (auto app = try_cast<Application>(obj)) {
         if (std::find(objs.begin(), objs.end(), obj) != objs.end()) {
             std::cerr << "<loop>";
             return;
@@ -26,10 +26,13 @@ void print_expression_impl(CRef obj, std::vector<CRef>& objs, bool parens) {
         if (parens)
             std::cerr << ')';
         objs.pop_back();
-    } else if (auto* n = try_cast<Number>(obj)) {
+    } else if (auto n = try_cast<Number>(obj)) {
         std::cerr << n->value;
-    } else if (auto* f = try_cast<Function>(obj)){
+    } else if (auto f = try_cast<Function>(obj)) {
         std::cerr << func_names[f->func];
+    } else if (auto fwd = try_cast<Forwarder>(obj)) {
+        std::cerr << '#';
+        print_expression_impl(fwd->target, objs, true);
     }
 }
 
@@ -43,17 +46,21 @@ void graphviz_dump_impl(CRef obj, std::set<CRef>& objs) {
     if (objs.count(obj))
         return;
     objs.insert(obj);
-    if (auto* app = try_cast<Application>(obj)) {
+    if (auto app = try_cast<Application>(obj)) {
         std::cerr << "c_" << (void*)app << " -> c_" << (void*)app->left << ";\n";
         std::cerr << "c_" << (void*)app << " -> c_" << (void*)app->right << " [color=blue];\n";
         graphviz_dump_impl(app->left, objs);
         graphviz_dump_impl(app->right, objs);
-    } else if (auto* num = try_cast<Number>(obj)) {
+    } else if (auto num = try_cast<Number>(obj)) {
         std::cerr << "c_" << (void*)num << " [label=\"" << num->value << "\"];\n";
-    } else if (auto* fun = try_cast<Function>(obj)) {
+    } else if (auto fun = try_cast<Function>(obj)) {
         if (!func_names[fun->func])
             func_names[fun->func] = "???";
         std::cerr << "c_" << (void*)fun << " [label=\"" << func_names[fun->func] << "\"];\n";
+    } else if (auto fwd = try_cast<Forwarder>(obj)) {
+        std::cerr << "c_" << (void*)fwd << " [label=\"f_" << (void*)fwd << "\"];\n";
+        std::cerr << "c_" << (void*)fwd << " -> c_" << (void*)fwd->target << ";\n";
+        graphviz_dump_impl(fwd->target, objs);
     }
 }
 

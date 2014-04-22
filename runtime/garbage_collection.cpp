@@ -89,6 +89,8 @@ void scan(Object& obj, Space& tospace) {
     if (auto app = try_cast<Application>(obj)) {
         tospace.migrate(app->left);
         tospace.migrate(app->right);
+    } else if (auto fwd = try_cast<Forwarder>(obj)) {
+        tospace.migrate(fwd->target);
     }
 }
 

@@ -45,10 +45,10 @@ namespace {
 
         SerializedApplication(Application const* app, Space const& space)
             : SerializedObject(app)
+            , left_addr(space.to_offset(app->left))
+            , right_addr(space.to_offset(app->right))
         {
             static_assert(sizeof(SerializedApplication) == sizeof(Application), "bad serialization implementation");
-            left_addr = space.to_offset(app->left);
-            right_addr = space.to_offset(app->right);
         }
     };
 
@@ -76,16 +76,31 @@ namespace {
         }
     };
 
+    struct SerializedForwarder : SerializedObject {
+        static constexpr ObjectType TYPE = ObjectType::forwarder_object;
+        std::uint64_t target_addr;
+
+        SerializedForwarder(Forwarder const* fwd, Space const& space)
+            : SerializedObject(fwd)
+            , target_addr(space.to_offset(fwd->target))
+        {
+            static_assert(sizeof(SerializedForwarder) == sizeof(Forwarder), "bad serialization implementation");
+        }
+    };
+
     void write_object(Space const& space, Object const& obj, std::ostream& os) {
         if (auto app = try_cast<Application>(obj)) {
             SerializedApplication s(app, space);
-            os.write(reinterpret_cast<char const*>(&s), sizeof(SerializedApplication));
+            os.write(reinterpret_cast<char const*>(&s), s.size);
         } else if (auto num = try_cast<Number>(obj)) {
             SerializedNumber s(num);
-            os.write(reinterpret_cast<char const*>(&s), sizeof(SerializedNumber));
+            os.write(reinterpret_cast<char const*>(&s), s.size);
         } else if (auto func = try_cast<Function>(obj)) {
             SerializedFunction s(func);
-            os.write(reinterpret_cast<char const*>(&s), sizeof(SerializedFunction));
+            os.write(reinterpret_cast<char const*>(&s), s.size);
+        } else if (auto fwd = try_cast<Forwarder>(obj)) {
+            SerializedForwarder s(fwd, space);
+            os.write(reinterpret_cast<char const*>(&s), s.size);
         } else {
             assert(!"invalid object");
         }
@@ -111,6 +126,9 @@ namespace {
             std::strncpy(name, s_func->name, sizeof(Ref));
             auto func = cast<Function>(obj);
             func->func = funcs_by_name[name];
+        } else if (auto s_fwd = try_cast<SerializedForwarder>(obj)) {
+            auto fwd = cast<Forwarder>(obj);
+            fwd->target = space.from_offset(s_fwd->target_addr);
         } else {
             assert(!"invalid object");
         }

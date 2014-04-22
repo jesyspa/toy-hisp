@@ -2,6 +2,7 @@
 
 #include "object.hpp"
 #include <cassert>
+#include <type_traits>
 
 // Check whether the object is of the given type
 template<typename T>
@@ -10,16 +11,28 @@ bool is(CRef obj) {
     return obj->type == T::TYPE;
 }
 
+template<typename T>
+bool is_convertible(CRef obj) {
+    assert(obj && "invalid pointer");
+    if (!std::is_same<T, Forwarder>::value && is<Forwarder>(obj))
+        obj = reinterpret_cast<Forwarder const*>(obj)->target;
+    return obj->type == T::TYPE;
+}
+
 // Unconditionally treat the pointer as referring to the given type.
 template<typename T>
 T* cast(Ref obj) {
-    assert(is<T>(obj) && "type mismatch");
+    assert(is_convertible<T>(obj) && "type mismatch");
+    if (!std::is_same<T, Forwarder>::value && is<Forwarder>(obj))
+        obj = reinterpret_cast<Forwarder*>(obj)->target;
     return reinterpret_cast<T*>(obj);
 }
 
 template<typename T>
 T const* cast(CRef obj) {
-    assert(is<T>(obj) && "type mismatch");
+    assert(is_convertible<T>(obj) && "type mismatch");
+    if (!std::is_same<T, Forwarder>::value && is<Forwarder>(obj))
+        obj = reinterpret_cast<Forwarder const*>(obj)->target;
     return reinterpret_cast<T const*>(obj);
 }
 

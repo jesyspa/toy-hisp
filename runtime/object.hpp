@@ -6,7 +6,8 @@
 enum class ObjectType {
     application_object,
     number_object,
-    function_object
+    function_object,
+    forwarder_object
 };
 
 struct Object {
@@ -38,3 +39,11 @@ struct Function : Object {
     Func func;
     static constexpr ObjectType TYPE = ObjectType::function_object;
 };
+
+struct Forwarder : Object {
+    Ref target;
+    static constexpr ObjectType TYPE = ObjectType::forwarder_object;
+};
+
+// Destroy obj, turning it into an object that forwards to target.
+void rewrite_as_forwarder(Ref obj, Ref target);

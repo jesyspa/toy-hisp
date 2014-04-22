@@ -1,0 +1,1 @@
+print ((\x. add x x) (print 5))
