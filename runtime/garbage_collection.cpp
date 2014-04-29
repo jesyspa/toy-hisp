@@ -1,7 +1,8 @@
 #include "garbage_collection.hpp"
 #include "builtins.hpp"
-#include "debug.hpp"
+#include "debugger.hpp"
 #include "serialisation.hpp"
+#include "stack.hpp"
 #include "space.hpp"
 #include "utility.hpp"
 #include <cassert>
@@ -60,24 +61,14 @@ void make_bool(SubStack stack, bool value) {
     }
 }
 
-void dump_memory() {
-#ifndef NDEBUG
-#ifndef DUMP_RAW
-    print_one(MultiGraphBag{global_stack, active_space});
-#else
-    print_one(MemoryBag{global_stack, active_space});
-#endif
-#endif
-}
-
 void create_init_file() {
     assert(global_stack.begin() + 1 == global_stack.end() && "dangerous with so many stacks");
     write_init_file(*global_stack.begin(), active_space);
 }
 
-SubStack use_init_file() {
+SubStack use_init_file(std::string name) {
     assert(!active_space.initialized() && "memory already initialized");
-    auto memory = read_init_file();
+    auto memory = read_init_file(std::move(name));
     active_space = std::move(memory.space);
     auto stack = request_stack();
     stack.push(memory.root);
@@ -122,3 +113,7 @@ SubStack request_stack() { return global_stack.get_ref(); }
 bool is_heap_ptr(CRef obj) { return active_space.contains(obj); }
 
 void deinit_gc() { active_space.deinit_space(); }
+
+DebugMemoryInfo get_debug_memory_info() {
+    return {&global_stack, &active_space};
+}

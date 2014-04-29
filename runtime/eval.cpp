@@ -1,4 +1,5 @@
 #include "eval.hpp"
+#include "debugger.hpp"
 #include "macros.hpp"
 #include "stack.hpp"
 #include "utility.hpp"
@@ -13,6 +14,8 @@ void eval(SubStack stack) {
     assert(stack.singleton() && "incorrect number of args");
     // Save the expression we are evaluating; we'll want to turn it into a forwarder later.
     stack.push(stack.top());
+
+    Debugger::step();
 
     // If there is an application at the top of the stack, we need to push the args and
     // evaluate the result.  If there are more than two objects on the stack, this is implicitly
@@ -35,6 +38,8 @@ void eval(SubStack stack) {
                 stack.push(app->left);
         }
 
+        Debugger::step();
+
         // We've finally gotten the stack in the shape we want it; the end of the left spine
         // should contain the next function to apply.  Apply it.
         auto f = stack.extract_as<Function>();
@@ -55,6 +60,9 @@ void eval(SubStack stack) {
             rewrite_as_forwarder(old_expr, result);
         }
     }
+
+    Debugger::step();
+
     assert(!stack.singleton() && "no result available");
     // There's only two objects left on the stack.  The top is the result; the bottom is the
     // node we were originally given to evaluate (that is now probably a forwarder to our result).

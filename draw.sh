@@ -1,7 +1,4 @@
-rm -rf pics
-mkdir pics
-cd pics
-. ../.graph.sh
-for a in *.dot; do
-    dot -Tpng $a > ${a%.dot}.png
+cd output
+for name in *.dot; do
+    dot -Tpng $name > ${name%.dot}.png
 done

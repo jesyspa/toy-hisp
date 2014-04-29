@@ -8,8 +8,8 @@ vars.Add('problem', 'Problem to solve', 'real')
 ########  FLAGS  ########
 
 flags = {
-   'cpp': ["-Wall", "-Wextra", "-Werror", "-std=c++1y", "-stdlib=libc++"],
-   'link': ["-lc++abi"],
+   'cpp': ["-Wall", "-Wextra", "-Werror", "-std=c++1y"],
+   'libs': ["boost_program_options"],
    'debug': ["-O0", "-g3"],
    'release': ["-O2", "-g", "-DNDEBUG"]
 }
@@ -18,7 +18,7 @@ flags = {
 
 ##### ENVIRONMENTS  #####
 
-env = Environment(variables=vars, CXX="clang++", CPPFLAGS=flags['cpp'], LINKFLAGS=flags['link'], ENV=os.environ)
+env = Environment(variables=vars, CXX='g++-4.9', CPPFLAGS=flags['cpp'], LIBS=flags['libs'], ENV=os.environ)
 
 prefix = 'release' if env['release'] else 'debug'
 

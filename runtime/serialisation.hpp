@@ -3,6 +3,7 @@
 #include "object.hpp"
 #include "space.hpp"
 #include <map>
+#include <string>
 
 // Map of function addresses to their names, and another map back.
 extern std::map<Func, char const*> func_names;
@@ -24,4 +25,4 @@ void write_init_file(CRef root, Space const& space);
 
 // Read a file cerated with write_init_file.  Currently very fragile and mostly
 // for testing purposes; we'll clean it up into something presentable later.
-MemoryInfo read_init_file();
+MemoryInfo read_init_file(std::string name);

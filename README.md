@@ -18,6 +18,6 @@ on this heap until it reaches an answer.
 ## Installation notes
 - I use a truckload of GHC extensions, including Template Haskell, so I doubt
   this'll work on any other compilers.
-- C++ compilation is done with Scons and relies on C++1y.  Clang 3.5 should be
-  enough.
+- C++ compilation is done with Scons and relies somewhat on C++1y.  GCC 4.8.2
+  should be enough.
 
