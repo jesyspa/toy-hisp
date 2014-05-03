@@ -10,14 +10,14 @@
 std::map<Func, char const*> func_names = {
 #define ENTRY(name)                                                                                                    \
     { name, #name }
-#include "funcs.inc"
+#include "memory/funcs.inc"
 #undef ENTRY
 };
 
 std::map<std::string, Func> funcs_by_name = {
 #define ENTRY(name)                                                                                                    \
     { #name, name }
-#include "funcs.inc"
+#include "memory/funcs.inc"
 #undef ENTRY
 };
 
