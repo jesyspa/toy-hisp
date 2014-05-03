@@ -1,4 +1,4 @@
-#include "stream_ptr.hpp"
+#include "debug/stream_ptr.hpp"
 #include <fstream>
 
 OStreamPtr open_file(std::string filename) {

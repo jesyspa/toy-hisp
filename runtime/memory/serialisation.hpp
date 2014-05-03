@@ -4,8 +4,8 @@
  *  \brief Tools for serializing and deserializing the program.
  */
 
-#include "object.hpp"
-#include "space.hpp"
+#include "hisp/object.hpp"
+#include "memory/space.hpp"
 #include <map>
 #include <string>
 

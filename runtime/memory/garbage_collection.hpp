@@ -1,6 +1,6 @@
 #pragma once
 
-#include "object.hpp"
+#include "hisp/object.hpp"
 #include <string>
 
 class Stack;
@@ -47,12 +47,6 @@ void make_number(Stack stack, int value);
 
 //! \brief Allocate a function object.
 void make_function(Stack stack, Func func);
-
-/*! \brief Allocate a function object corresponding to the value.
- *
- *  We use the usual lambda calculus convention: true is K, false is K I.
- */
-void make_bool(Stack stack, bool value);
 
 //! \brief Get a full overview of the current object graph and root set.
 DebugMemoryInfo get_debug_memory_info();

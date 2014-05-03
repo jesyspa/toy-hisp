@@ -1,10 +1,10 @@
-#include "debugger.hpp"
-#include "configuration_read.hpp"
-#include "garbage_collection.hpp"
+#include "debug/debugger.hpp"
+#include "configuration/read.hpp"
+#include "memory/garbage_collection.hpp"
 #include "macros.hpp"
-#include "serialisation.hpp"
-#include "stack.hpp"
-#include "utility.hpp"
+#include "memory/serialisation.hpp"
+#include "memory/stack.hpp"
+#include "hisp/utility.hpp"
 #include <algorithm>
 #include <iostream>
 #include <ostream>

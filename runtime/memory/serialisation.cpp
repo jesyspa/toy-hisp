@@ -1,7 +1,7 @@
-#include "serialisation.hpp"
-#include "object.hpp"
-#include "builtins.hpp"
-#include "utility.hpp"
+#include "memory/serialisation.hpp"
+#include "hisp/builtins.hpp"
+#include "hisp/object.hpp"
+#include "hisp/utility.hpp"
 #include <cstdint>
 #include <cstring>
 #include <fstream>

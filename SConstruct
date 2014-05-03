@@ -18,7 +18,7 @@ flags = {
 
 ##### ENVIRONMENTS  #####
 
-env = Environment(variables=vars, CXX='g++-4.9', CPPFLAGS=flags['cpp'], LIBS=flags['libs'], ENV=os.environ)
+env = Environment(variables=vars, CPPFLAGS=flags['cpp'], LIBS=flags['libs'], ENV=os.environ)
 
 prefix = 'release' if env['release'] else 'debug'
 

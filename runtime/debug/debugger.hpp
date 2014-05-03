@@ -1,9 +1,9 @@
 #pragma once
 
-#include "stream_dispenser.hpp"
-#include "object.hpp"
-#include "stack.hpp"
-#include "space.hpp"
+#include "debug/stream_dispenser.hpp"
+#include "hisp/object.hpp"
+#include "memory/stack.hpp"
+#include "memory/space.hpp"
 
 //! \brief Singleton for improving debug information.
 class Debugger {

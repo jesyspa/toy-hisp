@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stream_ptr.hpp"
+#include "debug/stream_ptr.hpp"
 #include <string>
 
 //! \brief Utility class for getting streams on-demand.

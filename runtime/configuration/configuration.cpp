@@ -1,5 +1,5 @@
-#include "configuration_read.hpp"
-#include "configuration_write.hpp"
+#include "configuration/read.hpp"
+#include "configuration/write.hpp"
 
 namespace configuration {
 namespace {

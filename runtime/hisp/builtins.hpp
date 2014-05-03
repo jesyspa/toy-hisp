@@ -36,3 +36,9 @@ void sub(Stack stack);
 
 //! \brief Return whether the first argument is less than or equal to the second.
 void le(Stack stack);
+
+/*! \brief Make a function object corresponding to the value.
+ *
+ *  We use the usual lambda calculus convention: true is K, false is K I.
+ */
+void make_bool(Stack stack, bool value);

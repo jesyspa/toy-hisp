@@ -1,5 +1,5 @@
-#include "object.hpp"
-#include "utility.hpp"
+#include "hisp/object.hpp"
+#include "hisp/utility.hpp"
 
 void rewrite_as_forwarder(Ref obj, Ref target) {
     assert(obj != target && "forwarding to yourself does *not* work!");

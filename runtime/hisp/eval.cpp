@@ -1,8 +1,8 @@
-#include "eval.hpp"
-#include "debugger.hpp"
+#include "hisp/eval.hpp"
+#include "debug/debugger.hpp"
+#include "hisp/utility.hpp"
 #include "macros.hpp"
-#include "stack.hpp"
-#include "utility.hpp"
+#include "memory/stack.hpp"
 #include <cassert>
 
 void eval(Stack stack) {

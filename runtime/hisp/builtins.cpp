@@ -1,7 +1,8 @@
-#include "builtins.hpp"
-#include "eval.hpp"
-#include "stack.hpp"
-#include "utility.hpp"
+#include "hisp/builtins.hpp"
+#include "hisp/eval.hpp"
+#include "hisp/utility.hpp"
+#include "memory/stack.hpp"
+#include "memory/garbage_collection.hpp"
 #include <cstdio>
 
 // Implementations of Hisp built-in functions.  All expect their arguments to be passed on the
@@ -115,4 +116,14 @@ void le(Stack stack) {
     auto lhs_num = stack.extract_as<Number>()->value;
     auto rhs_num = stack.extract_as<Number>()->value;
     make_bool(stack, lhs_num <= rhs_num);
+}
+
+void make_bool(Stack stack, bool value) {
+    if (value) {
+        make_function(stack, comb_k);
+    } else {
+        make_function(stack, comb_k);
+        make_function(stack, comb_i);
+        make_application(stack);
+    }
 }

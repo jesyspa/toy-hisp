@@ -3,7 +3,7 @@
  * \brief Collection of helper macros.
  */
 
-#include "garbage_collection.hpp"
+#include "memory/garbage_collection.hpp"
 #include <cassert>
 
 #ifndef NDEBUG

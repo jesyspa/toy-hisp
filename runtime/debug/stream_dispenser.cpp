@@ -1,5 +1,5 @@
-#include "stream_dispenser.hpp"
-#include "configuration_read.hpp"
+#include "debug/stream_dispenser.hpp"
+#include "configuration/read.hpp"
 #include <sstream>
 #include <iomanip>
 #include <utility>

@@ -1,4 +1,4 @@
-#include "space.hpp"
+#include "memory/space.hpp"
 
 // base iterators
 Space::BaseIterator::BaseIterator(Ref obj)

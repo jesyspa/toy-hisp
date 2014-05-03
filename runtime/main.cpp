@@ -1,8 +1,8 @@
-#include "eval.hpp"
-#include "configuration_write.hpp"
-#include "configuration_read.hpp"
-#include "garbage_collection.hpp"
-#include "stack.hpp"
+#include "configuration/read.hpp"
+#include "configuration/write.hpp"
+#include "hisp/eval.hpp"
+#include "memory/garbage_collection.hpp"
+#include "memory/stack.hpp"
 #include <boost/program_options.hpp>
 #include <iostream>
 

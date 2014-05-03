@@ -1,10 +1,9 @@
-#include "garbage_collection.hpp"
-#include "builtins.hpp"
-#include "debugger.hpp"
-#include "serialisation.hpp"
-#include "stack.hpp"
-#include "space.hpp"
-#include "utility.hpp"
+#include "memory/garbage_collection.hpp"
+#include "debug/debugger.hpp"
+#include "memory/serialisation.hpp"
+#include "memory/stack.hpp"
+#include "memory/space.hpp"
+#include "hisp/utility.hpp"
 #include <cassert>
 #include <cstring>
 #include <iterator>
@@ -49,16 +48,6 @@ void make_function(Stack stack, Func func) {
     auto fun = new_object<Function>();
     fun->func = func;
     stack.push(fun);
-}
-
-void make_bool(Stack stack, bool value) {
-    if (value) {
-        make_function(stack, comb_k);
-    } else {
-        make_function(stack, comb_k);
-        make_function(stack, comb_i);
-        make_application(stack);
-    }
 }
 
 void create_init_file() {

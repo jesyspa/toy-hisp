@@ -1,6 +1,6 @@
 #pragma once
 
-#include "object.hpp"
+#include "hisp/object.hpp"
 #include <cassert>
 #include <type_traits>
 

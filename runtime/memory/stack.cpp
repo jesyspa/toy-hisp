@@ -1,4 +1,4 @@
-#include "stack.hpp"
+#include "memory/stack.hpp"
 #include <cassert>
 
 StackStorage::StackStorage()
