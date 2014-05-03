@@ -1,5 +1,4 @@
 #include "debug/debugger.hpp"
-#include "configuration/read.hpp"
 #include "memory/garbage_collection.hpp"
 #include "macros.hpp"
 #include "memory/serialisation.hpp"
@@ -129,11 +128,16 @@ void Debugger::DebuggerImpl::print_expression(CRef r) {
 }
 
 void Debugger::DebuggerImpl::step() {
-    switch (configuration::get_current_memory_dump_type()) {
-    case configuration::MemoryDumpType::None:
+    switch (dump_type) {
+    case MemoryDumpType::None:
         return;
-    case configuration::MemoryDumpType::AsGraph:
+    case MemoryDumpType::AsGraph:
         dump_memory_as_graph();
         return;
     }
+}
+
+void Debugger::DebuggerImpl::set_output_dir(std::string const& dir) {
+    array_streams.set_output_dir(dir);
+    graph_streams.set_output_dir(dir);
 }

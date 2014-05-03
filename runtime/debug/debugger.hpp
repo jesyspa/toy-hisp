@@ -4,13 +4,19 @@
 #include "hisp/object.hpp"
 #include "memory/stack.hpp"
 #include "memory/space.hpp"
+#include <string>
+
+//! \brief Type of memory dump to perform.
+enum class MemoryDumpType { None, AsGraph };
 
 //! \brief Singleton for improving debug information.
 class Debugger {
     struct DebuggerImpl {
         StreamDispenser graph_streams = StreamDispenser("graph", "dot");
         StreamDispenser array_streams = StreamDispenser("memory", "dump");
+        MemoryDumpType dump_type = MemoryDumpType::None;
 
+        void set_output_dir(std::string const& dir);
         void dump_graph_beneath(CRef r);
         void dump_memory_as_graph();
         void dump_memory_as_array();
@@ -65,6 +71,18 @@ public:
     static void step() {
         if (auto impl = get_instance())
             impl->step();
+    }
+
+    //! \brief Set the type of info to dump.
+    static void set_dump_type(MemoryDumpType dump_type) {
+        if (auto impl = get_instance())
+            impl->dump_type = dump_type;
+    }
+
+    //! \brief Set the directory to dump debug output to.
+    static void set_output_dir(std::string const& dir) {
+        if (auto impl = get_instance())
+            impl->set_output_dir(dir);
     }
 };
 

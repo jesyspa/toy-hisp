@@ -8,6 +8,7 @@ class StreamDispenser {
     // TODO: Allow for multiple implementations.
     // Can currently only create files of the form basename_num.ext
     int next_file_number_ = 0;
+    std::string directory_;
     std::string base_name_;
     std::string extension_;
 
@@ -21,6 +22,9 @@ public:
 
     //! \brief Create a dispenser that will create files with the given base name and extension.
     StreamDispenser(std::string base_name, std::string extension);
+
+    //! \brief Set the output directory
+    void set_output_dir(std::string dir);
 
     //! \brief Get a pointer to a new stream.
     OStreamPtr get_next();
