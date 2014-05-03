@@ -12,8 +12,8 @@ enum class MemoryDumpType { None, AsGraph };
 //! \brief Singleton for improving debug information.
 class Debugger {
     struct DebuggerImpl {
-        StreamDispenser graph_streams = StreamDispenser("graph", "dot");
-        StreamDispenser array_streams = StreamDispenser("memory", "dump");
+        StreamDispenser graph_streams{"graph", "dot"};
+        StreamDispenser array_streams{"memory", "dump"};
         MemoryDumpType dump_type = MemoryDumpType::None;
 
         void set_output_dir(std::string const& dir);
