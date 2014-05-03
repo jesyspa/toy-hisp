@@ -7,7 +7,6 @@
 #include "hisp/utility.hpp"
 #include <algorithm>
 #include <iostream>
-#include <ostream>
 #include <set>
 #include <vector>
 

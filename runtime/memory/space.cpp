@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
+#include <ostream>
 
 Space::Space() noexcept
     : bottom_{}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ostream>
+#include <iosfwd>
 #include <memory>
 
 /*! \brief Encapsulates a pointer to a stream.
