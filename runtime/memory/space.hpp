@@ -26,42 +26,42 @@ class Space {
         Ref obj_;
 
         //! \brief Construct an iterator pointer to the given object.
-        BaseIterator(Ref obj);
+        BaseIterator(Ref obj) noexcept;
 
         //! \brief Construct an invalid iterator.
-        BaseIterator();
+        BaseIterator() noexcept;
 
         //! \brief Increment the iterator and return the new value.
-        BaseIterator& operator++();
+        BaseIterator& operator++() noexcept;
 
         /*! \brief Increment the iterator and return the old value.
          *
          *  \remark Returns a Ref instead of a BaseIterator; derived classes should wrap the result into a suitable
          *  iterator type.
          */
-        Ref operator++(int);
+        Ref operator++(int) noexcept;
 
         //! \brief Advance the iterator.
-        void increment();
+        void increment() noexcept;
 
     public:
         //! \brief Check whether the given iterators refer to the same object.
-        friend bool operator==(BaseIterator lhs, BaseIterator rhs) { return lhs.obj_ == rhs.obj_; }
+        friend bool operator==(BaseIterator lhs, BaseIterator rhs) noexcept { return lhs.obj_ == rhs.obj_; }
 
         //! \brief Check whether the given iterators refer to different objects.
-        friend bool operator!=(BaseIterator lhs, BaseIterator rhs) { return !(lhs == rhs); }
+        friend bool operator!=(BaseIterator lhs, BaseIterator rhs) noexcept { return !(lhs == rhs); }
 
         //! \brief Check whether the left iterator's object was allocated before the right iterator's.
-        friend bool operator<(BaseIterator lhs, BaseIterator rhs) { return lhs.obj_ < rhs.obj_; }
+        friend bool operator<(BaseIterator lhs, BaseIterator rhs) noexcept { return lhs.obj_ < rhs.obj_; }
 
         //! \brief Check whether the left iterator's object was allocated after the right iterator's.
-        friend bool operator>(BaseIterator lhs, BaseIterator rhs) { return rhs < lhs; }
+        friend bool operator>(BaseIterator lhs, BaseIterator rhs) noexcept { return rhs < lhs; }
 
         //! \brief Check whether the left iterator's object was allocated no later than the right iterator's.
-        friend bool operator<=(BaseIterator lhs, BaseIterator rhs) { return !(rhs < lhs); }
+        friend bool operator<=(BaseIterator lhs, BaseIterator rhs) noexcept { return !(rhs < lhs); }
 
         //! \brief Check whether the left iterator's object was allocated no earlier than the right iterator's.
-        friend bool operator>=(BaseIterator lhs, BaseIterator rhs) { return !(lhs < rhs); }
+        friend bool operator>=(BaseIterator lhs, BaseIterator rhs) noexcept { return !(lhs < rhs); }
     };
 
 public:
@@ -72,54 +72,54 @@ public:
 
     public:
         //! \copydoc BaseIterator::operator++()
-        iterator& operator++();
+        iterator& operator++() noexcept;
 
         //! \copybrief BaseIterator::operator++()
-        iterator operator++(int);
+        iterator operator++(int) noexcept;
 
         //! \brief Get a reference to the current object.
-        Object& operator*() const;
+        Object& operator*() const noexcept;
 
         //! \brief Get a pointer to the current object.
-        Ref operator->() const;
+        Ref operator->() const noexcept;
 
         //! \copydoc BaseIterator::BaseIterator()
-        iterator() = default;
+        iterator() noexcept = default;
     };
 
     //! \brief Iterator over const objects.
     class const_iterator : public BaseIterator, public std::iterator<std::forward_iterator_tag, Object const> {
         friend class Space;
-        const_iterator(CRef obj);
+        const_iterator(CRef obj) noexcept;
 
     public:
         //! \copydoc BaseIterator::operator++()
-        const_iterator& operator++();
+        const_iterator& operator++() noexcept;
 
         //! \copybrief BaseIterator::operator++(int)
-        const_iterator operator++(int);
+        const_iterator operator++(int) noexcept;
 
         //! \copydoc iterator::operator*()
-        Object const& operator*() const;
+        Object const& operator*() const noexcept;
 
         //! \copydoc iterator::operator->()
-        CRef operator->() const;
+        CRef operator->() const noexcept;
 
         //! \copydoc BaseIterator::BaseIterator()
-        const_iterator() = default;
+        const_iterator() noexcept = default;
     };
 
     //! \brief Construct an empty space.
-    Space();
+    Space() noexcept;
     Space(Space const&) = delete;
     //! \brief Construct a space from another space, leaving the other space empty.
-    Space(Space&& other);
+    Space(Space&& other) noexcept;
     Space& operator=(Space const&) = delete;
     //! \brief Overwrite the current space with the other, leaving the other empty.
-    Space& operator=(Space&& other);
+    Space& operator=(Space&& other) noexcept;
 
     //! \brief Swap this space with other.
-    void swap(Space& other);
+    void swap(Space& other) noexcept;
 
     //! \brief Initialize the space to the given size.
     //
@@ -127,7 +127,7 @@ public:
     void init_space(std::size_t size);
 
     //! \brief Reset the space to be empty again, clearing any resources.
-    void deinit_space();
+    void deinit_space() noexcept;
 
     //! \brief Allocate an object of the given size.
     Ref allocate(std::size_t size);
@@ -152,13 +152,13 @@ public:
     void migrate(Ref& obj);
 
     //! \brief Check whether this space is initialized.
-    bool initialized() const;
+    bool initialized() const noexcept;
     //! \brief Return the number of bytes this space can contain in total.
-    std::size_t size() const;
+    std::size_t size() const noexcept;
     //! \brief Return the number of bytes already allocated.
-    std::size_t bytes_allocated() const;
+    std::size_t bytes_allocated() const noexcept;
     //! \brief Return the number of bytes still available.
-    std::size_t bytes_available() const;
+    std::size_t bytes_available() const noexcept;
     //! \brief Check whether the given pointer is pointing into this space.
     bool contains(CRef ptr) const;
 

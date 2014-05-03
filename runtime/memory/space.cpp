@@ -5,22 +5,22 @@
 #include <iomanip>
 #include <iostream>
 
-Space::Space()
+Space::Space() noexcept
     : bottom_{}
     , free_bottom_{}
     , top_{} {}
 
-Space::Space(Space&& other)
+Space::Space(Space&& other) noexcept
     : Space() {
     swap(other);
 }
 
-Space& Space::operator=(Space&& other) {
+Space& Space::operator=(Space&& other) noexcept {
     swap(other);
     return *this;
 }
 
-void Space::swap(Space& other) {
+void Space::swap(Space& other) noexcept {
     std::swap(bottom_, other.bottom_);
     std::swap(free_bottom_, other.free_bottom_);
     std::swap(top_, other.top_);
@@ -33,7 +33,7 @@ void Space::init_space(std::size_t size) {
     top_ = bottom_ + size;
 }
 
-void Space::deinit_space() {
+void Space::deinit_space() noexcept {
     assert(initialized() && "cannot deinitialize uninitialized space");
     free(bottom_);
     bottom_ = free_bottom_ = top_ = nullptr;
@@ -73,13 +73,13 @@ void Space::migrate(Ref& obj) {
     obj = obj->forward = new_obj->forward = new_obj;
 }
 
-bool Space::initialized() const { return bottom_ != nullptr; }
+bool Space::initialized() const noexcept { return bottom_ != nullptr; }
 
-std::size_t Space::size() const { return static_cast<std::size_t>(top_ - bottom_); }
+std::size_t Space::size() const noexcept { return static_cast<std::size_t>(top_ - bottom_); }
 
-std::size_t Space::bytes_allocated() const { return static_cast<std::size_t>(free_bottom_ - bottom_); }
+std::size_t Space::bytes_allocated() const noexcept { return static_cast<std::size_t>(free_bottom_ - bottom_); }
 
-std::size_t Space::bytes_available() const { return static_cast<std::size_t>(top_ - free_bottom_); }
+std::size_t Space::bytes_available() const noexcept { return static_cast<std::size_t>(top_ - free_bottom_); }
 
 bool Space::contains(CRef obj) const {
     assert(initialized() && "using uninitialized space");

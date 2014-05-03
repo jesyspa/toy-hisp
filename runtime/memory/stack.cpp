@@ -1,11 +1,11 @@
 #include "memory/stack.hpp"
 #include <cassert>
 
-StackStorage::StackStorage()
+StackStorage::StackStorage() noexcept
     : data_{{}}
     , top_{data_.begin()} {}
 
-Stack StackStorage::get_ref() {
+Stack StackStorage::get_ref() noexcept {
     return {*this, top_};
 }
 
@@ -17,15 +17,15 @@ auto StackStorage::begin() -> iterator { return data_.begin(); }
 
 auto StackStorage::end() -> iterator { return top_; }
 
-Stack::Stack(StackStorage& stack, iterator base)
+Stack::Stack(StackStorage& stack, iterator base) noexcept
     : ref_{&stack}
     , base_{base} {}
 
-std::size_t Stack::size() const { return ref_->top_ - base_; }
+std::size_t Stack::size() const noexcept { return ref_->top_ - base_; }
 
-bool Stack::empty() const { return ref_->top_ == base_; }
+bool Stack::empty() const noexcept { return ref_->top_ == base_; }
 
-bool Stack::singleton() const { return size() == 1; }
+bool Stack::singleton() const noexcept { return size() == 1; }
 
 Ref Stack::top() const {
     assert(!empty() && "inspecting top of empty stack");

@@ -97,11 +97,15 @@ void collect_garbage() {
     bytes_alive_at_last_collection = active_space.bytes_allocated();
 }
 
-Stack request_stack() { return global_stack.get_ref(); }
+Stack request_stack() noexcept { return global_stack.get_ref(); }
 
-bool is_heap_ptr(CRef obj) { return active_space.contains(obj); }
+bool is_heap_ptr(CRef obj) noexcept {
+    if (active_space.initialized())
+        return active_space.contains(obj);
+    return false;
+}
 
-void deinit_gc() { active_space.deinit_space(); }
+void deinit_gc() noexcept { active_space.deinit_space(); }
 
 DebugMemoryInfo get_debug_memory_info() {
     return {&global_stack, &active_space};

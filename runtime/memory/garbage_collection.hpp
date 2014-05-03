@@ -25,16 +25,16 @@ void create_init_file();
 Stack use_init_file(std::string name);
 
 //! \brief Get an empty stack at the top of the current program stack.
-Stack request_stack();
+Stack request_stack() noexcept;
 
 //! \brief Check whether the given object is on the (active) heap.
-bool is_heap_ptr(CRef obj);
+bool is_heap_ptr(CRef obj) noexcept;
 
 /*! \brief Destroy all objects involved in garbage collection.
  *
  *  Implicitly terminates the currently-executed program.
  */
-void deinit_gc();
+void deinit_gc() noexcept;
 
 /*! \brief Allocate an application object.
  *

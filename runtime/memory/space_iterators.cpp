@@ -1,52 +1,52 @@
 #include "memory/space.hpp"
 
 // base iterators
-Space::BaseIterator::BaseIterator(Ref obj)
+Space::BaseIterator::BaseIterator(Ref obj) noexcept
     : obj_(obj) {}
 
-auto Space::BaseIterator::operator++() -> BaseIterator& {
+auto Space::BaseIterator::operator++() noexcept -> BaseIterator& {
     increment();
     return *this;
 }
 
-auto Space::BaseIterator::operator++(int) -> Ref {
+auto Space::BaseIterator::operator++(int) noexcept -> Ref {
     Ref obj = obj_;
     increment();
     return obj;
 }
 
-void Space::BaseIterator::increment() {
+void Space::BaseIterator::increment() noexcept {
     auto ptr = reinterpret_cast<char*>(obj_);
     ptr += obj_->size;
     obj_ = reinterpret_cast<Ref>(ptr);
 }
 
 // mutable iterator
-auto Space::iterator::operator++() -> iterator& { return static_cast<iterator&>(BaseIterator::operator++()); }
+auto Space::iterator::operator++() noexcept -> iterator& { return static_cast<iterator&>(BaseIterator::operator++()); }
 
-auto Space::iterator::operator++(int) -> iterator {
+auto Space::iterator::operator++(int) noexcept -> iterator {
     return {BaseIterator::operator++(0)};
 }
 
-Object& Space::iterator::operator*() const { return *obj_; }
+Object& Space::iterator::operator*() const noexcept { return *obj_; }
 
-Ref Space::iterator::operator->() const { return obj_; }
+Ref Space::iterator::operator->() const noexcept { return obj_; }
 
 // const iterators
-Space::const_iterator::const_iterator(CRef obj)
+Space::const_iterator::const_iterator(CRef obj) noexcept
     : BaseIterator{const_cast<Ref>(obj)} {}
 
-auto Space::const_iterator::operator++() -> const_iterator& {
+auto Space::const_iterator::operator++() noexcept -> const_iterator& {
     return static_cast<const_iterator&>(BaseIterator::operator++());
 }
 
-auto Space::const_iterator::operator++(int) -> const_iterator {
+auto Space::const_iterator::operator++(int) noexcept -> const_iterator {
     return {BaseIterator::operator++(0)};
 }
 
-Object const& Space::const_iterator::operator*() const { return *obj_; }
+Object const& Space::const_iterator::operator*() const noexcept { return *obj_; }
 
-CRef Space::const_iterator::operator->() const { return obj_; }
+CRef Space::const_iterator::operator->() const noexcept { return obj_; }
 
 // space support
 auto Space::begin() -> iterator {

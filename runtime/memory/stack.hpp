@@ -36,13 +36,13 @@ public:
     friend class Stack;
 
     //! \brief Construct an empty stack.
-    StackStorage();
+    StackStorage() noexcept;
 
     StackStorage(StackStorage const&) = delete;
     StackStorage& operator=(StackStorage const&) = delete;
 
     //! \brief Create a stack on top of the current ones.
-    Stack get_ref();
+    Stack get_ref() noexcept;
 
     //! \brief Get an iterator to the bottom individual element.
     iterator begin();
@@ -69,17 +69,17 @@ class Stack {
      *
      *  The base should be in the storage.
      */
-    Stack(StackStorage& storage, iterator base);
+    Stack(StackStorage& storage, iterator base) noexcept;
 
 public:
     friend class StackStorage;
 
     //! \brief Return number of elements currently stored.
-    std::size_t size() const;
+    std::size_t size() const noexcept;
     //! \brief Check whether the stack is empty.
-    bool empty() const;
+    bool empty() const noexcept;
     //! \brief Check whether the stack contains exactly one element.
-    bool singleton() const;
+    bool singleton() const noexcept;
     //! \brief Return a reference to the top element of the stack.
     Ref top() const;
 
