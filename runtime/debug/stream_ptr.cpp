@@ -2,9 +2,9 @@
 #include <fstream>
 
 OStreamPtr open_file(std::string filename) {
-    auto file_ptr = std::make_unique<std::ofstream>(std::move(filename));
+    auto file_ptr = new std::ofstream(std::move(filename));
     auto deleter = [](std::ostream* ptr) { delete ptr; };
-    return {file_ptr.release(), deleter};
+    return {file_ptr, deleter};
 }
 
 // TODO: Come up with a better name for this.

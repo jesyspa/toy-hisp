@@ -8,7 +8,7 @@ vars.Add('problem', 'Problem to solve', 'real')
 ########  FLAGS  ########
 
 flags = {
-   'cpp': ["-Wall", "-Wextra", "-Werror", "-std=c++1y"],
+   'cpp': ["-Wall", "-Wextra", "-Werror", "-std=c++11"],
    'libs': ["boost_program_options"],
    'debug': ["-O0", "-g3"],
    'release': ["-O2", "-g", "-DNDEBUG"]
