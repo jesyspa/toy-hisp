@@ -5,7 +5,7 @@
 #include "utility.hpp"
 #include <cassert>
 
-void eval(SubStack stack) {
+void eval(Stack stack) {
     // TODO: Split this function into more sensible sub-functions.
     // If we are told to evaluate a forwarder, instead evaluate its target.
     while (auto fwd = stack.try_extract_as<Forwarder>())

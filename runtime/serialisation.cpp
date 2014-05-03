@@ -165,7 +165,7 @@ void write_init_file(CRef root, Space const& space) {
         write_object(space, obj, hic);
 }
 
-MemoryInfo read_init_file(std::string name) {
+ProgramInitInfo read_init_file(std::string name) {
     std::ifstream hic(std::move(name), std::ios::binary);
 
     char tag[4] = {};

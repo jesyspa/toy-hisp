@@ -13,11 +13,11 @@
 namespace {
 std::size_t bytes_alive_at_last_collection;
 Space active_space;
-Stack global_stack;
+StackStorage global_stack;
 }
 
 template <typename T>
-WARN_UNUSED_RESULT T* new_object() {
+T* new_object() {
     auto obj = active_space.allocate(sizeof(T));
     if (!obj) {
         // If not, try again after garbage collection.
@@ -32,26 +32,26 @@ WARN_UNUSED_RESULT T* new_object() {
     return static_cast<T*>(obj);
 }
 
-void make_application(SubStack stack) {
+void make_application(Stack stack) {
     auto app = new_object<Application>();
     app->right = stack.extract();
     app->left = stack.extract();
     stack.push(app);
 }
 
-void make_number(SubStack stack, int value) {
+void make_number(Stack stack, int value) {
     auto num = new_object<Number>();
     num->value = value;
     stack.push(num);
 }
 
-void make_function(SubStack stack, Func func) {
+void make_function(Stack stack, Func func) {
     auto fun = new_object<Function>();
     fun->func = func;
     stack.push(fun);
 }
 
-void make_bool(SubStack stack, bool value) {
+void make_bool(Stack stack, bool value) {
     if (value) {
         make_function(stack, comb_k);
     } else {
@@ -66,7 +66,7 @@ void create_init_file() {
     write_init_file(*global_stack.begin(), active_space);
 }
 
-SubStack use_init_file(std::string name) {
+Stack use_init_file(std::string name) {
     assert(!active_space.initialized() && "memory already initialized");
     auto memory = read_init_file(std::move(name));
     active_space = std::move(memory.space);
@@ -108,7 +108,7 @@ void collect_garbage() {
     bytes_alive_at_last_collection = active_space.bytes_allocated();
 }
 
-SubStack request_stack() { return global_stack.get_ref(); }
+Stack request_stack() { return global_stack.get_ref(); }
 
 bool is_heap_ptr(CRef obj) { return active_space.contains(obj); }
 

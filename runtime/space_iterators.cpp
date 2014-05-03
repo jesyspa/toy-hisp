@@ -1,5 +1,6 @@
 #include "space.hpp"
 
+// base iterators
 Space::BaseIterator::BaseIterator(Ref obj)
     : obj_(obj) {}
 
@@ -20,9 +21,7 @@ void Space::BaseIterator::increment() {
     obj_ = reinterpret_cast<Ref>(ptr);
 }
 
-Space::iterator::iterator(Ref obj)
-    : BaseIterator{obj} {}
-
+// mutable iterator
 auto Space::iterator::operator++() -> iterator& { return static_cast<iterator&>(BaseIterator::operator++()); }
 
 auto Space::iterator::operator++(int) -> iterator {
@@ -33,6 +32,7 @@ Object& Space::iterator::operator*() const { return *obj_; }
 
 Ref Space::iterator::operator->() const { return obj_; }
 
+// const iterators
 Space::const_iterator::const_iterator(CRef obj)
     : BaseIterator{const_cast<Ref>(obj)} {}
 
@@ -48,6 +48,7 @@ Object const& Space::const_iterator::operator*() const { return *obj_; }
 
 CRef Space::const_iterator::operator->() const { return obj_; }
 
+// space support
 auto Space::begin() -> iterator {
     return iterator{reinterpret_cast<Ref>(bottom_)};
 }

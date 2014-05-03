@@ -103,7 +103,7 @@ Ref Space::from_offset(std::size_t offset) {
     return reinterpret_cast<Ref>(bottom_ + offset);
 }
 
-void Space::print_readable(std::ostream& os) const {
+void Space::print_hexdump(std::ostream& os) const {
     for (std::size_t i = 0; i < size(); ++i) {
         if (i != 0 && i % 8 == 0)
             os << '\n' << (void*)(bottom_ + i) << ": ";

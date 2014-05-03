@@ -74,7 +74,7 @@ void graphviz_dump(std::ostream& out, CRef root) {
     out << "}\n";
 }
 
-void multi_graphviz_dump(std::ostream& out, Stack const& stack, Space const& space) {
+void multi_graphviz_dump(std::ostream& out, StackStorage const& stack, Space const& space) {
     std::set<CRef> objs;
 
     out << "digraph {\n";
@@ -92,9 +92,9 @@ void multi_graphviz_dump(std::ostream& out, Stack const& stack, Space const& spa
     out << "}\n";
 }
 
-void raw_dump(std::ostream& out, Stack const& stack, Space const& space) {
+void raw_dump(std::ostream& out, StackStorage const& stack, Space const& space) {
     out << "heap";
-    space.print_readable(out);
+    space.print_hexdump(out);
 
     out << "\n";
     out << "stack\n";
@@ -106,18 +106,18 @@ void raw_dump(std::ostream& out, Stack const& stack, Space const& space) {
 }
 
 void Debugger::DebuggerImpl::dump_graph_beneath(CRef r) {
-    auto stream = for_graphs.get_next();
+    auto stream = graph_streams.get_next();
     graphviz_dump(*stream, r);
 }
 
 void Debugger::DebuggerImpl::dump_memory_as_graph() {
-    auto stream = for_graphs.get_next();
+    auto stream = graph_streams.get_next();
     auto info = get_debug_memory_info();
     multi_graphviz_dump(*stream, *info.stack, *info.space);
 }
 
 void Debugger::DebuggerImpl::dump_memory_as_array() {
-    auto stream = for_graphs.get_next();
+    auto stream = array_streams.get_next();
     auto info = get_debug_memory_info();
     raw_dump(*stream, *info.stack, *info.space);
 }

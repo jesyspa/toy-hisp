@@ -3,33 +3,56 @@
 #include "object.hpp"
 #include <string>
 
-class SubStack;
+class Stack;
 struct DebugMemoryInfo;
 
-// Perform a garbage collection.  Invalidates all pointers into the heap.
+//! \brief Perform a garbage collection.  Invalidates all pointers into the heap.
 void collect_garbage();
 
-// Create an initialization file based on the current program state.
-// Should not be called while in eval.
+/*! \brief Create an initialization file based on the current program state.
+ *
+ *  Assumes the graph is not currently being evaluated.
+ *
+ *  \deprecated This was intended to create the first few init files to test the loading code.  It doesn't belong here
+ *  and should be moved out somewhere.
+ */
 void create_init_file();
-SubStack use_init_file(std::string name);
 
-// Get an (empty) stack starting at the top of the current program stack.
-SubStack request_stack();
+/*! \brief Load the given file to be the currently running program.
+ *
+ * Return a stack with the expression to be evaluated.
+ */
+Stack use_init_file(std::string name);
 
-// Check whether a pointer points into the (current) heap.
-//
-// Mostly for sanity checking.
+//! \brief Get an empty stack at the top of the current program stack.
+Stack request_stack();
+
+//! \brief Check whether the given object is on the (active) heap.
 bool is_heap_ptr(CRef obj);
 
-// Free resources used for garbage collection
+/*! \brief Destroy all objects involved in garbage collection.
+ *
+ *  Implicitly terminates the currently-executed program.
+ */
 void deinit_gc();
 
-// Allocation functions.  All return a pointer to the new object on the stack.
-void make_application(SubStack stack);
-void make_number(SubStack stack, int value);
-void make_function(SubStack stack, Func func);
-void make_bool(SubStack stack, bool value);
+/*! \brief Allocate an application object.
+ *
+ *  Use the top two values on the stack as left and right respectively.
+ */
+void make_application(Stack stack);
 
-// Acquire information about memory.  Mostly for debugging purposes.
+//! \brief Allocate a number object.
+void make_number(Stack stack, int value);
+
+//! \brief Allocate a function object.
+void make_function(Stack stack, Func func);
+
+/*! \brief Allocate a function object corresponding to the value.
+ *
+ *  We use the usual lambda calculus convention: true is K, false is K I.
+ */
+void make_bool(Stack stack, bool value);
+
+//! \brief Get a full overview of the current object graph and root set.
 DebugMemoryInfo get_debug_memory_info();

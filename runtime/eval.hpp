@@ -1,8 +1,12 @@
 #pragma once
 
-class SubStack;
+class Stack;
 
-// Evaluate the expression at the top of stack_ref, returning the result on the
-// same stack.  We assume the expression is the only thing currently on the
-// stack.
-void eval(SubStack stack);
+/*! \brief Evaluate the expression expression on the stack.
+ *
+ *  The result is placed on the stack.  The expression is also overwritten with a forwarder to the result, ensuring that
+ *  a second call to eval on the same expression will not reevaluate it.
+ *
+ *  \remark The stack should not contain any other objects.
+ */
+void eval(Stack stack);

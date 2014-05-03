@@ -3,7 +3,7 @@
 #include "stream_ptr.hpp"
 #include <string>
 
-// Utility class for getting streams on-demand.
+//! \brief Utility class for getting streams on-demand.
 class StreamDispenser {
     // TODO: Allow for multiple implementations.
     // Can currently only create files of the form basename_num.ext
@@ -19,7 +19,9 @@ public:
     StreamDispenser(StreamDispenser&&) = default;
     StreamDispenser& operator=(StreamDispenser&&) = default;
 
+    //! \brief Create a dispenser that will create files with the given base name and extension.
     StreamDispenser(std::string base_name, std::string extension);
 
+    //! \brief Get a pointer to a new stream.
     OStreamPtr get_next();
 };

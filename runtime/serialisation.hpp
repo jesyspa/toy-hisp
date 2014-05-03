@@ -1,28 +1,33 @@
 #pragma once
 
+/*! \file
+ *  \brief Tools for serializing and deserializing the program.
+ */
+
 #include "object.hpp"
 #include "space.hpp"
 #include <map>
 #include <string>
 
-// Map of function addresses to their names, and another map back.
+//! \brief Map of function pointers to their names.
 extern std::map<Func, char const*> func_names;
+//! \brief Map of function names to pointers to their implementations.
 extern std::map<std::string, Func> funcs_by_name;
 
-struct MemoryInfo {
+//! \brief Initialization info for a new evaluation execution.
+struct ProgramInitInfo {
     Ref root;
     Space space;
 };
 
-// Create a file from which we'll later be able to initialize the program.
-// Should only really be called from create_init_file, seeing as we only have
-// the relevant info there.
-//
-// Currently mostly a stub to bootstrap the binary file option; we need a
-// compiled file to test the loading code and we need loading code for such a
-// dump to be much use.
+/*! \brief Create an initialization file that we'll be able to load later.
+ *
+ *  Assumes that no evaluation is occuring at the moment.
+ *
+ *  \deprecated This was written to be able to better test read_init_file.  There's not much use for it outside that,
+ *  seeing as it cannot accurately capture the state of a running program.
+ */
 void write_init_file(CRef root, Space const& space);
 
-// Read a file cerated with write_init_file.  Currently very fragile and mostly
-// for testing purposes; we'll clean it up into something presentable later.
-MemoryInfo read_init_file(std::string name);
+//! \brief Read program initialization info from a file.
+ProgramInitInfo read_init_file(std::string name);

@@ -11,18 +11,18 @@
 // then interpret (or compile?).  The latter would make it easier to eventually compile to
 // supercombinators, too.
 
-void comb_i(SubStack stack) {
+void comb_i(Stack stack) {
     auto arg = stack.extract_as<Application>();
     stack.push(arg->right);
 }
 
-void comb_k(SubStack stack) {
+void comb_k(Stack stack) {
     auto arg = stack.extract_as<Application>();
     stack.pop();
     stack.push(arg->right);
 }
 
-void comb_s(SubStack stack) {
+void comb_s(Stack stack) {
     auto f = stack.extract_as<Application>();
     auto g = stack.extract_as<Application>();
     auto x = stack.extract_as<Application>();
@@ -36,7 +36,7 @@ void comb_s(SubStack stack) {
     make_application(stack);
 }
 
-void comb_l(SubStack stack) {
+void comb_l(Stack stack) {
     auto f = stack.extract_as<Application>();
     auto g = stack.extract_as<Application>();
     auto x = stack.extract_as<Application>();
@@ -48,7 +48,7 @@ void comb_l(SubStack stack) {
     make_application(stack);
 }
 
-void comb_r(SubStack stack) {
+void comb_r(Stack stack) {
     auto f = stack.extract_as<Application>();
     auto g = stack.extract_as<Application>();
     auto x = stack.extract_as<Application>();
@@ -59,14 +59,14 @@ void comb_r(SubStack stack) {
     make_application(stack);
 }
 
-void comb_y(SubStack stack) {
+void comb_y(Stack stack) {
     auto f = stack.extract_as<Application>();
     stack.push(f->right);
     stack.push(f);
     make_application(stack);
 }
 
-void print(SubStack stack) {
+void print(Stack stack) {
     auto arg = stack.extract_as<Application>();
     auto child_s = request_stack();
     child_s.push(arg->right);
@@ -75,7 +75,7 @@ void print(SubStack stack) {
     std::printf("%d\n", num->value);
 }
 
-void add(SubStack stack) {
+void add(Stack stack) {
     auto lhs = stack.extract_as<Application>();
     auto rhs = stack.extract_as<Application>();
     stack.push(lhs->right);
@@ -89,7 +89,7 @@ void add(SubStack stack) {
     make_number(stack, lhs_num + rhs_num);
 }
 
-void sub(SubStack stack) {
+void sub(Stack stack) {
     auto lhs = stack.extract_as<Application>();
     auto rhs = stack.extract_as<Application>();
     stack.push(lhs->right);
@@ -103,7 +103,7 @@ void sub(SubStack stack) {
     make_number(stack, lhs_num - rhs_num);
 }
 
-void le(SubStack stack) {
+void le(Stack stack) {
     auto lhs = stack.extract_as<Application>();
     auto rhs = stack.extract_as<Application>();
     stack.push(lhs->right);
