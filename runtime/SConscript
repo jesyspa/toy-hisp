@@ -1,9 +1,0 @@
-Import('env')
-
-prefix = env['prefix']
-env.Append(CPPPATH = ['#runtime/'])
-
-hisp_sources = Glob("*.cpp") + Glob("*/*.cpp")
-target = "".join(['#bin/', prefix, 'hisp'])
-
-env.Program(target, hisp_sources)

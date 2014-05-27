@@ -1,13 +1,17 @@
-bin/
-doc
-.dbgbuild
-dist
-*.hi
-lib/
-.local
+# directories
+doc/
+build/
+dist/
+
+# files
 main
+hisp
+.ycm_extra_conf.py
+
+# file formats
+*.hi
+*.hic
 *.o
 *.pdf
-.relbuild
-.sconsign.dblite
 .*.swp
+*.pyc
