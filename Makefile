@@ -3,9 +3,12 @@ CABAL-BUILD-FLAGS     :=
 
 all : haskell runtime
 
-runtime :
+build/Makefile :
 	mkdir -p build
-	cd build; cmake ..; make
+	cd build; cmake ..
+
+runtime : build/Makefile
+	$(MAKE) -C build
 	ln -sf build/runtime/hisp .
 
 haskell :

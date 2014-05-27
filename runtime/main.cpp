@@ -4,6 +4,7 @@
 #include "memory/stack.hpp"
 #include <boost/program_options.hpp>
 #include <iostream>
+#include <exception>
 
 namespace options = boost::program_options;
 
@@ -25,7 +26,7 @@ options::positional_options_description make_positional_options_description() {
 }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) try {
     auto desc = make_options_description();
     auto pos_desc = make_positional_options_description();
 
@@ -51,4 +52,12 @@ int main(int argc, char** argv) {
     eval(root);
     collect_garbage();
     deinit_gc();
+}
+catch (std::exception& e) {
+    std::cerr << "error: " << e.what() << std::endl;
+    return -1;
+}
+catch (...) {
+    std::cerr << "unknown fatal error" << std::endl;
+    return -2;
 }

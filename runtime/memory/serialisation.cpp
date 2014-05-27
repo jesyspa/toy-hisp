@@ -6,6 +6,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 
 std::map<Func, char const*> func_names = {
 #define ENTRY(name)                                                                                                    \
@@ -167,6 +168,8 @@ void write_init_file(CRef root, Space const& space) {
 
 ProgramInitInfo read_init_file(std::string name) {
     std::ifstream hic(std::move(name), std::ios::binary);
+    if (!hic)
+        throw std::runtime_error{"init file not found"};
 
     char tag[4] = {};
     hic.read(tag, sizeof(tag));
