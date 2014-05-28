@@ -175,13 +175,6 @@ public:
     //! \copydoc Space::end()
     const_iterator cend() const;
 
-    //! \brief Return the byte offset of the object from the beginning of the heap.
-    std::size_t to_offset(CRef obj) const;
-    //! \brief Return the object at the given offset.
-    Ref from_offset(std::size_t offset);
-    //! \copydoc Space::from_offset(std::size_t)
-    CRef from_offset(std::size_t offset) const;
-
     //! \brief Print a hexadecimal representation of the space.
     void print_hexdump(std::ostream& os) const;
 };

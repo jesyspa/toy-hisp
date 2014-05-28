@@ -48,7 +48,7 @@ struct Application : Object {
 //! \brief Hisp representation of a number.
 struct Number : Object {
     //! \brief Value of the number.
-    int value;
+    std::int64_t value;
     static constexpr ObjectType TYPE = ObjectType::number_object;
 };
 

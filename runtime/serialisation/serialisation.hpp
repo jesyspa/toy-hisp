@@ -1,7 +1,7 @@
 #pragma once
 
 /*! \file
- *  \brief Tools for serializing and deserializing the program.
+ *  \brief Tools for serialising and deserialising the program.
  */
 
 #include "hisp/object.hpp"
@@ -27,7 +27,7 @@ struct ProgramInitInfo {
  *  \deprecated This was written to be able to better test read_init_file.  There's not much use for it outside that,
  *  seeing as it cannot accurately capture the state of a running program.
  */
-void write_init_file(CRef root, Space const& space);
+void write_init_file(Ref root, Space& space);
 
 //! \brief Read program initialization info from a file.
 ProgramInitInfo read_init_file(std::string name);

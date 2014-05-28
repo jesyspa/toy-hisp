@@ -11,7 +11,7 @@ import CodeGeneration
 -- As a simplifying assumption, we make every object the maximum size (24
 -- bytes).  This makes offset calculations much easier.
 objectSize :: Int
-objectSize = 32
+objectSize = 24
 
 data ObjectType = ApplicationType | NumberType | FunctionType
                 deriving (Show, Eq, Ord, Enum)

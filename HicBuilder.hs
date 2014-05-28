@@ -26,7 +26,7 @@ field (Number i) = word64LE $ fromIntegral i
 field (Function str) = fixedString8 str
 
 object :: Object -> Builder
-object (Object tp fs) = mconcat $ [tpNum, objSize, pad64] ++ fields
+object (Object tp fs) = mconcat $ [tpNum, objSize] ++ fields
     where tpNum = objectType tp
           objSize  = word32LE $ fromIntegral objectSize
           fields  = map field $ pad 2 (Number 0) fs

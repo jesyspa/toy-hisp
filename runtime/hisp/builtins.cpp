@@ -3,7 +3,7 @@
 #include "hisp/utility.hpp"
 #include "memory/stack.hpp"
 #include "memory/garbage_collection.hpp"
-#include <cstdio>
+#include <iostream>
 
 // Implementations of Hisp built-in functions.  All expect their arguments to be passed on the
 // stack, and will place their return value on it, too.
@@ -73,7 +73,7 @@ void print(Stack stack) {
     child_s.push(arg->right);
     eval(child_s);
     auto num = cast<Number>(child_s.top());
-    std::printf("%d\n", num->value);
+    std::cout << num->value << '\n';
 }
 
 void add(Stack stack) {

@@ -49,7 +49,6 @@ int main(int argc, char** argv) try {
         Debugger::set_dump_type(MemoryDumpType::AsGraph);
 
     auto root = use_init_file(variables["input-file"].as<std::string>());
-    create_init_file();
     eval(root);
     collect_garbage();
     deinit_gc();

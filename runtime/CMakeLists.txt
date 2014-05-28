@@ -1,6 +1,7 @@
-set(RUNTIME_SOURCE_FILES debug/debugger.cpp debug/stream_ptr.cpp hisp/eval.cpp main.cpp memory/serialisation.cpp
-    memory/space_iterators.cpp debug/stream_dispenser.cpp hisp/builtins.cpp hisp/object.cpp
-    memory/garbage_collection.cpp memory/space.cpp memory/stack.cpp)
+set(RUNTIME_SOURCE_FILES debug/debugger.cpp hisp/builtins.cpp main.cpp memory/space_iterators.cpp
+    serialisation/serialised_hic.cpp debug/stream_dispenser.cpp hisp/eval.cpp memory/garbage_collection.cpp
+    memory/stack.cpp debug/stream_ptr.cpp hisp/object.cpp memory/space.cpp serialisation/serialisation.cpp
+    serialisation/binary_io.cpp)
 
 include_directories(.)
 add_executable(hisp ${RUNTIME_SOURCE_FILES})

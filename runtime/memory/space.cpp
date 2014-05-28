@@ -87,22 +87,6 @@ bool Space::contains(CRef obj) const {
     return bottom_ <= ptr && ptr < top_;
 }
 
-std::size_t Space::to_offset(CRef obj) const {
-    assert(initialized() && "using uninitialized space");
-    auto ptr = reinterpret_cast<char const*>(obj);
-    return ptr - bottom_;
-}
-
-CRef Space::from_offset(std::size_t offset) const {
-    assert(initialized() && "using uninitialized space");
-    return reinterpret_cast<CRef>(bottom_ + offset);
-}
-
-Ref Space::from_offset(std::size_t offset) {
-    assert(initialized() && "using uninitialized space");
-    return reinterpret_cast<Ref>(bottom_ + offset);
-}
-
 void Space::print_hexdump(std::ostream& os) const {
     for (std::size_t i = 0; i < size(); ++i) {
         if (i != 0 && i % 8 == 0)

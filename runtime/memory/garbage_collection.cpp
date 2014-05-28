@@ -1,9 +1,9 @@
 #include "memory/garbage_collection.hpp"
 #include "debug/debugger.hpp"
-#include "memory/serialisation.hpp"
-#include "memory/stack.hpp"
-#include "memory/space.hpp"
 #include "hisp/utility.hpp"
+#include "memory/space.hpp"
+#include "memory/stack.hpp"
+#include "serialisation/serialisation.hpp"
 #include <cassert>
 #include <cstring>
 #include <iterator>

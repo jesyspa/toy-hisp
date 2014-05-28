@@ -1,7 +1,7 @@
 #include "debug/debugger.hpp"
 #include "memory/garbage_collection.hpp"
 #include "macros.hpp"
-#include "memory/serialisation.hpp"
+#include "serialisation/serialisation.hpp"
 #include "memory/stack.hpp"
 #include "hisp/utility.hpp"
 #include <algorithm>
