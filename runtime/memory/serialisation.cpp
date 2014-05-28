@@ -2,12 +2,20 @@
 #include "hisp/builtins.hpp"
 #include "hisp/object.hpp"
 #include "hisp/utility.hpp"
+#include "meta/members.hpp"
 #include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
+#include <boost/mpl/fold.hpp>
+#include <boost/mpl/transform_view.hpp>
+#include <boost/mpl/int.hpp>
+#include <boost/mpl/plus.hpp>
+#include <boost/mpl/sizeof.hpp>
 
+const std::size_t func_name_length = 8;
 std::map<Func, char const*> func_names = {
 #define ENTRY(name)                                                                                                    \
     { name, #name }
@@ -23,12 +31,102 @@ std::map<std::string, Func> funcs_by_name = {
 };
 
 namespace {
-static_assert(sizeof(Ref) == sizeof(std::uint64_t), "pointer storage mismatch");
-static_assert(sizeof(CRef) == sizeof(Ref), "help please no");
-static_assert(sizeof(std::uint64_t) == 8, "unexpected size of uint64_t");
-static_assert(sizeof(std::uint32_t) == 4, "unexpected size of uint32_t");
+namespace mpl = boost::mpl;
+using namespace mpl::placeholders;
+
+template <typename Type, typename Tag>
+struct SerializedMemberSize {
+    using type = mpl::sizeof_<Type>;
+};
+
+template <>
+struct SerializedMemberSize<Ref, MEMBER_TAG(Object, forward)> {
+    using type = mpl::int_<0>;
+};
+
+template <typename Tag>
+struct SerializedMemberSize<Ref, Tag> {
+    using type = mpl::sizeof_<std::uint64_t>;
+};
+
+template <typename Tag>
+struct SerializedMemberSize<Func, Tag> {
+    using type = mpl::int_<func_name_length>;
+};
+
+template <typename T>
+struct GetSerializedMemberSize : SerializedMemberSize<typename T::member_type, typename T::tag>::type {};
+
+template <typename T>
+struct SerializedSize {
+    using sizes = typename mpl::transform_view<RecObjectMembers<T>, GetSerializedMemberSize<_1>>::type;
+    using type = typename mpl::fold<sizes, mpl::int_<0>, mpl::plus<_1, _2>>::type;
+    static constexpr std::uint32_t value = type::value;
+};
 
 auto const hisp_tag = "HISP";
+
+struct MemberSerializer {
+    template <typename MemberType>
+    static void print(MemberType const& member, Space const&, std::ostream& out) {
+        out.write(reinterpret_cast<char const*>(&member), sizeof(member));
+    }
+
+    static void print(CRef ptr, Space const& space, std::ostream& out) {
+        std::uint64_t offset = space.to_offset(ptr);
+        out.write(reinterpret_cast<char const*>(&offset), sizeof(offset));
+    }
+
+    static void print(Func fptr, Space const&, std::ostream& out) {
+        char name[func_name_length];
+        std::strncpy(name, func_names[fptr], sizeof(name));
+        out.write(name, sizeof(name));
+    }
+
+    template <typename Member, typename Tag, typename Obj>
+    static void execute(Tag, Obj const* obj, Space const& space, std::ostream& out) {
+        auto member = Member::template get(obj);
+        print(member, space, out);
+    }
+
+    template <typename Member, typename Obj>
+    static void execute(MEMBER_TAG(Object, size), Obj const*, Space const&, std::ostream& out) {
+        std::uint32_t size = SerializedSize<Obj>::value;
+        std::cerr << size << '\n';
+        out.write(reinterpret_cast<char const*>(&size), sizeof(size));
+    }
+
+    template <typename Member, typename Obj>
+    static void execute(MEMBER_TAG(Object, forward), Obj const*, Space const&, std::ostream&) {
+        // No need to save forwarding pointers.
+    }
+};
+
+template <typename T>
+struct SerializationGenerator {
+    template <typename Obj>
+    static void serialize(Obj const* obj, Space const& space, std::ostream& out) {
+        using BaseSG = SerializationGenerator<typename ObjectTraits<T>::base>;
+        BaseSG::serialize(obj, space, out);
+
+        RuntimeMemberwiseApply<MemberSerializer, T>(obj, space, out);
+    }
+
+    static void deserialize(Space& space, std::istream& in) {
+        (void)space;
+        (void)in;
+        // semantically: for each member, read the member
+        // special cases: size, forward
+    }
+};
+
+template <>
+struct SerializationGenerator<void> {
+    template <typename... Args>
+    static void serialize(Args&&...) {}
+    template <typename... Args>
+    static void deserialize(Args&&...) {}
+};
 
 struct SerializedObject {
     ObjectType type;
@@ -91,17 +189,13 @@ struct SerializedForwarder : SerializedObject {
 
 void write_object(Space const& space, Object const& obj, std::ostream& os) {
     if (auto app = try_cast<Application>(obj)) {
-        SerializedApplication s(app, space);
-        os.write(reinterpret_cast<char const*>(&s), s.size);
+        SerializationGenerator<Application>::serialize(app, space, os);
     } else if (auto num = try_cast<Number>(obj)) {
-        SerializedNumber s(num);
-        os.write(reinterpret_cast<char const*>(&s), s.size);
+        SerializationGenerator<Number>::serialize(num, space, os);
     } else if (auto func = try_cast<Function>(obj)) {
-        SerializedFunction s(func);
-        os.write(reinterpret_cast<char const*>(&s), s.size);
+        SerializationGenerator<Function>::serialize(func, space, os);
     } else if (auto fwd = try_cast<Forwarder>(obj)) {
-        SerializedForwarder s(fwd, space);
-        os.write(reinterpret_cast<char const*>(&s), s.size);
+        SerializationGenerator<Forwarder>::serialize(fwd, space, os);
     } else {
         assert(!"invalid object");
     }
@@ -149,17 +243,15 @@ std::uint64_t read_uint64(std::istream& is) {
 }
 }
 
-void write_init_file(CRef root, Space const& space) {
+void write_init_file(CRef, Space const& space) {
     std::ofstream hic("out.hic", std::ios::binary);
 
     hic.write(hisp_tag, 4);
     write_uint32(hic, 0);
     write_uint64(hic, 0);
 
-    auto root_addr = space.to_offset(root);
+    std::uint64_t root_addr = 0xCDDCCDDCCDDCCDDC, heap_size = 0xABBAABBAABBAABBA;
     write_uint64(hic, root_addr);
-
-    auto heap_size = space.bytes_allocated();
     write_uint64(hic, heap_size);
 
     for (auto& obj : space)

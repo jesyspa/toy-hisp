@@ -5,7 +5,7 @@ all : haskell runtime
 
 build/Makefile :
 	mkdir -p build
-	cd build; cmake ..
+	cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..
 
 runtime : build/Makefile
 	$(MAKE) -C build
