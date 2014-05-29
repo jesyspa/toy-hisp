@@ -72,4 +72,3 @@ POD SerialisedHic::read_direct() {
     read(pod);
     return pod;
 }
-

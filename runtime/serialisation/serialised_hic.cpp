@@ -40,9 +40,7 @@ void SerialisedHic::advance(std::size_t bytes) {
     rw_index += bytes;
 }
 
-void SerialisedHic::seek_begin() {
-    rw_index = 0;
-}
+void SerialisedHic::seek_begin() { rw_index = 0; }
 
 void SerialisedHic::start_object() { object_index = rw_index; }
 
@@ -57,7 +55,7 @@ bool SerialisedHic::at_top() const { return rw_index == data.size(); }
 Ref SerialisedHic::from_offset(std::size_t offset) const { return object_offsets.right.at(offset); }
 std::size_t SerialisedHic::to_offset(Ref obj) const { return object_offsets.left.at(obj); }
 
-void SerialisedHic::set_root(Ref obj) { root_offset = to_offset(obj);}
+void SerialisedHic::set_root(Ref obj) { root_offset = to_offset(obj); }
 Ref SerialisedHic::get_root() const { return from_offset(root_offset); }
 
 void SerialisedHic::write_to_stream(std::ostream& os) const {

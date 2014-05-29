@@ -1,8 +1,7 @@
 #include "memory/space.hpp"
 
 // base iterators
-Space::BaseIterator::BaseIterator(Ref obj) noexcept
-    : obj_(obj) {}
+Space::BaseIterator::BaseIterator(Ref obj) noexcept : obj_(obj) {}
 
 auto Space::BaseIterator::operator++() noexcept -> BaseIterator& {
     increment();
@@ -33,8 +32,7 @@ Object& Space::iterator::operator*() const noexcept { return *obj_; }
 Ref Space::iterator::operator->() const noexcept { return obj_; }
 
 // const iterators
-Space::const_iterator::const_iterator(CRef obj) noexcept
-    : BaseIterator{const_cast<Ref>(obj)} {}
+Space::const_iterator::const_iterator(CRef obj) noexcept : BaseIterator{const_cast<Ref>(obj)} {}
 
 auto Space::const_iterator::operator++() noexcept -> const_iterator& {
     return static_cast<const_iterator&>(BaseIterator::operator++());

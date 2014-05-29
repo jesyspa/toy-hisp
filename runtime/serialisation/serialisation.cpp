@@ -68,8 +68,6 @@ struct SerialisedSize {
     static constexpr std::uint32_t value = type::value;
 };
 
-auto const hisp_tag = "HISP";
-
 struct MemberSerialiser {
     template <typename MemberType>
     static void print(MemberType const& member, SerialisedHic& hic) {

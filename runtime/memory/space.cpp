@@ -5,15 +5,9 @@
 #include <iomanip>
 #include <ostream>
 
-Space::Space() noexcept
-    : bottom_{}
-    , free_bottom_{}
-    , top_{} {}
+Space::Space() noexcept : bottom_{}, free_bottom_{}, top_{} {}
 
-Space::Space(Space&& other) noexcept
-    : Space() {
-    swap(other);
-}
+Space::Space(Space&& other) noexcept : Space() { swap(other); }
 
 Space& Space::operator=(Space&& other) noexcept {
     swap(other);

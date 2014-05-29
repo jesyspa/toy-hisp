@@ -7,9 +7,7 @@ StreamDispenser::StreamDispenser(std::string base_name, std::string extension)
     : base_name_(std::move(base_name))
     , extension_(std::move(extension)) {}
 
-void StreamDispenser::set_output_dir(std::string str) {
-    directory_ = std::move(str);
-}
+void StreamDispenser::set_output_dir(std::string str) { directory_ = std::move(str); }
 
 OStreamPtr StreamDispenser::get_next() {
     std::ostringstream name;
