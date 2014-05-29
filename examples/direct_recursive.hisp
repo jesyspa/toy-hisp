@@ -1,0 +1,2 @@
+triangle = \x. le x 0 0 (add x (triangle (sub x 1)));
+main = print (triangle 10);

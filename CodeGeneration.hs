@@ -5,7 +5,8 @@ module CodeGeneration (
 import Hisp
 import SKI
 import Unbind
+import Control.Arrow (second)
 
-compile :: HispExpr Lambda a -> SKI a
-compile = unbind
+compile :: [(a, HispExpr Lambda a)] -> [(a, SKI a)]
+compile = map (second unbind)
 

@@ -1,1 +1,1 @@
-(\x. print (add x (add x x))) 5
+main = (\x. print (add x (add x x))) 5;

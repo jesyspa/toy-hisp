@@ -1,1 +1,1 @@
-print (le 0 1 5 10)
+main = print (le 0 1 5 10);

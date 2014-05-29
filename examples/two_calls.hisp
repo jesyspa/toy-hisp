@@ -1,1 +1,1 @@
-print ((\g. add (g 6) (g 8)) ((comb_y \f. \acc. \x. le x 0 acc (f (add acc x) (sub x 1))) 0))
+main = print ((\g. add (g 6) (g 8)) ((comb_y \f. \acc. \x. le x 0 acc (f (add acc x) (sub x 1))) 0));

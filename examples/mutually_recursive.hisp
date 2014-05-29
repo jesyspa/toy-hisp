@@ -1,0 +1,3 @@
+f = \x. le x 0 0 (g x);
+g = \y. add y (f (sub y 1));
+main = print (f 10);

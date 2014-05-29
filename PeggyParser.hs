@@ -7,8 +7,12 @@ import Hisp
 
 [peggy|
 
-top :: HExpr
-    = expr !.
+top :: [(String, HExpr)]
+    = definition+ !.
+
+-- TODO: Enable line-based definitions.
+definition ::: (String, HExpr)
+    = (variable "=" expr ";")
 
 expr :: HExpr
     = subExpr+ { foldl1 (:@:) $1 }
@@ -30,6 +34,7 @@ abstraction :: HExpr
 
 |]
 
+peggyParse :: String -> Either ParseError [(String, HExpr)]
 peggyParse = parseString top "<stdin>"
 
 showPos :: SrcPos -> String

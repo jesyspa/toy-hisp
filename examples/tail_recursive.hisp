@@ -1,1 +1,1 @@
-print ((comb_y \f. \acc. \x. le x 0 acc (f (add acc x) (sub x 1))) 0 10)
+main = print ((comb_y \f. \acc. \x. le x 0 acc (f (add acc x) (sub x 1))) 0 10);

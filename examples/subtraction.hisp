@@ -1,1 +1,1 @@
-print (sub 5 7)
+main = print (sub 5 7);

@@ -13,7 +13,7 @@ import CodeGeneration
 objectSize :: Int
 objectSize = 24
 
-data ObjectType = ApplicationType | NumberType | FunctionType
+data ObjectType = ApplicationType | NumberType | FunctionType | ForwarderType
                 deriving (Show, Eq, Ord, Enum)
 
 data Field = Number Int
