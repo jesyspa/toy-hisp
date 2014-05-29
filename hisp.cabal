@@ -15,6 +15,6 @@ executable main
                        bytestring, void, peggy
   hs-source-dirs:      .
   extensions:          FlexibleInstances, StandaloneDeriving, FlexibleContexts,
-                       TemplateHaskell, NoMonomorphismRestriction,
-                       DeriveFunctor, DeriveFoldable, DeriveTraversable,
-                       QuasiQuotes
+                       NoMonomorphismRestriction, DeriveFunctor, DeriveFoldable,
+                       DeriveTraversable,
+  ghc-options:         -Wall

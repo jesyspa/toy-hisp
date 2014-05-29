@@ -6,7 +6,6 @@ import Control.Applicative
 import Data.Maybe
 import Hic
 import SKI
-import Data.Foldable as F
 import qualified Data.Set as S
 import qualified Data.Map as M
 
@@ -34,8 +33,8 @@ skiToHic :: M.Map String (SKI String) -> Hic
 skiToHic globals = Hic (numberTree rootTree) (objectSize * length numberedObjects) numberedObjects
     where trees =  S.unions $ map subtrees $ M.elems globals
           treeIndex x = S.findIndex x trees
-          objects = makeObjects globals trees
+          treeObjects = makeObjects globals trees
           numberTree = toOffset . treeIndex
           numberObject = fmap numberTree
-          numberedObjects = numberObject <$> M.elems objects
+          numberedObjects = numberObject <$> M.elems treeObjects
           rootTree = error "no main defined" `fromMaybe` M.lookup "main" globals

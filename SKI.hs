@@ -1,6 +1,6 @@
 module SKI (
     HispExpr(..),
-    SKI(..),
+    SKI,
     Combinator(..),
     Comb(..),
     combName,

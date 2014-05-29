@@ -6,9 +6,7 @@ import Prelude hiding (any)
 import Hisp
 import SKI (Combinator(..), Comb(..))
 import Bound
-import Data.Maybe
 import Data.Traversable
-import Data.Foldable
 import Control.Applicative
 import Control.Monad
 

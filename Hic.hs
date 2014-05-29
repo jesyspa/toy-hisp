@@ -6,8 +6,6 @@ module Hic (
     objectSize
 ) where
 
-import CodeGeneration
-
 -- As a simplifying assumption, we make every object the maximum size (24
 -- bytes).  This makes offset calculations much easier.
 objectSize :: Int
