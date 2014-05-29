@@ -16,5 +16,5 @@ executable main
   hs-source-dirs:      .
   extensions:          FlexibleInstances, StandaloneDeriving, FlexibleContexts,
                        NoMonomorphismRestriction, DeriveFunctor, DeriveFoldable,
-                       DeriveTraversable,
+                       DeriveTraversable
   ghc-options:         -Wall

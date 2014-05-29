@@ -14,7 +14,7 @@ top :: [(String, HExpr)]
     = definition+ !.
 
 -- TODO: Enable line-based definitions.
-definition ::: (String, HExpr)
+definition :: (String, HExpr)
     = (variable rhs ";")
 
 rhs :: HExpr
