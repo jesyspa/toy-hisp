@@ -4,23 +4,17 @@ version:               0.0.1
 synopsis:              A very simple language to learn lambda calculus better.
 license:               PublicDomain
 author:                Anton Golov
-stability:             what, where?
+stability:             hypothetical
 build-type:            Simple
 cabal-version:         >= 1.8
 extra-source-files:    Makefile
 
 executable main
   main-is:             Main.hs
-  build-depends:       base, mtl, lens, transformers, containers, pretty,
-                       monadplus, prelude-extras, bound, wl-pprint, free,
+  build-depends:       base, containers, prelude-extras, bound, wl-pprint,
                        bytestring, void, peggy
   hs-source-dirs:      .
-  extensions:          TypeSynonymInstances, FlexibleInstances,
-                       MultiParamTypeClasses, StandaloneDeriving,
-                       OverlappingInstances, IncoherentInstances,
-                       UndecidableInstances, FlexibleContexts,
-                       RankNTypes, TemplateHaskell,
-                       NoMonomorphismRestriction, ScopedTypeVariables,
-                       ExplicitForAll, DeriveFunctor, DeriveFoldable,
-                       DeriveTraversable, KindSignatures, GADTs,
-                       EmptyDataDecls, TypeFamilies, QuasiQuotes
+  extensions:          FlexibleInstances, StandaloneDeriving, FlexibleContexts,
+                       TemplateHaskell, NoMonomorphismRestriction,
+                       DeriveFunctor, DeriveFoldable, DeriveTraversable,
+                       QuasiQuotes
