@@ -16,13 +16,14 @@ objectSize = 24
 data ObjectType = ApplicationType | NumberType | FunctionType | ForwarderType
                 deriving (Show, Eq, Ord, Enum)
 
-data Field = Number Int
-           | Function String
-           deriving (Eq, Ord, Show)
+data Field a = Number Int
+             | Function String
+             | Ref a
+             deriving (Eq, Ord, Show, Functor)
 
-data Object = Object ObjectType [Field]
-            deriving (Eq, Ord, Show)
+data Object a = Object ObjectType [Field a]
+              deriving (Eq, Ord, Show, Functor)
 
-data Hic = Hic { root :: Int, size :: Int, objects :: [Object]}
+data Hic = Hic { root :: Int, size :: Int, objects :: [Object Int]}
          deriving (Show, Eq, Ord)
 

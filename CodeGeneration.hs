@@ -5,8 +5,8 @@ module CodeGeneration (
 import Hisp
 import SKI
 import Unbind
-import Control.Arrow (second)
+import qualified Data.Map as M
 
-compile :: [(a, HispExpr Lambda a)] -> [(a, SKI a)]
-compile = map (second unbind)
+compile :: Ord a => M.Map a (HispExpr Lambda a) -> M.Map a (SKI a)
+compile = M.map unbind
 

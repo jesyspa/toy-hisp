@@ -22,11 +22,12 @@ objectType NumberType = word32LE 1
 objectType FunctionType = word32LE 2
 objectType ForwarderType = word32LE 3
 
-field :: Field -> Builder
+field :: Field Int -> Builder
 field (Number i) = word64LE $ fromIntegral i
 field (Function str) = fixedString8 str
+field (Ref ref) = word64LE $ fromIntegral ref
 
-object :: Object -> Builder
+object :: Object Int -> Builder
 object (Object tp fs) = mconcat $ [tpNum, objSize] ++ fields
     where tpNum = objectType tp
           objSize  = word32LE $ fromIntegral objectSize
