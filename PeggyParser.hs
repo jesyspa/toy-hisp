@@ -12,21 +12,24 @@ top :: [(String, HExpr)]
 
 -- TODO: Enable line-based definitions.
 definition ::: (String, HExpr)
-    = (variable "=" expr ";")
+    = (variable rhs ";")
+
+rhs :: HExpr
+    = variable* "=" expr { foldr lambda $2 $1 }
 
 expr :: HExpr
     = subExpr+ { foldl1 (:@:) $1 }
 
-subExpr ::: HExpr
+subExpr :: HExpr
     = number { Number $1 }
     / variable { Variable $1 }
     / abstraction
     / "(" expr ")"
 
-number :: Int
+number ::: Int
     = [0-9]+ { read $1 }
 
-variable :: String
+variable ::: String
     = [a-zA-Z_]+
 
 abstraction :: HExpr

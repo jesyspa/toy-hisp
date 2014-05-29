@@ -1,0 +1,2 @@
+foo x y z = add x (sub y z);
+main = print (foo 1 2 3);

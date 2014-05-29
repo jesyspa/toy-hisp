@@ -1,0 +1,2 @@
+foo x = add x x;
+main = print (foo 5);
