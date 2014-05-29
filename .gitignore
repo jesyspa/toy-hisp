@@ -2,11 +2,13 @@
 doc/
 build/
 dist/
+.cabal-sandbox/
 
 # files
 main
 hisp
 .ycm_extra_conf.py
+cabal.sandbox.config
 
 # file formats
 *.hi

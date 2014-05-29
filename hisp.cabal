@@ -1,3 +1,4 @@
+-- vim: set textwidth=80:
 name:                  hisp
 version:               0.0.1
 synopsis:              A very simple language to learn lambda calculus better.
@@ -10,9 +11,9 @@ extra-source-files:    Makefile
 
 executable main
   main-is:             Main.hs
-  build-depends:       base, mtl, parsec, lens, transformers, containers,
-                       pretty, template-haskell, monadplus, prelude-extras,
-                       bound, wl-pprint, free, bytestring, void
+  build-depends:       base, mtl, lens, transformers, containers, pretty,
+                       monadplus, prelude-extras, bound, wl-pprint, free,
+                       bytestring, void, peggy
   hs-source-dirs:      .
   extensions:          TypeSynonymInstances, FlexibleInstances,
                        MultiParamTypeClasses, StandaloneDeriving,
@@ -22,4 +23,4 @@ executable main
                        NoMonomorphismRestriction, ScopedTypeVariables,
                        ExplicitForAll, DeriveFunctor, DeriveFoldable,
                        DeriveTraversable, KindSignatures, GADTs,
-                       EmptyDataDecls, TypeFamilies
+                       EmptyDataDecls, TypeFamilies, QuasiQuotes
