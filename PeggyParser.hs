@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
+{-# OPTIONS_GHC -fno-warn-unused-do-bind -fno-warn-unused-matches #-}
 {-# LANGUAGE TemplateHaskell, QuasiQuotes #-}
 -- Peggy produces many spurrious warnings this way.
 module PeggyParser (
@@ -21,13 +21,31 @@ rhs :: HExpr
     = variable* "=" expr { foldr lambda $2 $1 }
 
 expr :: HExpr
-    = subExpr+ { foldl1 (:@:) $1 }
+    = cmpExpr
 
-subExpr :: HExpr
+cmpExpr :: HExpr
+    = addExpr cmpOp addExpr { Variable $2 :@: $1 :@: $3 }
+    / addExpr
+
+addExpr :: HExpr
+    = addExpr addOp mulExpr { Variable $2 :@: $1 :@: $3 }
+    / mulExpr
+
+mulExpr :: HExpr
+    = mulExpr mulOp appExpr { Variable $2 :@: $1 :@: $3 }
+    / appExpr
+
+appExpr :: HExpr
+    = simpleExpr+ { foldl1 (:@:) $1 }
+
+simpleExpr :: HExpr
     = number { Number $1 }
     / variable { Variable $1 }
     / abstraction
     / "(" expr ")"
+
+abstraction :: HExpr
+    = "\\" variable "." expr { lambda $1 $2 }
 
 number ::: Int
     = [0-9]+ { read $1 }
@@ -35,8 +53,16 @@ number ::: Int
 variable ::: String
     = [a-zA-Z_]+
 
-abstraction :: HExpr
-    = "\\" variable "." expr { lambda $1 $2 }
+cmpOp ::: String
+    = "<=" { "le" }
+
+-- multiplication not implemented yet
+mulOp ::: String
+    = !. { undefined }
+
+addOp ::: String
+    = "+" { "add" }
+    / "-" { "sub" }
 
 |]
 

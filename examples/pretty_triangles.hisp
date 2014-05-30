@@ -1,0 +1,2 @@
+tri x = (x <= 0) 0 (x + tri (x - 1));
+main = print (tri 10);
