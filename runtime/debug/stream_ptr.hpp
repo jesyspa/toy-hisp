@@ -12,7 +12,7 @@ class OStreamPtr {
     std::unique_ptr<std::ostream, deleter_func*> stream_;
 
     OStreamPtr() = delete;
-    OStreamPtr(std::ostream* stream, deleter_func* deleter)
+    OStreamPtr(std::ostream* stream, deleter_func* deleter) noexcept
         : stream_(stream, deleter) {}
 
 public:
@@ -23,7 +23,7 @@ public:
     std::ostream* operator->() const { return stream_.get(); }
 
     //! \brief Swap two stream pointers, so that they each refer to the other's stream.
-    void swap(OStreamPtr& other) { stream_.swap(other.stream_); }
+    void swap(OStreamPtr& other) noexcept { stream_.swap(other.stream_); }
 
     friend OStreamPtr open_file(std::string filename);
 

@@ -16,7 +16,7 @@ struct ObjectTypeTag;
 using ObjectTypes = mpl::vector<Application, Number, Function, Forwarder>;
 
 template <typename T>
-constexpr ObjectType get_type() {
+constexpr ObjectType get_type() noexcept {
     using iter = typename mpl::find<ObjectTypes, T>::type;
     using end = mpl::end<ObjectTypes>::type;
     static_assert(!std::is_same<iter, end>::value, "type not found");

@@ -41,13 +41,13 @@ template <typename T>
 using ArrayRef = T const (&)[ObjectTypeCount::value];
 
 template <typename T, template <typename> class F, int... Ints>
-ArrayRef<T> make_array_impl(ISeq<Ints...> ints) {
+ArrayRef<T> make_array_impl(ISeq<Ints...> ints) noexcept {
     static T const array[] = {PrepareValue<T, F>::template get<Ints>(ints)...};
     return array;
 }
 
 template <template <typename> class F, typename T = typename F<Object>::value_type>
-ArrayRef<T> make_array() {
+ArrayRef<T> make_array() noexcept {
     using seq = GenSeq<ObjectTypeCount::value>;
     return make_array_impl<T, F>(seq{});
 }
