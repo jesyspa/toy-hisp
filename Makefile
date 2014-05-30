@@ -12,8 +12,8 @@ runtime : build/Makefile
 	ln -sf build/runtime/hisp .
 
 haskell :
-	runhaskell Setup.hs configure $(CABAL-CONFIGURE-FLAGS)
-	runhaskell Setup.hs build $(CABAL-BUILD-FLAGS)
+	cabal configure $(CABAL-CONFIGURE-FLAGS)
+	cabal build $(CABAL-BUILD-FLAGS)
 	ln -sf dist/build/main/main .
 
 dotfiles := $(wildcard output/*.dot)
@@ -28,11 +28,11 @@ pictures : ${dotfiles:.dot=.png}
 .PHONY : clean
 .PHONY : test
 
-test :
+test : haskell runtime
 	./run_tests.sh examples
 
 clean :
-	runhaskell Setup.hs clean
+	cabal clean
 	rm -rf build
 	rm -f main hisp *.hic
 	rm -rf output
