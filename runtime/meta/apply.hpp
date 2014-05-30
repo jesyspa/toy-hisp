@@ -11,9 +11,9 @@ namespace detail {
 namespace mpl = boost::mpl;
 namespace ph = mpl::placeholders;
 
-template<typename F, typename LHS, typename RHS>
+template <typename F, typename LHS, typename RHS>
 struct RAOp {
-    template<typename... Args>
+    template <typename... Args>
     static void execute(Ref obj, Args&&... args) {
         if (obj->type == get_type<LHS>())
             F::template apply<LHS>::type::execute(static_cast<LHS*>(obj), std::forward<Args>(args)...);
@@ -23,13 +23,13 @@ struct RAOp {
 };
 
 struct RAState {
-    template<typename... Args>
+    template <typename... Args>
     static void execute(Ref, Args&&...) {
         throw std::runtime_error{"object has invalid type"};
     }
 };
 
-template<template <typename> class F, typename... Args>
+template <template <typename> class F, typename... Args>
 void RuntimeApply(Ref obj, Args&&... args) {
     using Op = RAOp<mpl::quote1<F>, ph::_2, ph::_1>;
     using RA = typename mpl::reverse_fold<ObjectTypes, RAState, Op>::type;
@@ -38,4 +38,3 @@ void RuntimeApply(Ref obj, Args&&... args) {
 }
 
 using detail::RuntimeApply;
-

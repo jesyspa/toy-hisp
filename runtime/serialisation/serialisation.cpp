@@ -6,6 +6,7 @@
 #include "hisp/utility.hpp"
 #include "meta/members.hpp"
 #include "meta/apply.hpp"
+#include "meta/array_gen.hpp"
 #include <cstdint>
 #include <cstring>
 #include <fstream>
@@ -66,6 +67,7 @@ template <typename T>
 struct SerialisedSize {
     using sizes = typename mpl::transform_view<RecObjectMembers<T>, GetSerialisedMemberSize<ph::_1>>::type;
     using type = typename mpl::fold<sizes, mpl::int_<0>, mpl::plus<ph::_1, ph::_2>>::type;
+    using value_type = std::uint32_t;
     static constexpr std::uint32_t value = type::value;
 };
 
@@ -152,9 +154,7 @@ struct MemberDeserialiser {
 
 template <typename T>
 struct SerialisationGenerator {
-    static void execute(T* obj, SerialisedHic& hic) {
-        RuntimeRecMemberwiseApply<MemberSerialiser, T>(obj, hic);
-    }
+    static void execute(T* obj, SerialisedHic& hic) { RuntimeRecMemberwiseApply<MemberSerialiser, T>(obj, hic); }
 };
 
 template <typename T>
@@ -173,7 +173,7 @@ void identify_object(Space& space, SerialisedHic& hic) {
     obj->type = hic.read_direct<ObjectType>();
     auto size = hic.read_direct<std::uint32_t>();
 
-    std::uint32_t sizes[] = {sizeof(Application), sizeof(Number), sizeof(Function), sizeof(Forwarder)};
+    auto& sizes = make_array<mpl::sizeof_, std::uint32_t>();
     space.extend(obj, sizes[(std::size_t)obj->type]);
     hic.ignore(size - sizeof(ObjectType) - sizeof(std::uint32_t));
 
@@ -183,8 +183,7 @@ void identify_object(Space& space, SerialisedHic& hic) {
 void mark_object(Object& obj, SerialisedHic& hic) {
     hic.start_object();
 
-    std::uint32_t sizes[] = {SerialisedSize<Application>::value, SerialisedSize<Number>::value,
-                             SerialisedSize<Function>::value, SerialisedSize<Forwarder>::value};
+    auto& sizes = make_array<SerialisedSize>();
 
     auto size = sizes[(std::size_t)obj.type];
     hic.write(obj.type);
@@ -194,13 +193,9 @@ void mark_object(Object& obj, SerialisedHic& hic) {
     hic.end_object(&obj);
 }
 
-void write_object(Ref obj, SerialisedHic& hic) {
-    RuntimeApply<SerialisationGenerator>(obj, hic);
-}
+void write_object(Ref obj, SerialisedHic& hic) { RuntimeApply<SerialisationGenerator>(obj, hic); }
 
-void read_object(Ref obj, SerialisedHic& hic) {
-    RuntimeApply<DeserialisationGenerator>(obj, hic);
-}
+void read_object(Ref obj, SerialisedHic& hic) { RuntimeApply<DeserialisationGenerator>(obj, hic); }
 }
 
 void write_init_file(Ref root, Space& space) {
