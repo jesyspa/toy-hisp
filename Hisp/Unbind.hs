@@ -1,14 +1,14 @@
-module Unbind (
+module Hisp.Unbind (
     unbind
 ) where
 
-import Prelude hiding (any)
-import Hisp
-import SKI (Combinator(..), Comb(..))
 import Bound
-import Data.Traversable
 import Control.Applicative
 import Control.Monad
+import Data.Traversable
+import Hisp.Hisp
+import Hisp.SKI (Combinator(..), Comb(..))
+import Prelude hiding (any)
 
 -- If the term has no bound variables, drop the unnecessary indirection and
 -- return just that.  Otherwise, it's not that simple so return nothing.

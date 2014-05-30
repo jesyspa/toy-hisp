@@ -1,12 +1,12 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind -fno-warn-unused-matches #-}
 {-# LANGUAGE TemplateHaskell, QuasiQuotes #-}
 -- Peggy produces many spurrious warnings this way.
-module PeggyParser (
+module Hisp.PeggyParser (
     peggyParse, showError
 ) where
 
+import Hisp.Hisp
 import Text.Peggy
-import Hisp
 
 [peggy|
 

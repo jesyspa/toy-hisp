@@ -1,14 +1,14 @@
 module Main where
 
-import CodeGeneration
 import Control.Applicative
 import Data.ByteString.Builder (toLazyByteString, Builder)
 import Data.ByteString.Lazy (writeFile)
-import qualified Data.Map as M
-import HicBuilder (hic)
-import PeggyParser
+import Hisp.CodeGeneration
+import Hisp.HicBuilder (hic)
+import Hisp.PeggyParser
+import Hisp.SkiToHic
 import Prelude hiding (writeFile)
-import SkiToHic
+import qualified Data.Map as M
 
 printToFile :: Builder -> IO ()
 printToFile = writeFile "out.hic" . toLazyByteString

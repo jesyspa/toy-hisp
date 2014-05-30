@@ -1,13 +1,13 @@
-module SkiToHic (
+module Hisp.SkiToHic (
     skiToHic
 ) where
 
 import Control.Applicative
 import Data.Maybe
-import Hic
-import SKI
-import qualified Data.Set as S
+import Hisp.Hic as Hic
+import Hisp.SKI as SKI
 import qualified Data.Map as M
+import qualified Data.Set as S
 
 toOffset :: Int -> Int
 toOffset = (objectSize*)

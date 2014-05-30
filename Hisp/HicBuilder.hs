@@ -1,10 +1,10 @@
-module HicBuilder (
+module Hisp.HicBuilder (
     hic
 ) where
 
 import Data.ByteString.Builder
 import Data.Monoid
-import Hic
+import Hisp.Hic
 
 pad :: Int -> a -> [a] -> [a]
 pad n v xs = xs ++ replicate (n - length xs) v

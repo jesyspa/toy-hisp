@@ -1,4 +1,4 @@
-module Hic (
+module Hisp.Hic (
     ObjectType(..),
     Hic(..),
     Field(..),

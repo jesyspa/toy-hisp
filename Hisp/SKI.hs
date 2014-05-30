@@ -1,4 +1,4 @@
-module SKI (
+module Hisp.SKI (
     HispExpr(..),
     SKI,
     Combinator(..),
@@ -7,11 +7,11 @@ module SKI (
     absurdAbs
 ) where
 
-import Hisp
 import Control.Applicative
 import Control.Monad
 import Data.Foldable
 import Data.Traversable
+import Hisp.Hisp
 
 data Combinator = S | K | I | L | R deriving (Show, Read, Eq, Ord, Enum)
 

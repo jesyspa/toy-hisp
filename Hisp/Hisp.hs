@@ -1,4 +1,4 @@
-module Hisp (
+module Hisp.Hisp (
     Lambda(..),
     VoidAbs,
     HispExpr(..),
