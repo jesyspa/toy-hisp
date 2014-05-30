@@ -26,9 +26,14 @@ pictures : ${dotfiles:.dot=.png}
 .PHONY : haskell
 .PHONY : runtime
 .PHONY : clean
+.PHONY : test
+
+test :
+	./run_tests.sh examples
 
 clean :
 	runhaskell Setup.hs clean
 	rm -rf build
 	rm -f main hisp *.hic
 	rm -rf output
+	rm -rf test-run-*
