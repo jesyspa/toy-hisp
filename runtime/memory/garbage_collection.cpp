@@ -4,6 +4,8 @@
 #include "memory/space.hpp"
 #include "memory/stack.hpp"
 #include "meta/type_index.hpp"
+#include "meta/members.hpp"
+#include "meta/apply.hpp"
 #include "serialisation/serialisation.hpp"
 #include <cassert>
 #include <cstring>
@@ -65,14 +67,29 @@ Stack use_init_file(std::string name) {
     return stack;
 }
 
-void scan(Object& obj, Space& tospace) {
-    if (auto app = try_cast<Application>(obj)) {
-        tospace.migrate(app->left);
-        tospace.migrate(app->right);
-    } else if (auto fwd = try_cast<Forwarder>(obj)) {
-        tospace.migrate(fwd->target);
+namespace {
+struct ScanMember {
+    template <typename MemberType>
+    static void update(MemberType&, Space&) {}
+
+    static void update(Ref& ref, Space& tospace) { tospace.migrate(ref); }
+
+    template <typename Member, typename Tag, typename Obj>
+    static void execute(Tag, Obj* p, Space& tospace) {
+        update(Member::template get(p), tospace);
     }
+
+    template <typename Member, typename Obj>
+    static void execute(MEMBER_TAG(Object, forward), Obj*, Space&) {}
+};
+
+template <typename T>
+struct Scanner {
+    static void execute(T* obj, Space& tospace) { RuntimeRecMemberwiseApply<ScanMember, T>(obj, tospace); }
+};
 }
+
+void scan(Object& obj, Space& tospace) { RuntimeApply<Scanner>(&obj, tospace); }
 
 void update_roots(Space& tospace) {
     for (auto& e : global_stack)

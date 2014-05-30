@@ -88,9 +88,9 @@ public:
     };
 
     //! \brief Iterator over const objects.
-    class const_iterator : public BaseIterator, public std::iterator<std::forward_iterator_tag, Object const> {
+    class const_iterator : public BaseIterator, public std::iterator<std::forward_iterator_tag, Object> {
         friend class Space;
-        const_iterator(CRef obj) noexcept;
+        const_iterator(Ref obj) noexcept;
 
     public:
         //! \copydoc BaseIterator::operator++()
@@ -100,10 +100,10 @@ public:
         const_iterator operator++(int) noexcept;
 
         //! \copydoc iterator::operator*()
-        Object const& operator*() const noexcept;
+        Object& operator*() const noexcept;
 
         //! \copydoc iterator::operator->()
-        CRef operator->() const noexcept;
+        Ref operator->() const noexcept;
 
         //! \copydoc BaseIterator::BaseIterator()
         const_iterator() noexcept = default;
@@ -162,6 +162,7 @@ public:
     //! \brief Check whether the given pointer is pointing into this space.
     bool contains(CRef ptr) const;
 
+    // TODO: Maybe merge these into one iterator type?
     //! \brief Return an iterator to the first allocated object.
     iterator begin();
     //! \brief Return an iterator to one past the last allocated object.

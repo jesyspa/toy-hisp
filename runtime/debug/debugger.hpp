@@ -17,10 +17,10 @@ class Debugger {
         MemoryDumpType dump_type = MemoryDumpType::None;
 
         void set_output_dir(std::string const& dir);
-        void dump_graph_beneath(CRef r);
+        void dump_graph_beneath(Ref r);
         void dump_memory_as_graph();
         void dump_memory_as_array();
-        void print_expression(CRef r);
+        void print_expression(Ref r);
         void step();
     };
 
@@ -38,7 +38,7 @@ class Debugger {
 
 public:
     //! \brief Dump the part of the object graph reachable from root.
-    static void dump_graph_beneath(CRef root) {
+    static void dump_graph_beneath(Ref root) {
         if (auto impl = get_instance())
             impl->dump_graph_beneath(root);
     }
@@ -59,7 +59,7 @@ public:
     }
 
     //! \brief Print a human-readable version of the expression starting at root.
-    static void print_expression(CRef root) {
+    static void print_expression(Ref root) {
         if (auto impl = get_instance())
             impl->print_expression(root);
     }

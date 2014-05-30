@@ -32,7 +32,7 @@ Object& Space::iterator::operator*() const noexcept { return *obj_; }
 Ref Space::iterator::operator->() const noexcept { return obj_; }
 
 // const iterators
-Space::const_iterator::const_iterator(CRef obj) noexcept : BaseIterator{const_cast<Ref>(obj)} {}
+Space::const_iterator::const_iterator(Ref obj) noexcept : BaseIterator{obj} {}
 
 auto Space::const_iterator::operator++() noexcept -> const_iterator& {
     return static_cast<const_iterator&>(BaseIterator::operator++());
@@ -42,9 +42,9 @@ auto Space::const_iterator::operator++(int) noexcept -> const_iterator {
     return {BaseIterator::operator++(0)};
 }
 
-Object const& Space::const_iterator::operator*() const noexcept { return *obj_; }
+Object& Space::const_iterator::operator*() const noexcept { return *obj_; }
 
-CRef Space::const_iterator::operator->() const noexcept { return obj_; }
+Ref Space::const_iterator::operator->() const noexcept { return obj_; }
 
 // space support
 auto Space::begin() -> iterator {
@@ -56,11 +56,11 @@ auto Space::end() -> iterator {
 }
 
 auto Space::begin() const -> const_iterator {
-    return const_iterator{reinterpret_cast<CRef>(bottom_)};
+    return const_iterator{reinterpret_cast<Ref>(bottom_)};
 }
 
 auto Space::end() const -> const_iterator {
-    return const_iterator{reinterpret_cast<CRef>(free_bottom_)};
+    return const_iterator{reinterpret_cast<Ref>(free_bottom_)};
 }
 
 auto Space::cbegin() const -> const_iterator { return begin(); }

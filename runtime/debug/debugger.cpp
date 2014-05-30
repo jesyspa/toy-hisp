@@ -4,71 +4,114 @@
 #include "serialisation/serialisation.hpp"
 #include "memory/stack.hpp"
 #include "hisp/utility.hpp"
+#include "meta/apply.hpp"
 #include <algorithm>
 #include <iostream>
 #include <set>
 #include <vector>
 
 namespace {
-void print_expression_impl(std::ostream& out, CRef obj, std::vector<CRef>& objs, bool parens) {
+
+template <typename T>
+struct ExpressionPrinter;
+
+void print_expression_impl(Ref obj, std::ostream& out, std::vector<CRef>& objs, bool parens) {
     ASSERT_SANITY(obj);
-    if (auto app = try_cast<Application>(obj)) {
-        if (std::find(objs.begin(), objs.end(), obj) != objs.end()) {
-            out << "<loop>";
-            return;
-        }
-        objs.push_back(obj);
+    if (std::find(objs.begin(), objs.end(), obj) != objs.end()) {
+        out << "<loop>";
+        return;
+    }
+    objs.push_back(obj);
+    RuntimeApply<ExpressionPrinter>(obj, out, objs, parens);
+    objs.pop_back();
+}
+
+void print_expression(std::ostream& out, Ref root) {
+    std::vector<CRef> objs;
+    print_expression_impl(root, out, objs, false);
+}
+
+template <>
+struct ExpressionPrinter<Application> {
+    static void execute(Application* app, std::ostream& out, std::vector<CRef>& objs, bool parens) {
         if (parens)
             out << '(';
-        print_expression_impl(out, app->left, objs, false);
+        print_expression_impl(app->left, out, objs, false);
         out << ' ';
-        print_expression_impl(out, app->right, objs, true);
+        print_expression_impl(app->right, out, objs, true);
         if (parens)
             out << ')';
-        objs.pop_back();
-    } else if (auto n = try_cast<Number>(obj)) {
-        out << n->value;
-    } else if (auto f = try_cast<Function>(obj)) {
-        out << func_names[f->func];
-    } else if (auto fwd = try_cast<Forwarder>(obj)) {
-        out << '#';
-        print_expression_impl(out, fwd->target, objs, true);
     }
-}
+};
 
-void print_expression(std::ostream& out, CRef root) {
-    std::vector<CRef> objs;
-    print_expression_impl(out, root, objs, false);
-}
+template <>
+struct ExpressionPrinter<Number> {
+    static void execute(Number* num, std::ostream& out, std::vector<CRef>&, bool) { out << num->value; }
+};
 
-void graphviz_dump_impl(std::ostream& out, CRef obj, std::set<CRef>& objs) {
+template <>
+struct ExpressionPrinter<Function> {
+    static void execute(Function* fun, std::ostream& out, std::vector<CRef>&, bool) { out << func_names.at(fun->func); }
+};
+
+template <>
+struct ExpressionPrinter<Forwarder> {
+    static void execute(Forwarder* fwd, std::ostream& out, std::vector<CRef>& objs, bool) {
+        out << '#';
+        print_expression_impl(fwd->target, out, objs, true);
+    }
+};
+
+template <typename T>
+struct GraphPrinter;
+
+void graphviz_dump_impl(Ref obj, std::ostream& out, std::set<CRef>& objs) {
     ASSERT_SANITY(obj);
     if (objs.count(obj))
         return;
     objs.insert(obj);
-    if (auto app = try_cast<Application>(obj)) {
+    RuntimeApply<GraphPrinter>(obj, out, objs);
+}
+template <>
+struct GraphPrinter<Application> {
+    static void execute(Application* app, std::ostream& out, std::set<CRef>& objs) {
         out << "c_" << (void*)app << " -> c_" << (void*)app->left << ";\n";
         out << "c_" << (void*)app << " -> c_" << (void*)app->right << " [color=blue];\n";
-        graphviz_dump_impl(out, app->left, objs);
-        graphviz_dump_impl(out, app->right, objs);
-    } else if (auto num = try_cast<Number>(obj)) {
+        graphviz_dump_impl(app->left, out, objs);
+        graphviz_dump_impl(app->right, out, objs);
+    }
+};
+
+template <>
+struct GraphPrinter<Number> {
+    static void execute(Number* num, std::ostream& out, std::set<CRef>&) {
         out << "c_" << (void*)num << " [label=\"" << num->value << "\"];\n";
-    } else if (auto fun = try_cast<Function>(obj)) {
+    }
+};
+
+template <>
+struct GraphPrinter<Function> {
+    static void execute(Function* fun, std::ostream& out, std::set<CRef>&) {
         if (!func_names[fun->func])
             func_names[fun->func] = "???";
         out << "c_" << (void*)fun << " [label=\"" << func_names[fun->func] << "\"];\n";
-    } else if (auto fwd = try_cast<Forwarder>(obj)) {
+    }
+};
+
+template <>
+struct GraphPrinter<Forwarder> {
+    static void execute(Forwarder* fwd, std::ostream& out, std::set<CRef>& objs) {
         out << "c_" << (void*)fwd << " [label=\"f_" << (void*)fwd << "\"];\n";
         out << "c_" << (void*)fwd << " -> c_" << (void*)fwd->target << ";\n";
-        graphviz_dump_impl(out, fwd->target, objs);
+        graphviz_dump_impl(fwd->target, out, objs);
     }
-}
+};
 
-void graphviz_dump(std::ostream& out, CRef root) {
+void graphviz_dump(std::ostream& out, Ref root) {
     std::set<CRef> objs;
 
     out << "digraph {\n";
-    graphviz_dump_impl(out, root, objs);
+    graphviz_dump_impl(root, out, objs);
     out << "}\n";
 }
 
@@ -80,12 +123,12 @@ void multi_graphviz_dump(std::ostream& out, StackStorage const& stack, Space con
     int root_count = 0;
     for (auto root : stack) {
         out << "s_" << root_count << " -> c_" << (void*)root << ";\n";
-        graphviz_dump_impl(out, root, objs);
+        graphviz_dump_impl(root, out, objs);
         ++root_count;
     }
 
     for (auto& obj : space)
-        graphviz_dump_impl(out, &obj, objs);
+        graphviz_dump_impl(&obj, out, objs);
 
     out << "}\n";
 }
@@ -103,7 +146,7 @@ void raw_dump(std::ostream& out, StackStorage const& stack, Space const& space) 
 }
 }
 
-void Debugger::DebuggerImpl::dump_graph_beneath(CRef r) {
+void Debugger::DebuggerImpl::dump_graph_beneath(Ref r) {
     auto stream = graph_streams.get_next();
     graphviz_dump(*stream, r);
 }
@@ -120,7 +163,7 @@ void Debugger::DebuggerImpl::dump_memory_as_array() {
     raw_dump(*stream, *info.stack, *info.space);
 }
 
-void Debugger::DebuggerImpl::print_expression(CRef r) {
+void Debugger::DebuggerImpl::print_expression(Ref r) {
     auto stream = take_pointer(std::cerr);
     // TODO: Rename this to not require explicit qualification.
     ::print_expression(*stream, r);
