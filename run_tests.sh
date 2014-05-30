@@ -20,6 +20,9 @@ mkdir "$testdir"
 for x in "$inputdir"/*.hisp; do
     name=$(basename $x)
     ./run_one_test.sh "$inputdir" "$testdir" "${name%.hisp}"
+    if [[ $? -ne 0 ]]; then
+        echo "$name failed." >&2
+    fi
 done
 
 

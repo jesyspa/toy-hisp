@@ -5,7 +5,7 @@ readonly outputdir="$2"
 readonly name="$3"
 readonly testdir="$outputdir/$name"
 
-set errexit
+set -o errexit
 
 mkdir "$testdir"
 mkdir "$testdir/output"
@@ -17,10 +17,10 @@ cp "$inputdir/${name}.hisp" "$testdir"
 mv out.hic "$testdir/${name}.hic"
 ./hisp --debug-output-dir "$testdir/output" --dump-graph "$testdir/${name}.hic" > "$testdir/${name}.actual"
 
-set noerrexit
+set +o errexit
 
 diff "$testdir/${name}.actual" "$testdir/${name}.expected" > "$testdir/${name}.diff"
 if [[ $? -ne 0 ]]; then
-    echo "fail: $name" >&2
+    echo "output mismatch in $name:" >&2
     cat "$testdir/${name}.diff" >&2
 fi
