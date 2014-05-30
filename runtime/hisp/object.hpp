@@ -4,12 +4,12 @@
 #include <cstdint>
 
 //! \brief Type of a Hisp object.
-enum class ObjectType { application_object, number_object, function_object, forwarder_object };
+using ObjectType = std::uint32_t;
 
 /*! \brief A Hisp object.
  *
  *  This class contains the header information that all objects need.  Concrete object types should derive from this and
- *  provide a static constexpr ObjectType TYPE member to indicate their real type.
+ *  be registered in meta/type_index.hpp.
  */
 struct Object {
     //! \brief The object's type.
@@ -41,28 +41,23 @@ struct Application : Object {
 
     //! \brief The argument of the function.
     Ref right;
-
-    static constexpr ObjectType TYPE = ObjectType::application_object;
 };
 
 //! \brief Hisp representation of a number.
 struct Number : Object {
     //! \brief Value of the number.
     std::int64_t value;
-    static constexpr ObjectType TYPE = ObjectType::number_object;
 };
 
 //! \brief Hisp representation of a (built-in) function.
 struct Function : Object {
     //! \brief Pointer to the compiled implementation of this function.
     Func func;
-    static constexpr ObjectType TYPE = ObjectType::function_object;
 };
 
 //! \brief Meta-object that indicates that the result of this node is elsewhere.
 struct Forwarder : Object {
     Ref target;
-    static constexpr ObjectType TYPE = ObjectType::forwarder_object;
 };
 
 //! \brief Destroy obj, turning it into an object that forwards to target.

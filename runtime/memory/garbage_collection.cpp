@@ -3,6 +3,7 @@
 #include "hisp/utility.hpp"
 #include "memory/space.hpp"
 #include "memory/stack.hpp"
+#include "meta/type_index.hpp"
 #include "serialisation/serialisation.hpp"
 #include <cassert>
 #include <cstring>
@@ -27,7 +28,7 @@ T* new_object() {
             std::exit(-1);
         }
     }
-    obj->type = T::TYPE;
+    obj->type = get_type<T>();
     return static_cast<T*>(obj);
 }
 

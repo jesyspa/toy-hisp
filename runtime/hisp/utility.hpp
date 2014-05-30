@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hisp/object.hpp"
+#include "meta/type_index.hpp"
 #include <cassert>
 #include <type_traits>
 
@@ -8,7 +9,7 @@
 template <typename T>
 bool is(CRef obj) {
     assert(obj && "invalid pointer");
-    return obj->type == T::TYPE;
+    return obj->type == get_type<T>();
 }
 
 //! \brief Check whether the pointee can be converted to the given type.
@@ -17,7 +18,7 @@ bool is_convertible(CRef obj) {
     assert(obj && "invalid pointer");
     if (!std::is_same<T, Forwarder>::value && is<Forwarder>(obj))
         obj = reinterpret_cast<Forwarder const*>(obj)->target;
-    return obj->type == T::TYPE;
+    return obj->type == get_type<T>();
 }
 
 //! \brief Unconditionally treat the pointer as referring to the given type.

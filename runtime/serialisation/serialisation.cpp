@@ -5,6 +5,7 @@
 #include "hisp/object.hpp"
 #include "hisp/utility.hpp"
 #include "meta/members.hpp"
+#include "meta/apply.hpp"
 #include <cstdint>
 #include <cstring>
 #include <fstream>
@@ -86,19 +87,19 @@ struct MemberSerialiser {
     }
 
     template <typename Member, typename Tag, typename Obj>
-    static void execute(Tag, Obj const* obj, SerialisedHic& hic) {
+    static void execute(Tag, Obj* obj, SerialisedHic& hic) {
         auto member = Member::template get(obj);
         print(member, hic);
     }
 
     template <typename Member, typename Obj>
-    static void execute(MEMBER_TAG(Object, size), Obj const*, SerialisedHic& hic) {
+    static void execute(MEMBER_TAG(Object, size), Obj*, SerialisedHic& hic) {
         std::uint32_t size = SerialisedSize<Obj>::value;
         hic.write(size);
     }
 
     template <typename Member, typename Obj>
-    static void execute(MEMBER_TAG(Object, forward), Obj const*, SerialisedHic&) {
+    static void execute(MEMBER_TAG(Object, forward), Obj*, SerialisedHic&) {
         // No need to save forwarding pointers.
     }
 };
@@ -151,11 +152,14 @@ struct MemberDeserialiser {
 
 template <typename T>
 struct SerialisationGenerator {
-    static void serialise(T const* obj, SerialisedHic& hic) {
+    static void execute(T* obj, SerialisedHic& hic) {
         RuntimeRecMemberwiseApply<MemberSerialiser, T>(obj, hic);
     }
+};
 
-    static void deserialise(T* obj, SerialisedHic& hic) {
+template <typename T>
+struct DeserialisationGenerator {
+    static void execute(T* obj, SerialisedHic& hic) {
         int size = 0;
         RuntimeRecMemberwiseApply<MemberDeserialiser, T>(obj, hic, size);
         hic.ignore(size);
@@ -190,30 +194,12 @@ void mark_object(Object& obj, SerialisedHic& hic) {
     hic.end_object(&obj);
 }
 
-void write_object(Object const& obj, SerialisedHic& hic) {
-    if (auto app = try_cast<Application>(obj))
-        SerialisationGenerator<Application>::serialise(app, hic);
-    else if (auto num = try_cast<Number>(obj))
-        SerialisationGenerator<Number>::serialise(num, hic);
-    else if (auto func = try_cast<Function>(obj))
-        SerialisationGenerator<Function>::serialise(func, hic);
-    else if (auto fwd = try_cast<Forwarder>(obj))
-        SerialisationGenerator<Forwarder>::serialise(fwd, hic);
-    else
-        throw std::runtime_error{"invalid object type"};
+void write_object(Ref obj, SerialisedHic& hic) {
+    RuntimeApply<SerialisationGenerator>(obj, hic);
 }
 
-void read_object(Object& obj, SerialisedHic& hic) {
-    if (auto app = try_cast<Application>(obj))
-        SerialisationGenerator<Application>::deserialise(app, hic);
-    else if (auto num = try_cast<Number>(obj))
-        SerialisationGenerator<Number>::deserialise(num, hic);
-    else if (auto func = try_cast<Function>(obj))
-        SerialisationGenerator<Function>::deserialise(func, hic);
-    else if (auto fwd = try_cast<Forwarder>(obj))
-        SerialisationGenerator<Forwarder>::deserialise(fwd, hic);
-    else
-        throw std::runtime_error{"invalid object type"};
+void read_object(Ref obj, SerialisedHic& hic) {
+    RuntimeApply<DeserialisationGenerator>(obj, hic);
 }
 }
 
@@ -226,7 +212,7 @@ void write_init_file(Ref root, Space& space) {
     hic.seek_begin();
 
     for (auto& obj : space)
-        write_object(obj, hic);
+        write_object(&obj, hic);
 
     hic.set_root(root);
 
@@ -256,7 +242,7 @@ ProgramInitInfo read_init_file(std::string name) {
     hic.seek_begin();
 
     for (auto& obj : space)
-        read_object(obj, hic);
+        read_object(&obj, hic);
     auto root = hic.get_root();
 
     return {root, std::move(space)};
