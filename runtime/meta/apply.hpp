@@ -16,7 +16,7 @@ struct RAOp {
     template <typename... Args>
     static void execute(Ref obj, Args&&... args) {
         if (obj->type == get_type<LHS>())
-            F::template apply<LHS>::type::execute(static_cast<LHS*>(obj), std::forward<Args>(args)...);
+            F::execute(static_cast<LHS*>(obj), std::forward<Args>(args)...);
         else
             RHS::execute(obj, std::forward<Args>(args)...);
     }
@@ -29,9 +29,9 @@ struct RAState {
     }
 };
 
-template <template <typename> class F, typename... Args>
+template <typename F, typename... Args>
 void RuntimeApply(Ref obj, Args&&... args) {
-    using Op = RAOp<mpl::quote1<F>, ph::_2, ph::_1>;
+    using Op = RAOp<F, ph::_2, ph::_1>;
     using RA = typename mpl::reverse_fold<ObjectTypes, RAState, Op>::type;
     RA::execute(obj, std::forward<Args>(args)...);
 }

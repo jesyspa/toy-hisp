@@ -152,13 +152,15 @@ struct MemberDeserialiser {
     }
 };
 
-template <typename T>
 struct SerialisationGenerator {
-    static void execute(T* obj, SerialisedHic& hic) { RuntimeRecMemberwiseApply<MemberSerialiser, T>(obj, hic); }
+    template <typename T>
+    static void execute(T* obj, SerialisedHic& hic) {
+        RuntimeRecMemberwiseApply<MemberSerialiser, T>(obj, hic);
+    }
 };
 
-template <typename T>
 struct DeserialisationGenerator {
+    template <typename T>
     static void execute(T* obj, SerialisedHic& hic) {
         int size = 0;
         RuntimeRecMemberwiseApply<MemberDeserialiser, T>(obj, hic, size);

@@ -12,8 +12,28 @@
 
 namespace {
 
-template <typename T>
-struct ExpressionPrinter;
+void print_expression_impl(Ref obj, std::ostream& out, std::vector<CRef>& objs, bool parens);
+
+struct ExpressionPrinter {
+    static void execute(Application* app, std::ostream& out, std::vector<CRef>& objs, bool parens) {
+        if (parens)
+            out << '(';
+        print_expression_impl(app->left, out, objs, false);
+        out << ' ';
+        print_expression_impl(app->right, out, objs, true);
+        if (parens)
+            out << ')';
+    }
+
+    static void execute(Number* num, std::ostream& out, std::vector<CRef>&, bool) { out << num->value; }
+
+    static void execute(Function* fun, std::ostream& out, std::vector<CRef>&, bool) { out << func_names.at(fun->func); }
+
+    static void execute(Forwarder* fwd, std::ostream& out, std::vector<CRef>& objs, bool) {
+        out << '#';
+        print_expression_impl(fwd->target, out, objs, true);
+    }
+};
 
 void print_expression_impl(Ref obj, std::ostream& out, std::vector<CRef>& objs, bool parens) {
     ASSERT_SANITY(obj);
@@ -31,39 +51,32 @@ void print_expression(std::ostream& out, Ref root) {
     print_expression_impl(root, out, objs, false);
 }
 
-template <>
-struct ExpressionPrinter<Application> {
-    static void execute(Application* app, std::ostream& out, std::vector<CRef>& objs, bool parens) {
-        if (parens)
-            out << '(';
-        print_expression_impl(app->left, out, objs, false);
-        out << ' ';
-        print_expression_impl(app->right, out, objs, true);
-        if (parens)
-            out << ')';
+void graphviz_dump_impl(Ref obj, std::ostream& out, std::set<CRef>& objs);
+
+struct GraphPrinter {
+    static void execute(Application* app, std::ostream& out, std::set<CRef>& objs) {
+        out << "c_" << (void*)app << " -> c_" << (void*)app->left << ";\n";
+        out << "c_" << (void*)app << " -> c_" << (void*)app->right << " [color=blue];\n";
+        graphviz_dump_impl(app->left, out, objs);
+        graphviz_dump_impl(app->right, out, objs);
+    }
+
+    static void execute(Number* num, std::ostream& out, std::set<CRef>&) {
+        out << "c_" << (void*)num << " [label=\"" << num->value << "\"];\n";
+    }
+
+    static void execute(Function* fun, std::ostream& out, std::set<CRef>&) {
+        if (!func_names[fun->func])
+            func_names[fun->func] = "???";
+        out << "c_" << (void*)fun << " [label=\"" << func_names[fun->func] << "\"];\n";
+    }
+
+    static void execute(Forwarder* fwd, std::ostream& out, std::set<CRef>& objs) {
+        out << "c_" << (void*)fwd << " [label=\"f_" << (void*)fwd << "\"];\n";
+        out << "c_" << (void*)fwd << " -> c_" << (void*)fwd->target << ";\n";
+        graphviz_dump_impl(fwd->target, out, objs);
     }
 };
-
-template <>
-struct ExpressionPrinter<Number> {
-    static void execute(Number* num, std::ostream& out, std::vector<CRef>&, bool) { out << num->value; }
-};
-
-template <>
-struct ExpressionPrinter<Function> {
-    static void execute(Function* fun, std::ostream& out, std::vector<CRef>&, bool) { out << func_names.at(fun->func); }
-};
-
-template <>
-struct ExpressionPrinter<Forwarder> {
-    static void execute(Forwarder* fwd, std::ostream& out, std::vector<CRef>& objs, bool) {
-        out << '#';
-        print_expression_impl(fwd->target, out, objs, true);
-    }
-};
-
-template <typename T>
-struct GraphPrinter;
 
 void graphviz_dump_impl(Ref obj, std::ostream& out, std::set<CRef>& objs) {
     ASSERT_SANITY(obj);
@@ -72,41 +85,6 @@ void graphviz_dump_impl(Ref obj, std::ostream& out, std::set<CRef>& objs) {
     objs.insert(obj);
     RuntimeApply<GraphPrinter>(obj, out, objs);
 }
-template <>
-struct GraphPrinter<Application> {
-    static void execute(Application* app, std::ostream& out, std::set<CRef>& objs) {
-        out << "c_" << (void*)app << " -> c_" << (void*)app->left << ";\n";
-        out << "c_" << (void*)app << " -> c_" << (void*)app->right << " [color=blue];\n";
-        graphviz_dump_impl(app->left, out, objs);
-        graphviz_dump_impl(app->right, out, objs);
-    }
-};
-
-template <>
-struct GraphPrinter<Number> {
-    static void execute(Number* num, std::ostream& out, std::set<CRef>&) {
-        out << "c_" << (void*)num << " [label=\"" << num->value << "\"];\n";
-    }
-};
-
-template <>
-struct GraphPrinter<Function> {
-    static void execute(Function* fun, std::ostream& out, std::set<CRef>&) {
-        if (!func_names[fun->func])
-            func_names[fun->func] = "???";
-        out << "c_" << (void*)fun << " [label=\"" << func_names[fun->func] << "\"];\n";
-    }
-};
-
-template <>
-struct GraphPrinter<Forwarder> {
-    static void execute(Forwarder* fwd, std::ostream& out, std::set<CRef>& objs) {
-        out << "c_" << (void*)fwd << " [label=\"f_" << (void*)fwd << "\"];\n";
-        out << "c_" << (void*)fwd << " -> c_" << (void*)fwd->target << ";\n";
-        graphviz_dump_impl(fwd->target, out, objs);
-    }
-};
-
 void graphviz_dump(std::ostream& out, Ref root) {
     std::set<CRef> objs;
 

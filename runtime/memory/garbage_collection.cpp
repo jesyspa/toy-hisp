@@ -83,9 +83,11 @@ struct ScanMember {
     static void execute(MEMBER_TAG(Object, forward), Obj*, Space&) {}
 };
 
-template <typename T>
 struct Scanner {
-    static void execute(T* obj, Space& tospace) { RuntimeRecMemberwiseApply<ScanMember, T>(obj, tospace); }
+    template <typename T>
+    static void execute(T* obj, Space& tospace) {
+        RuntimeRecMemberwiseApply<ScanMember, T>(obj, tospace);
+    }
 };
 }
 
