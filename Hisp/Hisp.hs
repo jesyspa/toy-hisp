@@ -6,8 +6,8 @@ module Hisp.Hisp (
     Abstraction,
     lambda,
     absurdAbs,
-    Typed(..),
-    liftTyped,
+    Typed'(..),
+    Typed,
     bindTyped,
     ignoreType,
     TypedHispExpr,
@@ -21,38 +21,35 @@ import Control.Monad
 import Data.Foldable
 import Data.Traversable
 import Data.Void
-import Data.Monoid
 import Prelude.Extras
 
 
 class Abstraction abs where
     substitute :: abs ty a -> (a -> HispExpr abs ty c) -> abs ty c
 
-data Typed f ty a = Typed ty (f a)
-                  deriving (Eq, Ord, Read, Show, Functor, Foldable, Traversable)
+data Typed' ty a = Typed ty a
+                    deriving (Eq, Ord, Read, Show, Functor, Foldable, Traversable)
 
-liftTyped :: (f a -> g b) -> Typed f ty a -> Typed g ty b
-liftTyped f (Typed tx x) = Typed tx (f x)
+type Typed f ty a = Typed' ty (f a)
 
 bindTyped :: (Monad f) => Typed f ty a -> (a -> f b) -> Typed f ty b
-bindTyped x f = liftTyped (>>=f) x
+bindTyped x f = fmap (>>=f) x
 
-ignoreType :: Typed f () a -> f a
+instance Applicative (Typed' ()) where
+    pure = return
+    (<*>) = ap
+
+instance Monad (Typed' ()) where
+    return = Typed ()
+    Typed () x >>= f = f x
+
+ignoreType :: Typed' () a -> a
 ignoreType (Typed () x) = x
 
-instance (Eq   ty, Eq1   f) => Eq1   (Typed f ty) where
-    Typed tx x ==# Typed ty y = tx == ty && x ==# y
-instance (Ord  ty, Ord1  f) => Ord1  (Typed f ty) where
-    Typed tx x `compare1` Typed ty y = compare tx ty `mappend` compare1 x y
-instance (Read ty, Read1 f) => Read1 (Typed f ty) where
-    readsPrec1 = undefined
-instance (Show ty, Show1 f) => Show1 (Typed f ty) where
-    showsPrec1 = undefined
-
-type TypedScope b f ty = Typed (Scope b f) ty
+type TypedScope b f ty a = Typed (Scope b f) ty a
 
 
-newtype Lambda ty name = Lambda { getLambda :: TypedScope () (HispExpr Lambda ty) ty name }
+newtype Lambda ty a = Lambda { getLambda :: TypedScope () (HispExpr Lambda ty) ty a }
                     deriving (Eq, Ord, Read, Show, Functor, Foldable, Traversable)
 
 instance Eq   ty => Eq1   (Lambda ty)
@@ -79,7 +76,7 @@ instance Abstraction VoidAbs where
     substitute (VoidAbs x) _ = VoidAbs x
 
 
-type TypedHispExpr abs ty = Typed (HispExpr abs ty) ty
+type TypedHispExpr abs ty a = Typed (HispExpr abs ty) ty a
 
 infixl 3 :@:
 data HispExpr abs ty a

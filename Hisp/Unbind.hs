@@ -4,7 +4,6 @@ module Hisp.Unbind (
 ) where
 
 import Bound
-import Control.Applicative
 import Control.Monad
 import Data.Traversable
 import Hisp.Hisp
@@ -22,10 +21,6 @@ trivialize (Typed () e) = fmap join $ traverse f e
     where f (B _) = Nothing
           f (F x) = Just x
 
--- Used to turn Comb (g (h a)) into g (h (Comb a)).
-flipCombVar :: (Traversable f, Functor f, Applicative g, Traversable g, Applicative h) => f (g (h a)) -> g (h (f a))
-flipCombVar = fmap sequenceA . sequenceA
-
 
 unbindScope :: (Functor (abs ()), Abstraction abs) => HispExpr Lambda () (Var () (HispExpr Lambda () a)) -> TypedHispExpr abs () (Comb a)
 unbindScope (Variable (B ())) = mkComb I
@@ -36,7 +31,16 @@ unbindScope (x :@: y) = case (trivialize x, trivialize y) of
                             (Nothing, Just y') -> mkComb L |@| unbindTypedScope x |@| unbind y'
                             (Just x', Nothing) -> mkComb R |@| unbind x' |@| unbindTypedScope y
                             (Just x', Just y') -> mkComb K |@| (unbind x' |@| unbind y')
-unbindScope (Abstraction (Lambda s)) = undefined s -- fmap join . unbindTypedScope . fmap flipCombVar . unbindTypedScope $ unscope s
+unbindScope (Abstraction (Lambda (Typed () s))) = doubleUnbindScope $ unscope s
+
+doubleUnbindScope :: (Functor (abs ()), Abstraction abs) => HispExpr Lambda () (Var () (HispExpr Lambda () (Var () (HispExpr Lambda () a)))) -> TypedHispExpr abs () (Comb a)
+doubleUnbindScope = joinComb . unbindScope . fmap flipCombVar . ignoreType . unbindScope
+
+flipCombVar :: Comb (Var () (HispExpr Lambda () a)) -> Var () (HispExpr Lambda () (Comb a))
+flipCombVar = fmap sequenceA . sequenceA
+
+joinComb :: (Functor (abs ()), Abstraction abs) => TypedHispExpr abs () (Comb (Comb a)) -> TypedHispExpr abs () (Comb a)
+joinComb = fmap (fmap join)
 
 unbindTypedScope :: (Functor (abs ()), Abstraction abs) => TypedHispExpr Lambda () (Var () (HispExpr Lambda () a)) -> TypedHispExpr abs () (Comb a)
 unbindTypedScope = unbindScope . ignoreType

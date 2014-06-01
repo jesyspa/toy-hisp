@@ -18,7 +18,7 @@ definition :: (String, HExpr)
     = (variable rhs ";")
 
 rhs :: HExpr
-    = variable* "=" expr { foldr (\x -> liftTyped (lambda x)) $2 $1 }
+    = variable* "=" expr { foldr (\x -> fmap (lambda x)) $2 $1 }
 
 expr :: HExpr
     = cmpExpr
@@ -45,7 +45,7 @@ simpleExpr :: HExpr
     / "(" expr ")"
 
 abstraction :: HExpr
-    = "\\" variable "." expr { liftTyped (lambda $1) $2 }
+    = "\\" variable "." expr { fmap (lambda $1) $2 }
 
 number ::: Int
     = [0-9]+ { read $1 }
