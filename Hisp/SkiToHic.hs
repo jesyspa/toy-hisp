@@ -4,6 +4,7 @@ module Hisp.SkiToHic (
 
 import Control.Applicative
 import Data.Maybe
+import Hisp.Hisp
 import Hisp.Hic as Hic
 import Hisp.SKI as SKI
 import qualified Data.Map as M
@@ -13,8 +14,11 @@ toOffset :: Int -> Int
 toOffset = (objectSize*)
 
 subtrees :: Ord a => SKI a -> S.Set (SKI a)
-subtrees x@(a :@: b) = x `S.insert` subtrees a `S.union` subtrees b
+subtrees x@(a :@: b) = x `S.insert` typedSubtrees a `S.union` typedSubtrees b
 subtrees x = S.singleton x
+
+typedSubtrees :: Ord a => TSKI a -> S.Set (SKI a)
+typedSubtrees = subtrees . ignoreType
 
 toObject :: M.Map String (SKI String) -> SKI String -> Object (SKI String)
 toObject globs (Variable (Misc x)) = case M.lookup x globs of
@@ -22,7 +26,7 @@ toObject globs (Variable (Misc x)) = case M.lookup x globs of
                                            Nothing -> Object FunctionType [Function x]
 toObject _     (Variable (Comb x)) = Object FunctionType [Function $ combName x]
 toObject _     (SKI.Number x) = Object NumberType [Hic.Number x]
-toObject _     (lhs :@: rhs) = Object ApplicationType [Ref lhs, Ref rhs]
+toObject _     (lhs :@: rhs) = Object ApplicationType [Ref $ ignoreType lhs, Ref $ ignoreType rhs]
 toObject _     (Abstraction x) = absurdAbs x
 
 

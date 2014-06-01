@@ -1,10 +1,12 @@
 module Hisp.SKI (
     HispExpr(..),
+    TSKI,
     SKI,
     Combinator(..),
     Comb(..),
     combName,
-    absurdAbs
+    absurdAbs,
+    mkComb
 ) where
 
 import Control.Applicative
@@ -14,6 +16,9 @@ import Data.Traversable
 import Hisp.Hisp
 
 data Combinator = S | K | I | L | R deriving (Show, Read, Eq, Ord, Enum)
+
+mkComb :: Combinator -> TypedHispExpr abs () (Comb a)
+mkComb x = Typed () (Variable $ Comb x)
 
 data Comb a = Comb Combinator | Misc a deriving (Show, Read, Eq, Ord, Functor, Foldable, Traversable)
 
@@ -33,4 +38,5 @@ combName I = "comb_i"
 combName L = "comb_l"
 combName R = "comb_r"
 
-type SKI a = HispExpr VoidAbs (Comb a)
+type SKI a = HispExpr VoidAbs () (Comb a)
+type TSKI a = TypedHispExpr VoidAbs () (Comb a)

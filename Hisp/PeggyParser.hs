@@ -18,34 +18,34 @@ definition :: (String, HExpr)
     = (variable rhs ";")
 
 rhs :: HExpr
-    = variable* "=" expr { foldr lambda $2 $1 }
+    = variable* "=" expr { foldr (\x -> liftTyped (lambda x)) $2 $1 }
 
 expr :: HExpr
     = cmpExpr
 
 cmpExpr :: HExpr
-    = addExpr cmpOp addExpr { Variable $2 :@: $1 :@: $3 }
+    = addExpr cmpOp addExpr { mkVariable $2 |@| $1 |@| $3 }
     / addExpr
 
 addExpr :: HExpr
-    = addExpr addOp mulExpr { Variable $2 :@: $1 :@: $3 }
+    = addExpr addOp mulExpr { mkVariable $2 |@| $1 |@| $3 }
     / mulExpr
 
 mulExpr :: HExpr
-    = mulExpr mulOp appExpr { Variable $2 :@: $1 :@: $3 }
+    = mulExpr mulOp appExpr { mkVariable $2 |@| $1 |@| $3 }
     / appExpr
 
 appExpr :: HExpr
-    = simpleExpr+ { foldl1 (:@:) $1 }
+    = simpleExpr+ { foldl1 (|@|) $1 }
 
 simpleExpr :: HExpr
-    = number { Number $1 }
-    / variable { Variable $1 }
+    = number { Typed () (Number $1) }
+    / variable { mkVariable $1 }
     / abstraction
     / "(" expr ")"
 
 abstraction :: HExpr
-    = "\\" variable "." expr { lambda $1 $2 }
+    = "\\" variable "." expr { liftTyped (lambda $1) $2 }
 
 number ::: Int
     = [0-9]+ { read $1 }
@@ -65,6 +65,9 @@ addOp ::: String
     / "-" { "sub" }
 
 |]
+
+mkVariable :: String -> HExpr
+mkVariable = Typed () . Variable
 
 peggyParse :: String -> Either ParseError [(String, HExpr)]
 peggyParse = parseString top "<stdin>"
