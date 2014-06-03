@@ -12,7 +12,7 @@ extra-source-files:    Makefile
 executable main
   main-is:             Main.hs
   build-depends:       base, containers, prelude-extras, bound, wl-pprint,
-                       bytestring, void, peggy, mtl
+                       bytestring, void, peggy, mtl, transformers
   hs-source-dirs:      .
   extensions:          FlexibleInstances, StandaloneDeriving, FlexibleContexts,
                        NoMonomorphismRestriction, DeriveFunctor, DeriveFoldable,

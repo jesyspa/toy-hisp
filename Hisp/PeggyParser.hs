@@ -8,9 +8,10 @@ module Hisp.PeggyParser (
 import qualified Hisp.Hisp as H
 import Hisp.Hisp (HExpr, UnifiedHExpr, (|@@|))
 import Hisp.TypeLike
+import Hisp.HispType
 import Text.Peggy
 
-type Type = ()
+type Type = HispType
 
 [peggy|
 

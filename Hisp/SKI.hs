@@ -15,6 +15,7 @@ import Data.Foldable
 import Data.Traversable hiding (sequence)
 import Hisp.Hisp
 import Hisp.TypeLike
+import Hisp.HispType
 
 data Combinator = S | K | I | L | R deriving (Show, Read, Eq, Ord, Enum)
 
@@ -73,5 +74,5 @@ combName I = "comb_i"
 combName L = "comb_l"
 combName R = "comb_r"
 
-type SKI a = HispExpr VoidAbs () (Comb a)
-type TSKI a = TypedHispExpr VoidAbs () (Comb a)
+type SKI a = HispExpr VoidAbs HispType (Comb a)
+type TSKI a = TypedHispExpr VoidAbs HispType (Comb a)

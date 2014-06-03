@@ -59,6 +59,7 @@ infixr 2 `asAppliedToM`
 asAppliedToM :: (Monad (Unification ty), TypeLike ty) => Unification ty (Typed' ty a) -> ty -> Unification ty (Typed' ty a)
 asAppliedToM x tp = x >>= \x' -> x' `asAppliedTo` tp
 
+
 instance Applicative (Typed' ()) where
     pure = return
     (<*>) = ap
@@ -67,8 +68,8 @@ instance Monad (Typed' ()) where
     return = Typed ()
     Typed () x >>= f = f x
 
-ignoreType :: Typed' () a -> a
-ignoreType (Typed () x) = x
+ignoreType :: Typed' ty a -> a
+ignoreType (Typed _ x) = x
 
 type TypedScope b f ty a = Typed (Scope b f) ty a
 

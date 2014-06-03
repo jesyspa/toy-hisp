@@ -1,6 +1,5 @@
 module Main where
 
-import Control.Applicative
 import Data.ByteString.Builder (toLazyByteString, Builder)
 import Data.ByteString.Lazy (writeFile)
 import Hisp.CodeGeneration
@@ -17,5 +16,12 @@ printToFile = writeFile "out.hic" . toLazyByteString
 main :: IO ()
 main = do
     contents <- getContents
-    let code = (skiToHic . compile . liftM M.fromList) <$> peggyParse contents
-    either (putStrLn.showError) (printToFile.hic) code
+    let ast = peggyParse contents
+    case ast of
+        Left err -> putStrLn $ showError err
+        Right ast' -> do
+            skiCode <- compile $ liftM M.fromList $ ast'
+            print skiCode
+            let code = skiToHic skiCode
+            printToFile $ hic code
+
