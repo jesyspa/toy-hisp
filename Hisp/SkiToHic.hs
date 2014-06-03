@@ -27,7 +27,7 @@ toObject globs (Variable (Misc x)) = case M.lookup x globs of
 toObject _     (Variable (Comb x)) = Object FunctionType [Function $ combName x]
 toObject _     (SKI.Number x) = Object NumberType [Hic.Number x]
 toObject _     (lhs :@: rhs) = Object ApplicationType [Ref $ ignoreType lhs, Ref $ ignoreType rhs]
-toObject _     (Abstraction x) = absurdAbs x
+toObject _     (Abstraction _ x) = absurdAbs x
 
 
 makeObjects :: M.Map String (SKI String) -> S.Set (SKI String) -> M.Map (SKI String) (Object (SKI String))

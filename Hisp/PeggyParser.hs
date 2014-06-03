@@ -5,47 +5,51 @@ module Hisp.PeggyParser (
     peggyParse, showError
 ) where
 
-import Hisp.Hisp
+import qualified Hisp.Hisp as H
+import Hisp.Hisp (HExpr, UnifiedHExpr, (|@@|))
+import Hisp.TypeLike
 import Text.Peggy
+
+type Type = ()
 
 [peggy|
 
-top :: [(String, HExpr)]
-    = definition+ !.
+top :: Unification Type [(String, HExpr Type)]
+    = definition+ !. { sequence $1 }
 
 -- TODO: Enable line-based definitions.
-definition :: (String, HExpr)
-    = (variable rhs ";")
+definition :: Unification Type (String, HExpr Type)
+    = (variable rhs ";") { liftTuple $1 }
 
-rhs :: HExpr
-    = variable* "=" expr { foldr (\x -> fmap (lambda x)) $2 $1 }
+rhs :: UnifiedHExpr Type
+    = variable* "=" expr { foldr (\x y -> y >>= H.lambda x) $2 $1 }
 
-expr :: HExpr
+expr :: UnifiedHExpr Type
     = cmpExpr
 
-cmpExpr :: HExpr
-    = addExpr cmpOp addExpr { mkVariable $2 |@| $1 |@| $3 }
+cmpExpr :: UnifiedHExpr Type
+    = addExpr cmpOp addExpr { H.variable $2 |@@| $1 |@@| $3 }
     / addExpr
 
-addExpr :: HExpr
-    = addExpr addOp mulExpr { mkVariable $2 |@| $1 |@| $3 }
+addExpr :: UnifiedHExpr Type
+    = addExpr addOp mulExpr { H.variable $2 |@@| $1 |@@| $3 }
     / mulExpr
 
-mulExpr :: HExpr
-    = mulExpr mulOp appExpr { mkVariable $2 |@| $1 |@| $3 }
+mulExpr :: UnifiedHExpr Type
+    = mulExpr mulOp appExpr { H.variable $2 |@@| $1 |@@| $3 }
     / appExpr
 
-appExpr :: HExpr
-    = simpleExpr+ { foldl1 (|@|) $1 }
+appExpr :: UnifiedHExpr Type
+    = simpleExpr+ { foldl1 (|@@|) $1 }
 
-simpleExpr :: HExpr
-    = number { Typed () (Number $1) }
-    / variable { mkVariable $1 }
+simpleExpr :: UnifiedHExpr Type
+    = number { H.number $1 }
+    / variable { H.variable $1 }
     / abstraction
     / "(" expr ")"
 
-abstraction :: HExpr
-    = "\\" variable "." expr { fmap (lambda $1) $2 }
+abstraction :: UnifiedHExpr Type
+    = "\\" variable "." expr { $2 >>= H.lambda $1 }
 
 number ::: Int
     = [0-9]+ { read $1 }
@@ -66,10 +70,10 @@ addOp ::: String
 
 |]
 
-mkVariable :: String -> HExpr
-mkVariable = Typed () . Variable
+liftTuple :: Monad m => (a, m b) -> m (a, b)
+liftTuple (a, mb) = mb >>= \b -> return (a, b)
 
-peggyParse :: String -> Either ParseError [(String, HExpr)]
+peggyParse :: String -> Either ParseError (Unification Type [(String, HExpr Type)])
 peggyParse = parseString top "<stdin>"
 
 showPos :: SrcPos -> String

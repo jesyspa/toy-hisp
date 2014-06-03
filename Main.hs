@@ -7,6 +7,7 @@ import Hisp.CodeGeneration
 import Hisp.HicBuilder (hic)
 import Hisp.PeggyParser
 import Hisp.SkiToHic
+import Control.Monad (liftM)
 import Prelude hiding (writeFile)
 import qualified Data.Map as M
 
@@ -16,5 +17,5 @@ printToFile = writeFile "out.hic" . toLazyByteString
 main :: IO ()
 main = do
     contents <- getContents
-    let code = (skiToHic . compile . M.fromList) <$> peggyParse contents
+    let code = (skiToHic . compile . liftM M.fromList) <$> peggyParse contents
     either (putStrLn.showError) (printToFile.hic) code

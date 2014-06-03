@@ -4,15 +4,22 @@ module Hisp.Hisp (
     HispExpr(..),
     HExpr,
     Abstraction,
+    asAppliedTo,
+    asAppliedToM,
+    unifiedWith,
     lambda,
+    variable,
+    number,
     absurdAbs,
     Typed'(..),
     Typed,
     bindTyped,
     ignoreType,
     TypedHispExpr,
+    UnifiedHExpr,
     TypedScope,
-    (|@|)
+    (|@|),
+    (|@@|)
 ) where
 
 import Bound hiding (substitute)
@@ -22,6 +29,7 @@ import Data.Foldable
 import Data.Traversable
 import Data.Void
 import Prelude.Extras
+import Hisp.TypeLike
 
 
 class Abstraction abs where
@@ -34,6 +42,22 @@ type Typed f ty a = Typed' ty (f a)
 
 bindTyped :: (Monad f) => Typed f ty a -> (a -> f b) -> Typed f ty b
 bindTyped x f = fmap (>>=f) x
+
+unifiedWith :: (Monad (Unification ty), TypeLike ty) => Typed' ty a -> ty -> Unification ty (Typed' ty a)
+unifiedWith (Typed tx x) t = liftM f $ unify tx t
+    where f t' = Typed t' x
+
+infixr 2 `asAppliedTo`
+asAppliedTo :: (Monad (Unification ty), TypeLike ty) => Typed' ty a -> ty -> Unification ty (Typed' ty a)
+asAppliedTo (Typed tx x) tp = do
+        te <- fresh
+        tf <- unapply tp te
+        t' <- unify tf tx
+        return $ Typed t' x
+
+infixr 2 `asAppliedToM`
+asAppliedToM :: (Monad (Unification ty), TypeLike ty) => Unification ty (Typed' ty a) -> ty -> Unification ty (Typed' ty a)
+asAppliedToM x tp = x >>= \x' -> x' `asAppliedTo` tp
 
 instance Applicative (Typed' ()) where
     pure = return
@@ -78,17 +102,28 @@ instance Abstraction VoidAbs where
 
 type TypedHispExpr abs ty a = Typed (HispExpr abs ty) ty a
 
-infixl 3 :@:
+infixl 5 :@:
 data HispExpr abs ty a
     = Variable a
     | Number Int
     | TypedHispExpr abs ty a :@: TypedHispExpr abs ty a
-    | Abstraction (abs ty a)
+    | Abstraction ty (abs ty a)
     deriving(Functor, Foldable, Traversable)
 
-infixl 3 |@|
-(|@|) :: TypedHispExpr abs () a -> TypedHispExpr abs () a -> TypedHispExpr abs () a
-x |@| y = Typed () (x :@: y)
+infixl 5 |@|
+(|@|) :: (Monad (Unification ty), TypeLike ty) =>
+    TypedHispExpr abs ty a -> TypedHispExpr abs ty a -> Unification ty (TypedHispExpr abs ty a)
+x@(Typed tx _) |@| y@(Typed ty _) = do
+        ta <- apply tx ty
+        return $ Typed ta (x :@: y)
+
+infixl 5 |@@|
+(|@@|) :: (Monad (Unification ty), TypeLike ty) =>
+    Unification ty (TypedHispExpr abs ty a) -> Unification ty (TypedHispExpr abs ty a) -> Unification ty (TypedHispExpr abs ty a)
+x |@@| y = do
+        x' <- x
+        y' <- y
+        x' |@| y'
 
 instance Eq   ty => Eq1   (HispExpr Lambda ty)
 instance Ord  ty => Ord1  (HispExpr Lambda ty)
@@ -117,9 +152,22 @@ instance (Abstraction abs, Functor (abs ty)) => Monad (HispExpr abs ty) where
     Variable a >>= f = f a
     Number x >>= _ = Number x
     (x :@: y) >>= f = x `bindTyped` f :@: y `bindTyped` f
-    Abstraction x >>= f = Abstraction $ x `substitute` f
+    Abstraction tp x >>= f = Abstraction tp $ x `substitute` f
 
-lambda :: Eq a => a -> HispExpr Lambda () a -> HispExpr Lambda () a
-lambda v = Abstraction . Lambda . Typed () . abstract1 v
+lambda :: (Monad (Unification ty), TypeLike ty, Eq a) => a -> TypedHispExpr Lambda ty a -> Unification ty (TypedHispExpr Lambda ty a)
+lambda v (Typed te e) = do
+        tp <- fresh
+        tf <- unapply te tp
+        let f = abstract1 v e
+        return $ Typed tf $ Abstraction tp $ Lambda $ Typed te f
 
-type HExpr = TypedHispExpr Lambda () String
+variable :: (Monad (Unification ty), TypeLike ty) => a -> Unification ty (TypedHispExpr abs ty a)
+variable x = liftM f fresh
+    where f tx = Typed tx (Variable x)
+
+number :: (Monad (Unification ty), TypeLike ty) => Int -> Unification ty (TypedHispExpr abs ty a)
+number x = liftM f $ constantType "Int"
+    where f tx = Typed tx (Number x)
+
+type HExpr ty = TypedHispExpr Lambda ty String
+type UnifiedHExpr ty = Unification ty (HExpr ty)

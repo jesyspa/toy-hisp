@@ -3,6 +3,7 @@ doc/
 build/
 dist/
 .cabal-sandbox/
+test-run-*/
 
 # files
 main
